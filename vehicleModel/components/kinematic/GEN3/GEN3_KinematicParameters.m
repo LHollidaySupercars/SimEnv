@@ -23,53 +23,52 @@ vehicle.kinematics.front.clevisShims_5129 = [0, 1.5, 0]; % CAD reference
 vehicle.kinematics.front.clevisShims_5117 = [0, 2.0, 0]; % CAD reference
 vehicle.kinematics.front.clevisShims_5118 = [0, 5.0, 0]; % CAD reference
 
+
+vehicle.ford.kinematics.front.clevis.POS1 = [0, 0 , 25.0];
+vehicle.ford.kinematics.front.clevis.POS2 = [0, 0 , 12.5];
+vehicle.ford.kinematics.front.clevis.POS3 = [0, 0 , 0.00];
+vehicle.ford.kinematics.front.clevis.POS4 = [0, 0 , -12.5];
+vehicle.ford.kinematics.front.clevis.POS5 = [0, 0 , -25.0];
+
+
+vehicle.ford.kinematics.rear.clevis.POS1 = [0, 0 , 25.0];
+vehicle.ford.kinematics.rear.clevis.POS2 = [0, 0 , 12.5];
+vehicle.ford.kinematics.rear.clevis.POS3 = [0, 0 , 0.00];
+vehicle.ford.kinematics.rear.clevis.POS4 = [0, 0 , -12.5];
+vehicle.ford.kinematics.rear.clevis.POS5 = [0, 0 , -25.0];
+
+vehicle.ford.kinematics.front.clevis.yOffset = [0, 28, 0];
+
+vehicle.ford.kinematics.rear.clevis.yOffset = [0, 28, 0];
 %% Front Geometry 
 % GEN3_KinematicParameters
-
-% Shim parts
-vehicle.kinematics.front.camberShims_5219 = [0, 1.016, 0]; % CAD reference
-vehicle.kinematics.front.camberShims_5220 = [0, 1.600, 0]; % CAD reference
-vehicle.kinematics.front.camberShims_5221 = [0, 2.540, 0]; % CAD reference
-vehicle.kinematics.front.camberShims_5222 = [0, 5.000, 0]; % CAD reference
-
-vehicle.kinematics.rear.camberShims_3127 = [0, 1.016, 0]; % CAD reference
-vehicle.kinematics.rear.camberShims_3140 = [0, 2.500, 0]; % CAD reference
-vehicle.kinematics.rear.camberShims_3141 = [0, 5.000, 0]; % CAD reference
-vehicle.kinematics.rear.camberShims_CAD_ERROR = [0, 1.6, 0]; % CAD reference
-
 
 % Nominal position is 3
 % From plane to wheel face is 6 degrees 
 
-
-vehicle.ford.kinematics.front.clevis.POS1 = [0, 0 , 25.0];
-vehicle.ford.kinematics.front.clevis.POS2 = [0, 0 , 12.5];
-vehicle.ford.kinematics.front.clevis.POS3 = [0, 28 , 0.00];
-vehicle.ford.kinematics.front.clevis.POS4 = [0, 28 , -12.5];
-vehicle.ford.kinematics.front.clevis.POS5 = [0, 28 , -25.0];
-
-vehicle.ford.kinematics.front.upperAArm.uprightConnector = [0, 82.5, 0];
-
-vehicle.ford.kinematics.front.upperAArm.uprightBalljointAdjust = [0, 0, 7.5]; % measurement is in the uprights reference plane
+vehicle.ford.kinematics.front.upperAArm.UBJ_UPRIGHT_POS_1 = [0, 0, 15.0]; 
+vehicle.ford.kinematics.front.upperAArm.UBJ_UPRIGHT_POS_2 = [0, 0, 7.50]; 
+vehicle.ford.kinematics.front.upperAArm.UBJ_UPRIGHT_POS_3 = [0, 0, 0.00]; 
+vehicle.ford.kinematics.front.upperAArm.UBJ_UPRIGHT_POS_4 = [0, 0, -7.5]; 
+vehicle.ford.kinematics.front.upperAArm.UBJ_UPRIGHT_POS_5 = [0, 0, -15.]; 
+% measurement is in the uprights reference plane
 % 3 discrete points would be enough of a change
 
 vehicle.ford.kinematics.front.damper.chassisPickup = [-1948.9736, 420.5562, 562.2953];
 
-vehicle.ford.kinematics.front.upperAArm.fore =      offset+ [-2175,      466.5289 , 294.92476]; % done
-vehicle.ford.kinematics.front.upperAArm.ballJoint = offset+ [-1949.2757, 702.919,   331.0431 ]  + vehicle.ford.kinematics.front.upperAArm.camberShimLeft * 6;  % done
-vehicle.ford.kinematics.front.upperAArm.aft =       offset+ [-1885,      466.5289,  294.92476]; % done
+vehicle.ford.kinematics.front.upperAArm.fore =       [-2175,      466.5289 , 294.92476] + vehicle.ford.kinematics.front.clevis.yOffset; % done
+vehicle.ford.kinematics.front.upperAArm.ballJoint =  [-1949.2757, 702.919,   331.0431 ];  % done
+vehicle.ford.kinematics.front.upperAArm.aft =        [-1885,      466.5289,  294.92476] + vehicle.ford.kinematics.front.clevis.yOffset; % done
 
 
-vehicle.ford.kinematics.front.lowerAArm.fore =      offset+ [-2148,      472, 66]; % done
-vehicle.ford.kinematics.front.lowerAArm.ballJoint = offset+ [-2012.3338, 781.9798, 60.1016]; % done
-vehicle.ford.kinematics.front.lowerAArm.aft =       offset+ [-1835,      472, 66];           % done
+vehicle.ford.kinematics.front.lowerAArm.fore =       [-2148,      472, 66] + vehicle.ford.kinematics.front.clevis.yOffset; % done
+vehicle.ford.kinematics.front.lowerAArm.ballJoint =  [-2012.3338, 781.9798, 60.1016]; % done
+vehicle.ford.kinematics.front.lowerAArm.aft =        [-1835,      472, 66] + vehicle.ford.kinematics.front.clevis.yOffset;           % done
 %% Static Camber Contributions
 
-
-vehicle.ford.kinematics.front.upperAArm.pivotPart = [0, 20, 0]; % CAD reference
-
-vehicle.ford.kinematics.front.steeringRack.toeRodUpright = offset+ [-2144.1745, 765.550,  58.9963]; % done; % done
-vehicle.ford.kinematics.front.steeringRack.toeRodChassis = offset+ [-2225,      420,      66];
+vehicle.ford.kinematics.front.upperAArm.pivotPart = [0, 20, 0]; % CAD reference Part 5146
+vehicle.ford.kinematics.front.steeringRack.toeRodUpright = [-2144.1745, 765.550,  58.9963]; % done
+vehicle.ford.kinematics.front.steeringRack.toeRodChassis = [-2225,      420,      66];
 
 % repeat the steering rack for code simplicity
 vehicle.ford.kinematics.front.lowerAArm.toeRodUpright = vehicle.ford.kinematics.front.steeringRack.toeRodUpright;
@@ -78,7 +77,6 @@ vehicle.ford.kinematics.front.lowerAArm.toeRodChassis = vehicle.ford.kinematics.
 vehicle.ford.kinematics.front.upright.rotationAxisOne = [-2025.8483, 839.9654, 207.83];
 vehicle.ford.kinematics.front.upright.rotationAxisTwo = [-2027.1295, 960.6252, 222.0372];
 
-vehicle.ford.kinematics.front.upright.wheelMatingFace2RotatationalAxis = []; %upright reference plane
 vehicle.ford.kinematics.front.ARB.torsionBarEnd =           [-1912.5, 490, 12.5]; % done
 vehicle.ford.kinematics.front.ARB.dropLinkConnection =      [-2089.8249, 490, 12.715]; % done
 vehicle.ford.kinematics.front.ARB.dropLinkRotationAxis =    [-2085, 415, 340]; % done
@@ -87,13 +85,6 @@ vehicle.ford.kinematics.front.ARB.dropLinkHole =                [-2085, 487.4097
 vehicle.ford.kinematics.front.ARB.transferLinkRotationAxis =    [-2042.5, 415, 340]; % done
 vehicle.ford.kinematics.front.ARB.transferLinkHole =            [-2042.5, 473.8328, 367.6351]; % done
 vehicle.ford.kinematics.front.ARB.transferLinkAArm =            [-2050.2524, 680.5690, 93.5423]; % done
-
-
-% hole 1 3 5 - Radius 80 17.5 deg steps
-% hole 2 4 - radius 65 12.5 deg steps
-% 
-% hole 1 2 3 radius 65 17.5 deg steps
-
 
 vehicle.ford.kinematics.front.ARB.transferLinkAArm = [-2050.2524, 680.5690, 93.5423]; % done
 % 
@@ -108,19 +99,13 @@ vehicle.ford.kinematics.rear.upperAArm.uprightConnector = [0, 82.5, 0];
 vehicle.ford.kinematics.rear.upperAArm.uprightBalljointAdjust = [0, 0, 15]; % measurement is in the uprights reference plane
 % 3 discrete points would be enough of a change
 
-vehicle.ford.kinematics.rear.clevis.POS1 = [0, 28 , 25.0];
-vehicle.ford.kinematics.rear.clevis.POS2 = [0, 28 , 12.5];
-vehicle.ford.kinematics.rear.clevis.POS3 = [0, 28 , 0.00];
-vehicle.ford.kinematics.rear.clevis.POS4 = [0, 28 , -12.5];
-vehicle.ford.kinematics.rear.clevis.POS5 = [0, 28 , -25.0];
-
 vehicle.ford.kinematics.rear.damper.chassisPickup = [680.5, 478.9772 , 588.8103];
 vehicle.ford.kinematics.rear.rocker.ARBPickup =     [680.4979, 689.9381 , 18.1861];
 vehicle.ford.kinematics.rear.rocker.damperPickup =  [680.3829, 693.2815 , 78.0929];
 vehicle.ford.kinematics.rear.rocker.uprightPickup = [680.4974, 801.4376 , 41.009];
 
-vehicle.ford.kinematics.rear.upperAArm.fore = [530.5, 417, 296] + clevisShimOffsetUFA;
-vehicle.ford.kinematics.rear.upperAArm.aft = [830.5, 417, 296] + clevisShimOffsetUAA
+vehicle.ford.kinematics.rear.upperAArm.fore = [530.5, 422, 296] + vehicle.ford.kinematics.rear.clevis.yOffset; % Face Reference parallel with x-z face
+vehicle.ford.kinematics.rear.upperAArm.aft = [830.5, 422, 296] + vehicle.ford.kinematics.rear.clevis.yOffset;
 % vehicle.ford.kinematics.rear.upperAArm.ballJoint = [680.5, 682.3263 , 322.7942]; % experimentally found to have 0 camber shims
 % found by using the rear camber correction, but using -6.6 which is the
 % negation of the nominal length from the cad 
@@ -130,11 +115,13 @@ vehicle.ford.kinematics.rear.upperAArm.ballJoint = [680.5, 688.7929 , 324.3043];
 % kinematic sweep function
 % Attempting to use the a arm place, central point :)
 
-vehicle.ford.kinematics.rear.lowerAArm.fore = [470.5, 244 , 71] + clevisShimOffsetLFA;
-vehicle.ford.kinematics.rear.lowerAArm.aft = [925.5, 244, 71] + clevisShimOffsetLAA;
+vehicle.ford.kinematics.rear.lowerAArm.fore = [470.5, 244 , 71] + vehicle.ford.kinematics.rear.clevis.yOffset;
+vehicle.ford.kinematics.rear.lowerAArm.aft = [925.5, 244, 71] + vehicle.ford.kinematics.rear.clevis.yOffset;
 vehicle.ford.kinematics.rear.lowerAArm.ballJoint = [680.4974, 801.4376, 42.009];
 
 vehicle.ford.kinematics.rear.lowerAArm.toeRodUpright = [810.9965, 801.9947 , 42.1483];
+warning('Needs to capture the toe offset from the lower A-Arm Plane')
+warning('This is currently not yet implemented')
 vehicle.ford.kinematics.rear.lowerAArm.toeRodChassis = [911.6355, 384.1572, 65.5999];
 
 vehicle.ford.kinematics.rear.upright.rotationAxis = [740.5586, 773.1527, 190.6875];
