@@ -1,6 +1,14 @@
-%% Front / Rear Shims
-vehicle.ford.kinematcis.rear.tyreRadius = 350; %mm
+%% Front / Rear Tyre Info
+% Centre point found from cad, upright rotation plane to tyre midplane
+% point
+vehicle.ford.kinematcis.rear.tyrecenterPoint = [0, 63.7124, 327.9533]; %mm
+vehicle.ford.kinematcis.front.tyrecenterPoint = [0, 63.7124, 327.9533]; %mm
+vehicle.ford.kinematcis.rear.tyreRadius = norm(vehicle.ford.kinematcis.rear.tyrecenterPoint); %mm
+vehicle.ford.kinematcis.front.tyreRadius = norm(vehicle.ford.kinematcis.front.tyrecenterPoint); %mm
+vehicle.ford.kinematics.rear.tyreWidth =  [0, 302, 0];
+vehicle.ford.kinematics.front.tyreWidth = [0, 302, 0];
 
+%% Front / Rear Shims
 % Camber Shims
 vehicle.kinematics.front.camberShims_5219 = [0, 1.016, 0]; % CAD reference
 vehicle.kinematics.front.camberShims_5220 = [0, 1.600, 0]; % CAD reference
@@ -40,17 +48,26 @@ vehicle.ford.kinematics.rear.clevis.POS5 = [0, 0 , -25.0];
 vehicle.ford.kinematics.front.clevis.yOffset = [0, 28, 0];
 
 vehicle.ford.kinematics.rear.clevis.yOffset = [0, 28, 0];
-%% Front Geometry 
-% GEN3_KinematicParameters
-
-% Nominal position is 3
-% From plane to wheel face is 6 degrees 
 
 vehicle.ford.kinematics.front.upperAArm.UBJ_UPRIGHT_POS_1 = [0, 0, 15.0]; 
 vehicle.ford.kinematics.front.upperAArm.UBJ_UPRIGHT_POS_2 = [0, 0, 7.50]; 
 vehicle.ford.kinematics.front.upperAArm.UBJ_UPRIGHT_POS_3 = [0, 0, 0.00]; 
 vehicle.ford.kinematics.front.upperAArm.UBJ_UPRIGHT_POS_4 = [0, 0, -7.5]; 
 vehicle.ford.kinematics.front.upperAArm.UBJ_UPRIGHT_POS_5 = [0, 0, -15.]; 
+
+
+vehicle.ford.kinematics.rear.upperAArm.UBJ_UPRIGHT_POS_1 = [0, 0, 15.0]; 
+vehicle.ford.kinematics.rear.upperAArm.UBJ_UPRIGHT_POS_2 = [0, 0, 7.50]; 
+vehicle.ford.kinematics.rear.upperAArm.UBJ_UPRIGHT_POS_3 = [0, 0, 0.00]; 
+vehicle.ford.kinematics.rear.upperAArm.UBJ_UPRIGHT_POS_4 = [0, 0, -7.5]; 
+vehicle.ford.kinematics.rear.upperAArm.UBJ_UPRIGHT_POS_5 = [0, 0, -15.];
+
+%% Front Geometry 
+% GEN3_KinematicParameters
+
+% Nominal position is 3
+% From plane to wheel face is 6 degrees 
+
 % measurement is in the uprights reference plane
 % 3 discrete points would be enough of a change
 
@@ -125,6 +142,10 @@ warning('This is currently not yet implemented')
 vehicle.ford.kinematics.rear.lowerAArm.toeRodChassis = [911.6355, 384.1572, 65.5999];
 
 vehicle.ford.kinematics.rear.upright.rotationAxis = [740.5586, 773.1527, 190.6875];
+% distance from the KPI axis, mesurements are taken from cad in a plane
+% perpendicular to the KPI axis
+vehicle.ford.kinematics.rear.upright.wheelCenterPlaneAlongUBJ2LBJAxis = [0, 0, 149.0105];
+vehicle.ford.kinematics.rear.upright.wheelCenterDelta2KPI = [59.76, 64.2, 0]
 
 vehicle.ford.kinematics.rear.upright.wheelMatingFace2RotatationalAxis = [0, 80.25, 0]; %upright reference plane
     
