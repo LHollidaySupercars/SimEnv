@@ -1,0 +1,406 @@
+<?xml version="1.0"?>
+<Maths Locale="English_Australia.1252" DefaultLocale="C" Id="Performance_TOY" Condition="'Vehicle Id' == &quot;GEN3 Toyota&quot;">
+
+ <MathConstants>
+
+  <!-- ======================================== -->
+  <!-- TOY — full fit with roll                   -->
+  <!-- ======================================== -->
+
+  <!-- TOY_Cz_roll -->
+  <MathConstant Name="TOY_Cz_roll_b1" Value="0.78344028" Unit=""/>
+  <MathConstant Name="TOY_Cz_roll_b2" Value="-0.01248005" Unit=""/>
+  <MathConstant Name="TOY_Cz_roll_b3" Value="-0.01141026" Unit=""/>
+  <MathConstant Name="TOY_Cz_roll_b4" Value="0.01708677" Unit=""/>
+  <MathConstant Name="TOY_Cz_roll_b5" Value="0.00008495" Unit=""/>
+  <MathConstant Name="TOY_Cz_roll_b6" Value="0.00003567" Unit=""/>
+  <MathConstant Name="TOY_Cz_roll_b7" Value="0.02399041" Unit=""/>
+  <MathConstant Name="TOY_Cz_roll_b8" Value="-0.00003621" Unit=""/>
+  <MathConstant Name="TOY_Cz_roll_b9" Value="0.00008860" Unit=""/>
+  <MathConstant Name="TOY_Cz_roll_b10" Value="-0.00015541" Unit=""/>
+
+  <!-- TOY_Cx_roll -->
+  <MathConstant Name="TOY_Cx_roll_b1" Value="0.68503790" Unit=""/>
+  <MathConstant Name="TOY_Cx_roll_b2" Value="0.00364387" Unit=""/>
+  <MathConstant Name="TOY_Cx_roll_b3" Value="0.00058677" Unit=""/>
+  <MathConstant Name="TOY_Cx_roll_b4" Value="-0.00521259" Unit=""/>
+  <MathConstant Name="TOY_Cx_roll_b5" Value="-0.00000971" Unit=""/>
+  <MathConstant Name="TOY_Cx_roll_b6" Value="0.00000018" Unit=""/>
+  <MathConstant Name="TOY_Cx_roll_b7" Value="-0.00051384" Unit=""/>
+  <MathConstant Name="TOY_Cx_roll_b8" Value="-0.00000113" Unit=""/>
+  <MathConstant Name="TOY_Cx_roll_b9" Value="0.00015012" Unit=""/>
+  <MathConstant Name="TOY_Cx_roll_b10" Value="-0.00006304" Unit=""/>
+
+  <!-- TOY_CzF_roll -->
+  <MathConstant Name="TOY_CzF_roll_b1" Value="0.86481821" Unit=""/>
+  <MathConstant Name="TOY_CzF_roll_b2" Value="-0.00595153" Unit=""/>
+  <MathConstant Name="TOY_CzF_roll_b3" Value="-0.00878098" Unit=""/>
+  <MathConstant Name="TOY_CzF_roll_b4" Value="-0.00263223" Unit=""/>
+  <MathConstant Name="TOY_CzF_roll_b5" Value="0.00006199" Unit=""/>
+  <MathConstant Name="TOY_CzF_roll_b6" Value="0.00002539" Unit=""/>
+  <MathConstant Name="TOY_CzF_roll_b7" Value="0.01176345" Unit=""/>
+  <MathConstant Name="TOY_CzF_roll_b8" Value="-0.00003161" Unit=""/>
+  <MathConstant Name="TOY_CzF_roll_b9" Value="0.00026909" Unit=""/>
+  <MathConstant Name="TOY_CzF_roll_b10" Value="-0.00015914" Unit=""/>
+
+  <!-- TOY_CzR_roll -->
+  <MathConstant Name="TOY_CzR_roll_b1" Value="-0.08137794" Unit=""/>
+  <MathConstant Name="TOY_CzR_roll_b2" Value="-0.00652853" Unit=""/>
+  <MathConstant Name="TOY_CzR_roll_b3" Value="-0.00262928" Unit=""/>
+  <MathConstant Name="TOY_CzR_roll_b4" Value="0.01971900" Unit=""/>
+  <MathConstant Name="TOY_CzR_roll_b5" Value="0.00002296" Unit=""/>
+  <MathConstant Name="TOY_CzR_roll_b6" Value="0.00001028" Unit=""/>
+  <MathConstant Name="TOY_CzR_roll_b7" Value="0.01222696" Unit=""/>
+  <MathConstant Name="TOY_CzR_roll_b8" Value="-0.00000460" Unit=""/>
+  <MathConstant Name="TOY_CzR_roll_b9" Value="-0.00018049" Unit=""/>
+  <MathConstant Name="TOY_CzR_roll_b10" Value="0.00000372" Unit=""/>
+
+  <!-- TOY_ABf_roll -->
+  <MathConstant Name="TOY_ABf_roll_b1" Value="-258.55022257" Unit=""/>
+  <MathConstant Name="TOY_ABf_roll_b2" Value="0.46563443" Unit=""/>
+  <MathConstant Name="TOY_ABf_roll_b3" Value="3.43778693" Unit=""/>
+  <MathConstant Name="TOY_ABf_roll_b4" Value="-1.11675211" Unit=""/>
+  <MathConstant Name="TOY_ABf_roll_b5" Value="-0.00502832" Unit=""/>
+  <MathConstant Name="TOY_ABf_roll_b6" Value="-0.01152386" Unit=""/>
+  <MathConstant Name="TOY_ABf_roll_b7" Value="-1.19106619" Unit=""/>
+  <MathConstant Name="TOY_ABf_roll_b8" Value="0.00262499" Unit=""/>
+  <MathConstant Name="TOY_ABf_roll_b9" Value="-0.01747559" Unit=""/>
+  <MathConstant Name="TOY_ABf_roll_b10" Value="0.01639131" Unit=""/>
+
+  <!-- TOY_EFF_roll -->
+  <MathConstant Name="TOY_EFF_roll_b1" Value="0.53052919" Unit=""/>
+  <MathConstant Name="TOY_EFF_roll_b2" Value="-0.00860668" Unit=""/>
+  <MathConstant Name="TOY_EFF_roll_b3" Value="-0.01191959" Unit=""/>
+  <MathConstant Name="TOY_EFF_roll_b4" Value="0.00314149" Unit=""/>
+  <MathConstant Name="TOY_EFF_roll_b5" Value="0.00007024" Unit=""/>
+  <MathConstant Name="TOY_EFF_roll_b6" Value="0.00003850" Unit=""/>
+  <MathConstant Name="TOY_EFF_roll_b7" Value="0.02268033" Unit=""/>
+  <MathConstant Name="TOY_EFF_roll_b8" Value="-0.00003258" Unit=""/>
+  <MathConstant Name="TOY_EFF_roll_b9" Value="0.00022193" Unit=""/>
+  <MathConstant Name="TOY_EFF_roll_b10" Value="-0.00014930" Unit=""/>
+
+  <!-- TOY_Cy_roll -->
+  <MathConstant Name="TOY_Cy_roll_b1" Value="0.05190121" Unit=""/>
+  <MathConstant Name="TOY_Cy_roll_b2" Value="0.00075473" Unit=""/>
+  <MathConstant Name="TOY_Cy_roll_b3" Value="-0.00288458" Unit=""/>
+  <MathConstant Name="TOY_Cy_roll_b4" Value="-0.14128769" Unit=""/>
+  <MathConstant Name="TOY_Cy_roll_b5" Value="-0.00001782" Unit=""/>
+  <MathConstant Name="TOY_Cy_roll_b6" Value="-0.00000973" Unit=""/>
+  <MathConstant Name="TOY_Cy_roll_b7" Value="-0.01148710" Unit=""/>
+  <MathConstant Name="TOY_Cy_roll_b8" Value="0.00004291" Unit=""/>
+  <MathConstant Name="TOY_Cy_roll_b9" Value="0.00197640" Unit=""/>
+  <MathConstant Name="TOY_Cy_roll_b10" Value="-0.00034538" Unit=""/>
+
+  <!-- TOY_CyF_roll -->
+  <MathConstant Name="TOY_CyF_roll_b1" Value="0.02590739" Unit=""/>
+  <MathConstant Name="TOY_CyF_roll_b2" Value="0.00037541" Unit=""/>
+  <MathConstant Name="TOY_CyF_roll_b3" Value="-0.00144417" Unit=""/>
+  <MathConstant Name="TOY_CyF_roll_b4" Value="-0.07061305" Unit=""/>
+  <MathConstant Name="TOY_CyF_roll_b5" Value="-0.00000887" Unit=""/>
+  <MathConstant Name="TOY_CyF_roll_b6" Value="-0.00000485" Unit=""/>
+  <MathConstant Name="TOY_CyF_roll_b7" Value="-0.00574638" Unit=""/>
+  <MathConstant Name="TOY_CyF_roll_b8" Value="0.00002143" Unit=""/>
+  <MathConstant Name="TOY_CyF_roll_b9" Value="0.00098965" Unit=""/>
+  <MathConstant Name="TOY_CyF_roll_b10" Value="-0.00017343" Unit=""/>
+
+  <!-- TOY_CyR_roll -->
+  <MathConstant Name="TOY_CyR_roll_b1" Value="0.02599382" Unit=""/>
+  <MathConstant Name="TOY_CyR_roll_b2" Value="0.00037932" Unit=""/>
+  <MathConstant Name="TOY_CyR_roll_b3" Value="-0.00144041" Unit=""/>
+  <MathConstant Name="TOY_CyR_roll_b4" Value="-0.07067465" Unit=""/>
+  <MathConstant Name="TOY_CyR_roll_b5" Value="-0.00000894" Unit=""/>
+  <MathConstant Name="TOY_CyR_roll_b6" Value="-0.00000488" Unit=""/>
+  <MathConstant Name="TOY_CyR_roll_b7" Value="-0.00574072" Unit=""/>
+  <MathConstant Name="TOY_CyR_roll_b8" Value="0.00002149" Unit=""/>
+  <MathConstant Name="TOY_CyR_roll_b9" Value="0.00098675" Unit=""/>
+  <MathConstant Name="TOY_CyR_roll_b10" Value="-0.00017195" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- TOY — simplified fit no roll               -->
+  <!-- ======================================== -->
+
+  <!-- TOY_Cz -->
+  <MathConstant Name="TOY_Cz_b1" Value="0.10262783" Unit=""/>
+  <MathConstant Name="TOY_Cz_b2" Value="-0.01413953" Unit=""/>
+  <MathConstant Name="TOY_Cz_b3" Value="-0.00207827" Unit=""/>
+  <MathConstant Name="TOY_Cz_b4" Value="0.00012316" Unit=""/>
+  <MathConstant Name="TOY_Cz_b5" Value="0.00002102" Unit=""/>
+  <MathConstant Name="TOY_Cz_b6" Value="-0.00007898" Unit=""/>
+
+  <!-- TOY_Cx -->
+  <MathConstant Name="TOY_Cx_b1" Value="0.64465881" Unit=""/>
+  <MathConstant Name="TOY_Cx_b2" Value="0.00494546" Unit=""/>
+  <MathConstant Name="TOY_Cx_b3" Value="0.00019576" Unit=""/>
+  <MathConstant Name="TOY_Cx_b4" Value="-0.00001582" Unit=""/>
+  <MathConstant Name="TOY_Cx_b5" Value="0.00000153" Unit=""/>
+  <MathConstant Name="TOY_Cx_b6" Value="-0.00000095" Unit=""/>
+
+  <!-- TOY_CzF -->
+  <MathConstant Name="TOY_CzF_b1" Value="0.28249785" Unit=""/>
+  <MathConstant Name="TOY_CzF_b2" Value="-0.00592687" Unit=""/>
+  <MathConstant Name="TOY_CzF_b3" Value="-0.00173333" Unit=""/>
+  <MathConstant Name="TOY_CzF_b4" Value="0.00008704" Unit=""/>
+  <MathConstant Name="TOY_CzF_b5" Value="0.00001586" Unit=""/>
+  <MathConstant Name="TOY_CzF_b6" Value="-0.00006722" Unit=""/>
+
+  <!-- TOY_CzR -->
+  <MathConstant Name="TOY_CzR_b1" Value="-0.17987002" Unit=""/>
+  <MathConstant Name="TOY_CzR_b2" Value="-0.00821266" Unit=""/>
+  <MathConstant Name="TOY_CzR_b3" Value="-0.00034494" Unit=""/>
+  <MathConstant Name="TOY_CzR_b4" Value="0.00003612" Unit=""/>
+  <MathConstant Name="TOY_CzR_b5" Value="0.00000517" Unit=""/>
+  <MathConstant Name="TOY_CzR_b6" Value="-0.00001176" Unit=""/>
+
+  <!-- TOY_ABf -->
+  <MathConstant Name="TOY_ABf_b1" Value="11.23452854" Unit=""/>
+  <MathConstant Name="TOY_ABf_b2" Value="-0.38198962" Unit=""/>
+  <MathConstant Name="TOY_ABf_b3" Value="0.46596745" Unit=""/>
+  <MathConstant Name="TOY_ABf_b4" Value="-0.00573239" Unit=""/>
+  <MathConstant Name="TOY_ABf_b5" Value="-0.00375664" Unit=""/>
+  <MathConstant Name="TOY_ABf_b6" Value="0.00878571" Unit=""/>
+
+  <!-- TOY_EFF -->
+  <MathConstant Name="TOY_EFF_b1" Value="-0.17398265" Unit=""/>
+  <MathConstant Name="TOY_EFF_b2" Value="-0.00912880" Unit=""/>
+  <MathConstant Name="TOY_EFF_b3" Value="-0.00301891" Unit=""/>
+  <MathConstant Name="TOY_EFF_b4" Value="0.00010152" Unit=""/>
+  <MathConstant Name="TOY_EFF_b5" Value="0.00002437" Unit=""/>
+  <MathConstant Name="TOY_EFF_b6" Value="-0.00007288" Unit=""/>
+
+  <!-- TOY_Cy -->
+  <MathConstant Name="TOY_Cy_b1" Value="1.22847625" Unit=""/>
+  <MathConstant Name="TOY_Cy_b2" Value="-0.00596627" Unit=""/>
+  <MathConstant Name="TOY_Cy_b3" Value="-0.01358615" Unit=""/>
+  <MathConstant Name="TOY_Cy_b4" Value="0.00000241" Unit=""/>
+  <MathConstant Name="TOY_Cy_b5" Value="0.00002337" Unit=""/>
+  <MathConstant Name="TOY_Cy_b6" Value="0.00005371" Unit=""/>
+
+  <!-- TOY_CyF -->
+  <MathConstant Name="TOY_CyF_b1" Value="0.61565647" Unit=""/>
+  <MathConstant Name="TOY_CyF_b2" Value="-0.00299380" Unit=""/>
+  <MathConstant Name="TOY_CyF_b3" Value="-0.00680753" Unit=""/>
+  <MathConstant Name="TOY_CyF_b4" Value="0.00000125" Unit=""/>
+  <MathConstant Name="TOY_CyF_b5" Value="0.00001173" Unit=""/>
+  <MathConstant Name="TOY_CyF_b6" Value="0.00002686" Unit=""/>
+
+  <!-- TOY_CyR -->
+  <MathConstant Name="TOY_CyR_b1" Value="0.61281978" Unit=""/>
+  <MathConstant Name="TOY_CyR_b2" Value="-0.00297247" Unit=""/>
+  <MathConstant Name="TOY_CyR_b3" Value="-0.00677863" Unit=""/>
+  <MathConstant Name="TOY_CyR_b4" Value="0.00000116" Unit=""/>
+  <MathConstant Name="TOY_CyR_b5" Value="0.00001164" Unit=""/>
+  <MathConstant Name="TOY_CyR_b6" Value="0.00002685" Unit=""/>
+
+ </MathConstants>
+
+ <MathExpressions>
+
+  <!-- ======================================== -->
+  <!-- TOY — full fit with roll                   -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="TOY_Cz_roll" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_Cz_roll_b1' []
+    + 'TOY_Cz_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cz_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cz_roll_b4' [] * 'Roll' [deg]
+    + 'TOY_Cz_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cz_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cz_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'TOY_Cz_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cz_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'TOY_Cz_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_Cx_roll" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_Cx_roll_b1' []
+    + 'TOY_Cx_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cx_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cx_roll_b4' [] * 'Roll' [deg]
+    + 'TOY_Cx_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cx_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cx_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'TOY_Cx_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cx_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'TOY_Cx_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_CzF_roll" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_CzF_roll_b1' []
+    + 'TOY_CzF_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CzF_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CzF_roll_b4' [] * 'Roll' [deg]
+    + 'TOY_CzF_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CzF_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CzF_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'TOY_CzF_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CzF_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'TOY_CzF_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_CzR_roll" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_CzR_roll_b1' []
+    + 'TOY_CzR_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CzR_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CzR_roll_b4' [] * 'Roll' [deg]
+    + 'TOY_CzR_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CzR_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CzR_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'TOY_CzR_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CzR_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'TOY_CzR_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_ABf_roll" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_ABf_roll_b1' []
+    + 'TOY_ABf_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_ABf_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_ABf_roll_b4' [] * 'Roll' [deg]
+    + 'TOY_ABf_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_ABf_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_ABf_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'TOY_ABf_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_ABf_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'TOY_ABf_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_EFF_roll" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_EFF_roll_b1' []
+    + 'TOY_EFF_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_EFF_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_EFF_roll_b4' [] * 'Roll' [deg]
+    + 'TOY_EFF_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_EFF_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_EFF_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'TOY_EFF_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_EFF_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'TOY_EFF_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_Cy_roll" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_Cy_roll_b1' []
+    + 'TOY_Cy_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cy_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cy_roll_b4' [] * 'Roll' [deg]
+    + 'TOY_Cy_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cy_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cy_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'TOY_Cy_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cy_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'TOY_Cy_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_CyF_roll" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_CyF_roll_b1' []
+    + 'TOY_CyF_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CyF_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CyF_roll_b4' [] * 'Roll' [deg]
+    + 'TOY_CyF_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CyF_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CyF_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'TOY_CyF_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CyF_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'TOY_CyF_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_CyR_roll" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_CyR_roll_b1' []
+    + 'TOY_CyR_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CyR_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CyR_roll_b4' [] * 'Roll' [deg]
+    + 'TOY_CyR_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CyR_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CyR_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'TOY_CyR_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CyR_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'TOY_CyR_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- TOY — simplified fit no roll               -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="TOY_Cz" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_Cz_b1' []
+    + 'TOY_Cz_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cz_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cz_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cz_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cz_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_Cx" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_Cx_b1' []
+    + 'TOY_Cx_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cx_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cx_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cx_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cx_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_CzF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_CzF_b1' []
+    + 'TOY_CzF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CzF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CzF_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CzF_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CzF_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_CzR" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_CzR_b1' []
+    + 'TOY_CzR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CzR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CzR_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CzR_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CzR_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_ABf" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_ABf_b1' []
+    + 'TOY_ABf_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_ABf_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_ABf_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_ABf_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_ABf_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_EFF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_EFF_b1' []
+    + 'TOY_EFF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_EFF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_EFF_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_EFF_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_EFF_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_Cy" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_Cy_b1' []
+    + 'TOY_Cy_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cy_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cy_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_Cy_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_Cy_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_CyF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_CyF_b1' []
+    + 'TOY_CyF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CyF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CyF_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CyF_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CyF_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="TOY_CyR" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'TOY_CyR_b1' []
+    + 'TOY_CyR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CyR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CyR_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'TOY_CyR_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'TOY_CyR_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+ </MathExpressions>
+
+</Maths>

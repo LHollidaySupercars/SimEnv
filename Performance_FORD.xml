@@ -1,0 +1,1095 @@
+<?xml version="1.0"?>
+<Maths Locale="English_Australia.1252" DefaultLocale="C" Id="Performance_FORD" Condition="'Vehicle Id' == &quot;GEN3 Ford&quot;">
+
+ <MathConstants>
+
+  <!-- ======================================== -->
+  <!-- Filter cutoff frequencies                -->
+  <!-- ======================================== -->
+
+  <MathConstant Name="filt_FRH" Value="10.0" Unit="Hz"/>
+  <MathConstant Name="filt_RRH" Value="10.0" Unit="Hz"/>
+  <MathConstant Name="filt_YAW" Value="2.0" Unit="Hz"/>
+
+  <!-- ======================================== -->
+  <!-- FORD — roll fit (degree 3)                 -->
+  <!-- ======================================== -->
+
+  <!-- FORD_Cz_roll -->
+  <MathConstant Name="FORD_Cz_roll_b1" Value="-1.31885723" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b2" Value="0.00835747" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b3" Value="0.01168301" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b4" Value="-0.63182533" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b5" Value="0.00018751" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b6" Value="0.00013535" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b7" Value="-0.33120719" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b8" Value="-0.00054681" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b9" Value="0.01835113" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b10" Value="-0.00289151" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b11" Value="-0.00000021" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b12" Value="-0.00000095" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b13" Value="0.02537848" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b14" Value="-0.00000033" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b15" Value="-0.00007841" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b16" Value="0.00000217" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b17" Value="0.00001343" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b18" Value="0.00163565" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b19" Value="0.00007798" Unit=""/>
+  <MathConstant Name="FORD_Cz_roll_b20" Value="-0.00000578" Unit=""/>
+
+  <!-- FORD_Cx_roll -->
+  <MathConstant Name="FORD_Cx_roll_b1" Value="0.56101898" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b2" Value="0.01058605" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b3" Value="-0.00162583" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b4" Value="-0.01035651" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b5" Value="-0.00009985" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b6" Value="-0.00000196" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b7" Value="0.00746760" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b8" Value="0.00003925" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b9" Value="-0.00062654" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b10" Value="0.00082609" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b11" Value="0.00000033" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b12" Value="0.00000004" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b13" Value="0.00010637" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b14" Value="-0.00000012" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b15" Value="0.00000302" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b16" Value="-0.00000008" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b17" Value="-0.00000425" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b18" Value="-0.00019644" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b19" Value="0.00010600" Unit=""/>
+  <MathConstant Name="FORD_Cx_roll_b20" Value="0.00000083" Unit=""/>
+
+  <!-- FORD_CzF_roll -->
+  <MathConstant Name="FORD_CzF_roll_b1" Value="-2.62987543" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b2" Value="0.05422195" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b3" Value="0.01273350" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b4" Value="-0.48121169" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b5" Value="-0.00016341" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b6" Value="0.00010416" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b7" Value="-0.21665631" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b8" Value="-0.00052184" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b9" Value="0.01177008" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b10" Value="-0.00044898" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b11" Value="0.00000036" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b12" Value="-0.00000056" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b13" Value="-0.00067580" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b14" Value="0.00000065" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b15" Value="-0.00004384" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b16" Value="0.00000119" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b17" Value="0.00000238" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b18" Value="0.00073516" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b19" Value="0.00076366" Unit=""/>
+  <MathConstant Name="FORD_CzF_roll_b20" Value="-0.00001257" Unit=""/>
+
+  <!-- FORD_CzR_roll -->
+  <MathConstant Name="FORD_CzR_roll_b1" Value="1.31101820" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b2" Value="-0.04586449" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b3" Value="-0.00105049" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b4" Value="-0.15061364" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b5" Value="0.00035092" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b6" Value="0.00003119" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b7" Value="-0.11455087" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b8" Value="-0.00002497" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b9" Value="0.00658105" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b10" Value="-0.00244254" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b11" Value="-0.00000057" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b12" Value="-0.00000039" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b13" Value="0.02605428" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b14" Value="-0.00000098" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b15" Value="-0.00003457" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b16" Value="0.00000098" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b17" Value="0.00001105" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b18" Value="0.00090049" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b19" Value="-0.00068568" Unit=""/>
+  <MathConstant Name="FORD_CzR_roll_b20" Value="0.00000679" Unit=""/>
+
+  <!-- FORD_ABf_roll -->
+  <MathConstant Name="FORD_ABf_roll_b1" Value="-122.31685450" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b2" Value="-8.15464981" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b3" Value="9.88092479" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b4" Value="136.49476392" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b5" Value="0.02161679" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b6" Value="-0.09750701" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b7" Value="-10.47394125" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b8" Value="0.07422023" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b9" Value="-0.90385862" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b10" Value="-1.09369167" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b11" Value="0.00002157" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b12" Value="0.00024618" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b13" Value="1.65420800" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b14" Value="-0.00021009" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b15" Value="0.00142875" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b16" Value="-0.00008311" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b17" Value="0.00187756" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b18" Value="-0.04602972" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b19" Value="0.07142411" Unit=""/>
+  <MathConstant Name="FORD_ABf_roll_b20" Value="0.00422439" Unit=""/>
+
+  <!-- FORD_EFF_roll -->
+  <MathConstant Name="FORD_EFF_roll_b1" Value="-1.37885695" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b2" Value="0.01364438" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b3" Value="0.00678356" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b4" Value="-0.65559719" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b5" Value="0.00012256" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b6" Value="0.00014754" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b7" Value="-0.31691786" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b8" Value="-0.00049296" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b9" Value="0.01774484" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b10" Value="-0.00194981" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b11" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b12" Value="-0.00000092" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b13" Value="0.02463685" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b14" Value="-0.00000042" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b15" Value="-0.00007408" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b16" Value="0.00000204" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b17" Value="0.00000933" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b18" Value="0.00137659" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b19" Value="0.00021731" Unit=""/>
+  <MathConstant Name="FORD_EFF_roll_b20" Value="-0.00000696" Unit=""/>
+
+  <!-- FORD_Cy_roll -->
+  <MathConstant Name="FORD_Cy_roll_b1" Value="-9.63072644" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b2" Value="0.21755040" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b3" Value="0.04284256" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b4" Value="-3.77408672" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b5" Value="-0.00118790" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b6" Value="0.00017309" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b7" Value="-0.01889614" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b8" Value="-0.00129831" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b9" Value="0.03513186" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b10" Value="0.02499465" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b11" Value="0.00000302" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b12" Value="-0.00000132" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b13" Value="-0.18088296" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b14" Value="0.00000137" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b15" Value="-0.00013444" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b16" Value="0.00000367" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b17" Value="-0.00008438" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b18" Value="0.00181610" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b19" Value="0.00313247" Unit=""/>
+  <MathConstant Name="FORD_Cy_roll_b20" Value="-0.00005426" Unit=""/>
+
+  <!-- FORD_CyF_roll -->
+  <MathConstant Name="FORD_CyF_roll_b1" Value="-4.81457729" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b2" Value="0.10877011" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b3" Value="0.02142687" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b4" Value="-1.88874888" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b5" Value="-0.00059410" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b6" Value="0.00008642" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b7" Value="-0.00933011" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b8" Value="-0.00064906" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b9" Value="0.01758200" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b10" Value="0.01250504" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b11" Value="0.00000151" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b12" Value="-0.00000066" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b13" Value="-0.09053428" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b14" Value="0.00000068" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b15" Value="-0.00006730" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b16" Value="0.00000184" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b17" Value="-0.00004222" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b18" Value="0.00090966" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b19" Value="0.00156652" Unit=""/>
+  <MathConstant Name="FORD_CyF_roll_b20" Value="-0.00002713" Unit=""/>
+
+  <!-- FORD_CyR_roll -->
+  <MathConstant Name="FORD_CyR_roll_b1" Value="-4.81614914" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b2" Value="0.10878029" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b3" Value="0.02141569" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b4" Value="-1.88533784" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b5" Value="-0.00059380" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b6" Value="0.00008667" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b7" Value="-0.00956603" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b8" Value="-0.00064925" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b9" Value="0.01754986" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b10" Value="0.01248961" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b11" Value="0.00000151" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b12" Value="-0.00000066" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b13" Value="-0.09034868" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b14" Value="0.00000069" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b15" Value="-0.00006714" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b16" Value="0.00000183" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b17" Value="-0.00004216" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b18" Value="0.00090644" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b19" Value="0.00156596" Unit=""/>
+  <MathConstant Name="FORD_CyR_roll_b20" Value="-0.00002713" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- FORD — simplified fit no roll (degree 3)   -->
+  <!-- ======================================== -->
+
+  <!-- FORD_Cz -->
+  <MathConstant Name="FORD_Cz_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_Cz_b2" Value="0.01042665" Unit=""/>
+  <MathConstant Name="FORD_Cz_b3" Value="-0.01499735" Unit=""/>
+  <MathConstant Name="FORD_Cz_b4" Value="-0.00047250" Unit=""/>
+  <MathConstant Name="FORD_Cz_b5" Value="-0.00013637" Unit=""/>
+  <MathConstant Name="FORD_Cz_b6" Value="0.00051947" Unit=""/>
+  <MathConstant Name="FORD_Cz_b7" Value="0.00000393" Unit=""/>
+  <MathConstant Name="FORD_Cz_b8" Value="-0.00000051" Unit=""/>
+  <MathConstant Name="FORD_Cz_b9" Value="-0.00000603" Unit=""/>
+  <MathConstant Name="FORD_Cz_b10" Value="0.00000311" Unit=""/>
+
+  <!-- FORD_Cx -->
+  <MathConstant Name="FORD_Cx_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_Cx_b2" Value="0.01547230" Unit=""/>
+  <MathConstant Name="FORD_Cx_b3" Value="0.00571076" Unit=""/>
+  <MathConstant Name="FORD_Cx_b4" Value="-0.00003778" Unit=""/>
+  <MathConstant Name="FORD_Cx_b5" Value="0.00001402" Unit=""/>
+  <MathConstant Name="FORD_Cx_b6" Value="-0.00012547" Unit=""/>
+  <MathConstant Name="FORD_Cx_b7" Value="-0.00000025" Unit=""/>
+  <MathConstant Name="FORD_Cx_b8" Value="0.00000008" Unit=""/>
+  <MathConstant Name="FORD_Cx_b9" Value="0.00000089" Unit=""/>
+  <MathConstant Name="FORD_Cx_b10" Value="-0.00000034" Unit=""/>
+
+  <!-- FORD_CzF -->
+  <MathConstant Name="FORD_CzF_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CzF_b2" Value="0.01631098" Unit=""/>
+  <MathConstant Name="FORD_CzF_b3" Value="-0.00948454" Unit=""/>
+  <MathConstant Name="FORD_CzF_b4" Value="-0.00024812" Unit=""/>
+  <MathConstant Name="FORD_CzF_b5" Value="-0.00002227" Unit=""/>
+  <MathConstant Name="FORD_CzF_b6" Value="0.00014154" Unit=""/>
+  <MathConstant Name="FORD_CzF_b7" Value="0.00000183" Unit=""/>
+  <MathConstant Name="FORD_CzF_b8" Value="-0.00000028" Unit=""/>
+  <MathConstant Name="FORD_CzF_b9" Value="-0.00000238" Unit=""/>
+  <MathConstant Name="FORD_CzF_b10" Value="0.00000134" Unit=""/>
+
+  <!-- FORD_CzR -->
+  <MathConstant Name="FORD_CzR_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CzR_b2" Value="-0.00588433" Unit=""/>
+  <MathConstant Name="FORD_CzR_b3" Value="-0.00551282" Unit=""/>
+  <MathConstant Name="FORD_CzR_b4" Value="-0.00022438" Unit=""/>
+  <MathConstant Name="FORD_CzR_b5" Value="-0.00011410" Unit=""/>
+  <MathConstant Name="FORD_CzR_b6" Value="0.00037793" Unit=""/>
+  <MathConstant Name="FORD_CzR_b7" Value="0.00000209" Unit=""/>
+  <MathConstant Name="FORD_CzR_b8" Value="-0.00000023" Unit=""/>
+  <MathConstant Name="FORD_CzR_b9" Value="-0.00000365" Unit=""/>
+  <MathConstant Name="FORD_CzR_b10" Value="0.00000177" Unit=""/>
+
+  <!-- FORD_ABf -->
+  <MathConstant Name="FORD_ABf_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_ABf_b2" Value="-3.62173780" Unit=""/>
+  <MathConstant Name="FORD_ABf_b3" Value="3.22218766" Unit=""/>
+  <MathConstant Name="FORD_ABf_b4" Value="0.00780113" Unit=""/>
+  <MathConstant Name="FORD_ABf_b5" Value="-0.03431853" Unit=""/>
+  <MathConstant Name="FORD_ABf_b6" Value="0.03530492" Unit=""/>
+  <MathConstant Name="FORD_ABf_b7" Value="-0.00002470" Unit=""/>
+  <MathConstant Name="FORD_ABf_b8" Value="0.00009861" Unit=""/>
+  <MathConstant Name="FORD_ABf_b9" Value="-0.00001862" Unit=""/>
+  <MathConstant Name="FORD_ABf_b10" Value="-0.00009184" Unit=""/>
+
+  <!-- FORD_EFF -->
+  <MathConstant Name="FORD_EFF_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_EFF_b2" Value="0.00724789" Unit=""/>
+  <MathConstant Name="FORD_EFF_b3" Value="-0.01399897" Unit=""/>
+  <MathConstant Name="FORD_EFF_b4" Value="-0.00043630" Unit=""/>
+  <MathConstant Name="FORD_EFF_b5" Value="-0.00014569" Unit=""/>
+  <MathConstant Name="FORD_EFF_b6" Value="0.00052362" Unit=""/>
+  <MathConstant Name="FORD_EFF_b7" Value="0.00000367" Unit=""/>
+  <MathConstant Name="FORD_EFF_b8" Value="-0.00000037" Unit=""/>
+  <MathConstant Name="FORD_EFF_b9" Value="-0.00000564" Unit=""/>
+  <MathConstant Name="FORD_EFF_b10" Value="0.00000273" Unit=""/>
+
+  <!-- FORD_Cy -->
+  <MathConstant Name="FORD_Cy_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_Cy_b2" Value="-0.02239313" Unit=""/>
+  <MathConstant Name="FORD_Cy_b3" Value="0.02373299" Unit=""/>
+  <MathConstant Name="FORD_Cy_b4" Value="0.00000058" Unit=""/>
+  <MathConstant Name="FORD_Cy_b5" Value="-0.00028530" Unit=""/>
+  <MathConstant Name="FORD_Cy_b6" Value="0.00026872" Unit=""/>
+  <MathConstant Name="FORD_Cy_b7" Value="0.00000061" Unit=""/>
+  <MathConstant Name="FORD_Cy_b8" Value="0.00000066" Unit=""/>
+  <MathConstant Name="FORD_Cy_b9" Value="-0.00000130" Unit=""/>
+  <MathConstant Name="FORD_Cy_b10" Value="0.00000009" Unit=""/>
+
+  <!-- FORD_CyF -->
+  <MathConstant Name="FORD_CyF_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CyF_b2" Value="-0.01113643" Unit=""/>
+  <MathConstant Name="FORD_CyF_b3" Value="0.01180700" Unit=""/>
+  <MathConstant Name="FORD_CyF_b4" Value="0.00000034" Unit=""/>
+  <MathConstant Name="FORD_CyF_b5" Value="-0.00014191" Unit=""/>
+  <MathConstant Name="FORD_CyF_b6" Value="0.00013355" Unit=""/>
+  <MathConstant Name="FORD_CyF_b7" Value="0.00000030" Unit=""/>
+  <MathConstant Name="FORD_CyF_b8" Value="0.00000033" Unit=""/>
+  <MathConstant Name="FORD_CyF_b9" Value="-0.00000065" Unit=""/>
+  <MathConstant Name="FORD_CyF_b10" Value="0.00000004" Unit=""/>
+
+  <!-- FORD_CyR -->
+  <MathConstant Name="FORD_CyR_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CyR_b2" Value="-0.01125670" Unit=""/>
+  <MathConstant Name="FORD_CyR_b3" Value="0.01192599" Unit=""/>
+  <MathConstant Name="FORD_CyR_b4" Value="0.00000025" Unit=""/>
+  <MathConstant Name="FORD_CyR_b5" Value="-0.00014340" Unit=""/>
+  <MathConstant Name="FORD_CyR_b6" Value="0.00013517" Unit=""/>
+  <MathConstant Name="FORD_CyR_b7" Value="0.00000031" Unit=""/>
+  <MathConstant Name="FORD_CyR_b8" Value="0.00000033" Unit=""/>
+  <MathConstant Name="FORD_CyR_b9" Value="-0.00000066" Unit=""/>
+  <MathConstant Name="FORD_CyR_b10" Value="0.00000005" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- FORD — yaw fit (degree 3, 19 terms)         -->
+  <!-- ======================================== -->
+
+  <!-- FORD_Cz_yaw -->
+  <MathConstant Name="FORD_Cz_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b3" Value="-0.02297560" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b4" Value="0.67743285" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b5" Value="0.00032576" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b6" Value="0.00003761" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b7" Value="-0.00009638" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b8" Value="-0.13846982" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b9" Value="-0.01597849" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b10" Value="0.01097952" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b11" Value="-0.00000086" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b12" Value="-0.00000017" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b13" Value="0.00000007" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b14" Value="0.00000045" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b15" Value="-0.00001065" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b16" Value="-0.00000264" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b17" Value="-0.00001321" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b18" Value="0.00255332" Unit=""/>
+  <MathConstant Name="FORD_Cz_yaw_b19" Value="-0.00101759" Unit=""/>
+
+  <!-- FORD_Cx_yaw -->
+  <MathConstant Name="FORD_Cx_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b3" Value="0.00672323" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b4" Value="0.08753155" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b5" Value="-0.00005307" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b6" Value="0.00000178" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b7" Value="0.00001482" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b8" Value="-0.01239928" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b9" Value="0.00296022" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b10" Value="-0.00397555" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b11" Value="0.00000017" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b12" Value="0.00000001" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b13" Value="-0.00000004" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b14" Value="-0.00000006" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b15" Value="0.00000011" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b16" Value="0.00000038" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b17" Value="0.00000206" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b18" Value="-0.00041830" Unit=""/>
+  <MathConstant Name="FORD_Cx_yaw_b19" Value="0.00044744" Unit=""/>
+
+  <!-- FORD_CzF_yaw -->
+  <MathConstant Name="FORD_CzF_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b3" Value="-0.00645463" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b4" Value="0.20434170" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b5" Value="0.00009978" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b6" Value="0.00004386" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b7" Value="-0.00008780" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b8" Value="-0.05722753" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b9" Value="-0.00180076" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b10" Value="0.00176743" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b11" Value="-0.00000031" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b12" Value="-0.00000010" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b13" Value="0.00000027" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b14" Value="0.00000012" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b15" Value="-0.00000705" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b16" Value="-0.00000238" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b17" Value="-0.00000520" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b18" Value="0.00050140" Unit=""/>
+  <MathConstant Name="FORD_CzF_yaw_b19" Value="-0.00000596" Unit=""/>
+
+  <!-- FORD_CzR_yaw -->
+  <MathConstant Name="FORD_CzR_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b3" Value="-0.01652097" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b4" Value="0.47309114" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b5" Value="0.00022598" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b6" Value="-0.00000626" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b7" Value="-0.00000858" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b8" Value="-0.08124229" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b9" Value="-0.01417773" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b10" Value="0.00921209" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b11" Value="-0.00000055" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b12" Value="-0.00000007" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b13" Value="-0.00000020" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b14" Value="0.00000033" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b15" Value="-0.00000360" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b16" Value="-0.00000026" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b17" Value="-0.00000801" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b18" Value="0.00205191" Unit=""/>
+  <MathConstant Name="FORD_CzR_yaw_b19" Value="-0.00101163" Unit=""/>
+
+  <!-- FORD_ABf_yaw -->
+  <MathConstant Name="FORD_ABf_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b3" Value="2.10872511" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b4" Value="-37.76396587" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b5" Value="0.00296740" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b6" Value="-0.03200303" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b7" Value="0.01855679" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b8" Value="14.65857898" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b9" Value="-1.16994409" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b10" Value="0.58170310" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b11" Value="0.00001297" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b12" Value="0.00007863" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b13" Value="-0.00006051" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b14" Value="-0.00003773" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b15" Value="0.00034496" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b16" Value="0.00092788" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b17" Value="0.00306502" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b18" Value="0.08165810" Unit=""/>
+  <MathConstant Name="FORD_ABf_yaw_b19" Value="-0.15616112" Unit=""/>
+
+  <!-- FORD_EFF_yaw -->
+  <MathConstant Name="FORD_EFF_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b3" Value="-0.02228770" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b4" Value="0.61242062" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b5" Value="0.00027925" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b6" Value="0.00004596" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b7" Value="-0.00007445" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b8" Value="-0.12449377" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b9" Value="-0.01373359" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b10" Value="0.00950354" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b11" Value="-0.00000071" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b12" Value="-0.00000018" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b13" Value="0.00000003" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b14" Value="0.00000038" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b15" Value="-0.00001036" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b16" Value="-0.00000250" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b17" Value="-0.00001163" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b18" Value="0.00222797" Unit=""/>
+  <MathConstant Name="FORD_EFF_yaw_b19" Value="-0.00086936" Unit=""/>
+
+  <!-- FORD_Cy_yaw -->
+  <MathConstant Name="FORD_Cy_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b3" Value="-0.00461845" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b4" Value="0.14860706" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b5" Value="0.00000159" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b6" Value="0.00000895" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b7" Value="0.00004859" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b8" Value="-0.01402608" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b9" Value="-0.00205845" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b10" Value="0.00024575" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b11" Value="0.00000003" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b12" Value="-0.00000000" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b13" Value="-0.00000013" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b14" Value="-0.00000007" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b15" Value="0.00000264" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b16" Value="-0.00000015" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b17" Value="0.00000019" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b18" Value="0.00017202" Unit=""/>
+  <MathConstant Name="FORD_Cy_yaw_b19" Value="-0.00002818" Unit=""/>
+
+  <!-- FORD_CyF_yaw -->
+  <MathConstant Name="FORD_CyF_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b3" Value="-0.00230520" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b4" Value="0.07416627" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b5" Value="0.00000096" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b6" Value="0.00000442" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b7" Value="0.00002419" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b8" Value="-0.00699026" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b9" Value="-0.00103560" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b10" Value="0.00012810" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b11" Value="0.00000002" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b12" Value="-0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b13" Value="-0.00000007" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b14" Value="-0.00000003" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b15" Value="0.00000131" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b16" Value="-0.00000007" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b17" Value="0.00000010" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b18" Value="0.00008692" Unit=""/>
+  <MathConstant Name="FORD_CyF_yaw_b19" Value="-0.00001492" Unit=""/>
+
+  <!-- FORD_CyR_yaw -->
+  <MathConstant Name="FORD_CyR_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b3" Value="-0.00231325" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b4" Value="0.07444079" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b5" Value="0.00000063" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b6" Value="0.00000453" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b7" Value="0.00002440" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b8" Value="-0.00703581" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b9" Value="-0.00102285" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b10" Value="0.00011765" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b11" Value="0.00000002" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b12" Value="-0.00000000" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b13" Value="-0.00000007" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b14" Value="-0.00000003" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b15" Value="0.00000133" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b16" Value="-0.00000008" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b17" Value="0.00000009" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b18" Value="0.00008510" Unit=""/>
+  <MathConstant Name="FORD_CyR_yaw_b19" Value="-0.00001325" Unit=""/>
+
+ </MathConstants>
+
+ <MathExpressions>
+
+  <!-- ======================================== -->
+  <!-- Roll channel definition                  -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="Roll" DisplayUnit="deg" DisplayDPS="2" DisplayColorIndex="2" Interpolate="1" Script="(atan2('C1_Damper Pos FL' [mm] -'C1_Damper Pos FR' [mm], 1600) + atan2('C1_Damper Pos RL' [mm] -'C1_Damper Pos RR' [mm], 1600)) /2" SampleRate="0" Unit="rad"/>
+
+  <!-- ======================================== -->
+  <!-- Filtered input channels                  -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="Laser Ride Height Front_filt" DisplayDPS="2" DisplayColorIndex="2" Interpolate="1" Script="filter_lp('Laser Ride Height Front' [mm], 'filt_FRH' [])" SampleRate="0" Unit="mm"/>
+
+  <MathExpression Id="Laser Ride Height Rear_filt" DisplayDPS="2" DisplayColorIndex="2" Interpolate="1" Script="filter_lp('Laser Ride Height Rear' [mm], 'filt_RRH' [])" SampleRate="0" Unit="mm"/>
+
+  <MathExpression Id="YawPitot Yaw Angle_filt" DisplayDPS="2" DisplayColorIndex="2" Interpolate="1" Script="abs(filter_lp('YawPitot Yaw Angle' [deg], 'filt_YAW' []))" SampleRate="0" Unit="deg"/>
+
+  <!-- ======================================== -->
+  <!-- FORD — roll fit (degree 3)                 -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="FORD_Cz_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_Cz_roll_b1' []
+    + 'FORD_Cz_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cz_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_roll_b4' [] * abs('Roll' [deg])
+    + 'FORD_Cz_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cz_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_Cz_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cz_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cz_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cz_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_Cz_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cz_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cz_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cz_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cz_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_Cx_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_Cx_roll_b1' []
+    + 'FORD_Cx_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cx_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_roll_b4' [] * abs('Roll' [deg])
+    + 'FORD_Cx_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cx_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_Cx_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cx_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cx_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cx_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_Cx_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cx_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cx_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cx_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cx_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CzF_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_CzF_roll_b1' []
+    + 'FORD_CzF_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzF_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_roll_b4' [] * abs('Roll' [deg])
+    + 'FORD_CzF_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzF_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_CzF_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CzF_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CzF_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzF_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_CzF_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CzF_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzF_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CzF_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzF_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CzR_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_CzR_roll_b1' []
+    + 'FORD_CzR_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzR_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_roll_b4' [] * abs('Roll' [deg])
+    + 'FORD_CzR_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzR_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_CzR_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CzR_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CzR_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzR_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_CzR_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CzR_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzR_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CzR_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzR_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_ABf_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_ABf_roll_b1' []
+    + 'FORD_ABf_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_ABf_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_roll_b4' [] * abs('Roll' [deg])
+    + 'FORD_ABf_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_ABf_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_ABf_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_ABf_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_ABf_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_ABf_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_ABf_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_ABf_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_ABf_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_ABf_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_ABf_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_EFF_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_EFF_roll_b1' []
+    + 'FORD_EFF_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_EFF_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_roll_b4' [] * abs('Roll' [deg])
+    + 'FORD_EFF_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_EFF_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_EFF_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_EFF_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_EFF_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_EFF_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_EFF_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_EFF_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_EFF_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_EFF_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_EFF_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_Cy_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_Cy_roll_b1' []
+    + 'FORD_Cy_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cy_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_roll_b4' [] * abs('Roll' [deg])
+    + 'FORD_Cy_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cy_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_Cy_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cy_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cy_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cy_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_Cy_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cy_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cy_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_Cy_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cy_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CyF_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_CyF_roll_b1' []
+    + 'FORD_CyF_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyF_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_roll_b4' [] * abs('Roll' [deg])
+    + 'FORD_CyF_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyF_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_CyF_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CyF_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CyF_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyF_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_CyF_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CyF_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyF_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CyF_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyF_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CyR_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_CyR_roll_b1' []
+    + 'FORD_CyR_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyR_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_roll_b4' [] * abs('Roll' [deg])
+    + 'FORD_CyR_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyR_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_CyR_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CyR_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CyR_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyR_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'FORD_CyR_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CyR_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyR_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'FORD_CyR_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyR_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- FORD — simplified fit no roll (degree 3)   -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="FORD_Cz" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_Cz_b1' []
+    + 'FORD_Cz_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cz_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cz_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cz_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cz_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_Cx" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_Cx_b1' []
+    + 'FORD_Cx_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cx_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cx_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cx_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cx_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CzF" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_CzF_b1' []
+    + 'FORD_CzF_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzF_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzF_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzF_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzF_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CzR" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_CzR_b1' []
+    + 'FORD_CzR_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzR_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzR_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CzR_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CzR_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_ABf" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_ABf_b1' []
+    + 'FORD_ABf_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_ABf_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_ABf_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_ABf_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_ABf_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_EFF" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_EFF_b1' []
+    + 'FORD_EFF_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_EFF_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_EFF_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_EFF_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_EFF_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_Cy" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_Cy_b1' []
+    + 'FORD_Cy_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cy_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cy_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_Cy_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_Cy_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CyF" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_CyF_b1' []
+    + 'FORD_CyF_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyF_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyF_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyF_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyF_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CyR" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'FORD_CyR_b1' []
+    + 'FORD_CyR_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyR_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyR_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'FORD_CyR_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'FORD_CyR_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- FORD — yaw fit (degree 3, Cy=0 at yaw=0)    -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="FORD_Cz_yaw" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'FORD_Cz_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cz_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_Cx_yaw" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'FORD_Cx_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cx_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CzF_yaw" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'FORD_CzF_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzF_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CzR_yaw" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'FORD_CzR_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CzR_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_ABf_yaw" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'FORD_ABf_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_ABf_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_EFF_yaw" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'FORD_EFF_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_EFF_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_Cy_yaw" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'FORD_Cy_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_Cy_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CyF_yaw" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'FORD_CyF_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyF_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="FORD_CyR_yaw" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'FORD_CyR_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'FORD_CyR_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+ </MathExpressions>
+
+</Maths>

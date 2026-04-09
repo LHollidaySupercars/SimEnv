@@ -1,0 +1,406 @@
+<?xml version="1.0"?>
+<Maths Locale="English_Australia.1252" DefaultLocale="C" Id="Performance_FORD" Condition="'Vehicle Id' == &quot;GEN3 Ford&quot;">
+
+ <MathConstants>
+
+  <!-- ======================================== -->
+  <!-- Ford — full fit with roll                   -->
+  <!-- ======================================== -->
+
+  <!-- Ford_Cz_roll -->
+  <MathConstant Name="Ford_Cz_roll_b1" Value="0.76277706" Unit=""/>
+  <MathConstant Name="Ford_Cz_roll_b2" Value="-0.00631062" Unit=""/>
+  <MathConstant Name="Ford_Cz_roll_b3" Value="-0.01337709" Unit=""/>
+  <MathConstant Name="Ford_Cz_roll_b4" Value="0.19038367" Unit=""/>
+  <MathConstant Name="Ford_Cz_roll_b5" Value="0.00001381" Unit=""/>
+  <MathConstant Name="Ford_Cz_roll_b6" Value="0.00002842" Unit=""/>
+  <MathConstant Name="Ford_Cz_roll_b7" Value="0.01297483" Unit=""/>
+  <MathConstant Name="Ford_Cz_roll_b8" Value="0.00000644" Unit=""/>
+  <MathConstant Name="Ford_Cz_roll_b9" Value="-0.00178736" Unit=""/>
+  <MathConstant Name="Ford_Cz_roll_b10" Value="0.00000978" Unit=""/>
+
+  <!-- Ford_Cx_roll -->
+  <MathConstant Name="Ford_Cx_roll_b1" Value="0.66927291" Unit=""/>
+  <MathConstant Name="Ford_Cx_roll_b2" Value="0.00307168" Unit=""/>
+  <MathConstant Name="Ford_Cx_roll_b3" Value="0.00124766" Unit=""/>
+  <MathConstant Name="Ford_Cx_roll_b4" Value="-0.02441405" Unit=""/>
+  <MathConstant Name="Ford_Cx_roll_b5" Value="-0.00000521" Unit=""/>
+  <MathConstant Name="Ford_Cx_roll_b6" Value="0.00000006" Unit=""/>
+  <MathConstant Name="Ford_Cx_roll_b7" Value="0.00109920" Unit=""/>
+  <MathConstant Name="Ford_Cx_roll_b8" Value="-0.00000577" Unit=""/>
+  <MathConstant Name="Ford_Cx_roll_b9" Value="0.00020966" Unit=""/>
+  <MathConstant Name="Ford_Cx_roll_b10" Value="0.00000801" Unit=""/>
+
+  <!-- Ford_CzF_roll -->
+  <MathConstant Name="Ford_CzF_roll_b1" Value="0.86769045" Unit=""/>
+  <MathConstant Name="Ford_CzF_roll_b2" Value="-0.00234238" Unit=""/>
+  <MathConstant Name="Ford_CzF_roll_b3" Value="-0.01038185" Unit=""/>
+  <MathConstant Name="Ford_CzF_roll_b4" Value="0.06877855" Unit=""/>
+  <MathConstant Name="Ford_CzF_roll_b5" Value="0.00002891" Unit=""/>
+  <MathConstant Name="Ford_CzF_roll_b6" Value="0.00002644" Unit=""/>
+  <MathConstant Name="Ford_CzF_roll_b7" Value="0.00504336" Unit=""/>
+  <MathConstant Name="Ford_CzF_roll_b8" Value="-0.00001719" Unit=""/>
+  <MathConstant Name="Ford_CzF_roll_b9" Value="-0.00072462" Unit=""/>
+  <MathConstant Name="Ford_CzF_roll_b10" Value="0.00005995" Unit=""/>
+
+  <!-- Ford_CzR_roll -->
+  <MathConstant Name="Ford_CzR_roll_b1" Value="-0.10491339" Unit=""/>
+  <MathConstant Name="Ford_CzR_roll_b2" Value="-0.00396823" Unit=""/>
+  <MathConstant Name="Ford_CzR_roll_b3" Value="-0.00299524" Unit=""/>
+  <MathConstant Name="Ford_CzR_roll_b4" Value="0.12160512" Unit=""/>
+  <MathConstant Name="Ford_CzR_roll_b5" Value="-0.00001510" Unit=""/>
+  <MathConstant Name="Ford_CzR_roll_b6" Value="0.00000198" Unit=""/>
+  <MathConstant Name="Ford_CzR_roll_b7" Value="0.00793147" Unit=""/>
+  <MathConstant Name="Ford_CzR_roll_b8" Value="0.00002363" Unit=""/>
+  <MathConstant Name="Ford_CzR_roll_b9" Value="-0.00106274" Unit=""/>
+  <MathConstant Name="Ford_CzR_roll_b10" Value="-0.00005018" Unit=""/>
+
+  <!-- Ford_ABf_roll -->
+  <MathConstant Name="Ford_ABf_roll_b1" Value="-240.10596782" Unit=""/>
+  <MathConstant Name="Ford_ABf_roll_b2" Value="0.32516220" Unit=""/>
+  <MathConstant Name="Ford_ABf_roll_b3" Value="3.23454491" Unit=""/>
+  <MathConstant Name="Ford_ABf_roll_b4" Value="-0.62271845" Unit=""/>
+  <MathConstant Name="Ford_ABf_roll_b5" Value="-0.00277893" Unit=""/>
+  <MathConstant Name="Ford_ABf_roll_b6" Value="-0.01028217" Unit=""/>
+  <MathConstant Name="Ford_ABf_roll_b7" Value="-0.76737297" Unit=""/>
+  <MathConstant Name="Ford_ABf_roll_b8" Value="0.00087735" Unit=""/>
+  <MathConstant Name="Ford_ABf_roll_b9" Value="0.04399458" Unit=""/>
+  <MathConstant Name="Ford_ABf_roll_b10" Value="-0.02936724" Unit=""/>
+
+  <!-- Ford_EFF_roll -->
+  <MathConstant Name="Ford_EFF_roll_b1" Value="0.53750596" Unit=""/>
+  <MathConstant Name="Ford_EFF_roll_b2" Value="-0.00399395" Unit=""/>
+  <MathConstant Name="Ford_EFF_roll_b3" Value="-0.01311125" Unit=""/>
+  <MathConstant Name="Ford_EFF_roll_b4" Value="0.15528929" Unit=""/>
+  <MathConstant Name="Ford_EFF_roll_b5" Value="0.00000947" Unit=""/>
+  <MathConstant Name="Ford_EFF_roll_b6" Value="0.00003098" Unit=""/>
+  <MathConstant Name="Ford_EFF_roll_b7" Value="0.01357645" Unit=""/>
+  <MathConstant Name="Ford_EFF_roll_b8" Value="0.00000415" Unit=""/>
+  <MathConstant Name="Ford_EFF_roll_b9" Value="-0.00151943" Unit=""/>
+  <MathConstant Name="Ford_EFF_roll_b10" Value="0.00004975" Unit=""/>
+
+  <!-- Ford_Cy_roll -->
+  <MathConstant Name="Ford_Cy_roll_b1" Value="-0.33219023" Unit=""/>
+  <MathConstant Name="Ford_Cy_roll_b2" Value="0.00524762" Unit=""/>
+  <MathConstant Name="Ford_Cy_roll_b3" Value="-0.00186913" Unit=""/>
+  <MathConstant Name="Ford_Cy_roll_b4" Value="-0.20203926" Unit=""/>
+  <MathConstant Name="Ford_Cy_roll_b5" Value="-0.00003082" Unit=""/>
+  <MathConstant Name="Ford_Cy_roll_b6" Value="-0.00000969" Unit=""/>
+  <MathConstant Name="Ford_Cy_roll_b7" Value="-0.01531151" Unit=""/>
+  <MathConstant Name="Ford_Cy_roll_b8" Value="0.00003460" Unit=""/>
+  <MathConstant Name="Ford_Cy_roll_b9" Value="0.00248150" Unit=""/>
+  <MathConstant Name="Ford_Cy_roll_b10" Value="-0.00029249" Unit=""/>
+
+  <!-- Ford_CyF_roll -->
+  <MathConstant Name="Ford_CyF_roll_b1" Value="-0.16634482" Unit=""/>
+  <MathConstant Name="Ford_CyF_roll_b2" Value="0.00262190" Unit=""/>
+  <MathConstant Name="Ford_CyF_roll_b3" Value="-0.00093185" Unit=""/>
+  <MathConstant Name="Ford_CyF_roll_b4" Value="-0.10095241" Unit=""/>
+  <MathConstant Name="Ford_CyF_roll_b5" Value="-0.00001537" Unit=""/>
+  <MathConstant Name="Ford_CyF_roll_b6" Value="-0.00000484" Unit=""/>
+  <MathConstant Name="Ford_CyF_roll_b7" Value="-0.00765516" Unit=""/>
+  <MathConstant Name="Ford_CyF_roll_b8" Value="0.00001726" Unit=""/>
+  <MathConstant Name="Ford_CyF_roll_b9" Value="0.00124153" Unit=""/>
+  <MathConstant Name="Ford_CyF_roll_b10" Value="-0.00014682" Unit=""/>
+
+  <!-- Ford_CyR_roll -->
+  <MathConstant Name="Ford_CyR_roll_b1" Value="-0.16584541" Unit=""/>
+  <MathConstant Name="Ford_CyR_roll_b2" Value="0.00262571" Unit=""/>
+  <MathConstant Name="Ford_CyR_roll_b3" Value="-0.00093728" Unit=""/>
+  <MathConstant Name="Ford_CyR_roll_b4" Value="-0.10108685" Unit=""/>
+  <MathConstant Name="Ford_CyR_roll_b5" Value="-0.00001545" Unit=""/>
+  <MathConstant Name="Ford_CyR_roll_b6" Value="-0.00000485" Unit=""/>
+  <MathConstant Name="Ford_CyR_roll_b7" Value="-0.00765635" Unit=""/>
+  <MathConstant Name="Ford_CyR_roll_b8" Value="0.00001734" Unit=""/>
+  <MathConstant Name="Ford_CyR_roll_b9" Value="0.00123997" Unit=""/>
+  <MathConstant Name="Ford_CyR_roll_b10" Value="-0.00014567" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- Ford — simplified fit no roll               -->
+  <!-- ======================================== -->
+
+  <!-- Ford_Cz -->
+  <MathConstant Name="Ford_Cz_b1" Value="1.00095580" Unit=""/>
+  <MathConstant Name="Ford_Cz_b2" Value="-0.01963674" Unit=""/>
+  <MathConstant Name="Ford_Cz_b3" Value="-0.00676344" Unit=""/>
+  <MathConstant Name="Ford_Cz_b4" Value="0.00007171" Unit=""/>
+  <MathConstant Name="Ford_Cz_b5" Value="0.00000193" Unit=""/>
+  <MathConstant Name="Ford_Cz_b6" Value="0.00001226" Unit=""/>
+
+  <!-- Ford_Cx -->
+  <MathConstant Name="Ford_Cx_b1" Value="0.52747756" Unit=""/>
+  <MathConstant Name="Ford_Cx_b2" Value="0.00524738" Unit=""/>
+  <MathConstant Name="Ford_Cx_b3" Value="0.00139998" Unit=""/>
+  <MathConstant Name="Ford_Cx_b4" Value="-0.00001001" Unit=""/>
+  <MathConstant Name="Ford_Cx_b5" Value="0.00000286" Unit=""/>
+  <MathConstant Name="Ford_Cx_b6" Value="-0.00001335" Unit=""/>
+
+  <!-- Ford_CzF -->
+  <MathConstant Name="Ford_CzF_b1" Value="0.51987821" Unit=""/>
+  <MathConstant Name="Ford_CzF_b2" Value="-0.00495601" Unit=""/>
+  <MathConstant Name="Ford_CzF_b3" Value="-0.00404417" Unit=""/>
+  <MathConstant Name="Ford_CzF_b4" Value="0.00005267" Unit=""/>
+  <MathConstant Name="Ford_CzF_b5" Value="0.00001099" Unit=""/>
+  <MathConstant Name="Ford_CzF_b6" Value="-0.00003358" Unit=""/>
+
+  <!-- Ford_CzR -->
+  <MathConstant Name="Ford_CzR_b1" Value="0.48107759" Unit=""/>
+  <MathConstant Name="Ford_CzR_b2" Value="-0.01468073" Unit=""/>
+  <MathConstant Name="Ford_CzR_b3" Value="-0.00271927" Unit=""/>
+  <MathConstant Name="Ford_CzR_b4" Value="0.00001904" Unit=""/>
+  <MathConstant Name="Ford_CzR_b5" Value="-0.00000906" Unit=""/>
+  <MathConstant Name="Ford_CzR_b6" Value="0.00004584" Unit=""/>
+
+  <!-- Ford_ABf -->
+  <MathConstant Name="Ford_ABf_b1" Value="-0.53232673" Unit=""/>
+  <MathConstant Name="Ford_ABf_b2" Value="-0.48726563" Unit=""/>
+  <MathConstant Name="Ford_ABf_b3" Value="0.62158975" Unit=""/>
+  <MathConstant Name="Ford_ABf_b4" Value="-0.00274182" Unit=""/>
+  <MathConstant Name="Ford_ABf_b5" Value="-0.00323467" Unit=""/>
+  <MathConstant Name="Ford_ABf_b6" Value="0.00579182" Unit=""/>
+
+  <!-- Ford_EFF -->
+  <MathConstant Name="Ford_EFF_b1" Value="0.66869463" Unit=""/>
+  <MathConstant Name="Ford_EFF_b2" Value="-0.01553539" Unit=""/>
+  <MathConstant Name="Ford_EFF_b3" Value="-0.00647229" Unit=""/>
+  <MathConstant Name="Ford_EFF_b4" Value="0.00006284" Unit=""/>
+  <MathConstant Name="Ford_EFF_b5" Value="0.00000682" Unit=""/>
+  <MathConstant Name="Ford_EFF_b6" Value="0.00000454" Unit=""/>
+
+  <!-- Ford_Cy -->
+  <MathConstant Name="Ford_Cy_b1" Value="1.57670741" Unit=""/>
+  <MathConstant Name="Ford_Cy_b2" Value="-0.00598873" Unit=""/>
+  <MathConstant Name="Ford_Cy_b3" Value="-0.01888978" Unit=""/>
+  <MathConstant Name="Ford_Cy_b4" Value="-0.00000379" Unit=""/>
+  <MathConstant Name="Ford_Cy_b5" Value="0.00003766" Unit=""/>
+  <MathConstant Name="Ford_Cy_b6" Value="0.00006420" Unit=""/>
+
+  <!-- Ford_CyF -->
+  <MathConstant Name="Ford_CyF_b1" Value="0.79030006" Unit=""/>
+  <MathConstant Name="Ford_CyF_b2" Value="-0.00301291" Unit=""/>
+  <MathConstant Name="Ford_CyF_b3" Value="-0.00945846" Unit=""/>
+  <MathConstant Name="Ford_CyF_b4" Value="-0.00000183" Unit=""/>
+  <MathConstant Name="Ford_CyF_b5" Value="0.00001886" Unit=""/>
+  <MathConstant Name="Ford_CyF_b6" Value="0.00003213" Unit=""/>
+
+  <!-- Ford_CyR -->
+  <MathConstant Name="Ford_CyR_b1" Value="0.78640735" Unit=""/>
+  <MathConstant Name="Ford_CyR_b2" Value="-0.00297582" Unit=""/>
+  <MathConstant Name="Ford_CyR_b3" Value="-0.00943132" Unit=""/>
+  <MathConstant Name="Ford_CyR_b4" Value="-0.00000196" Unit=""/>
+  <MathConstant Name="Ford_CyR_b5" Value="0.00001879" Unit=""/>
+  <MathConstant Name="Ford_CyR_b6" Value="0.00003208" Unit=""/>
+
+ </MathConstants>
+
+ <MathExpressions>
+
+  <!-- ======================================== -->
+  <!-- Ford — full fit with roll                   -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="Ford_Cz_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_Cz_roll_b1' []
+    + 'Ford_Cz_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cz_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cz_roll_b4' [] * 'Roll' [deg]
+    + 'Ford_Cz_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cz_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cz_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_Cz_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cz_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_Cz_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_Cx_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_Cx_roll_b1' []
+    + 'Ford_Cx_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cx_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cx_roll_b4' [] * 'Roll' [deg]
+    + 'Ford_Cx_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cx_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cx_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_Cx_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cx_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_Cx_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CzF_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_CzF_roll_b1' []
+    + 'Ford_CzF_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzF_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzF_roll_b4' [] * 'Roll' [deg]
+    + 'Ford_CzF_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzF_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzF_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_CzF_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzF_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_CzF_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CzR_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_CzR_roll_b1' []
+    + 'Ford_CzR_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzR_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzR_roll_b4' [] * 'Roll' [deg]
+    + 'Ford_CzR_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzR_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzR_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_CzR_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzR_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_CzR_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_ABf_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_ABf_roll_b1' []
+    + 'Ford_ABf_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_ABf_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_ABf_roll_b4' [] * 'Roll' [deg]
+    + 'Ford_ABf_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_ABf_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_ABf_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_ABf_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_ABf_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_ABf_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_EFF_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_EFF_roll_b1' []
+    + 'Ford_EFF_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_EFF_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_EFF_roll_b4' [] * 'Roll' [deg]
+    + 'Ford_EFF_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_EFF_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_EFF_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_EFF_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_EFF_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_EFF_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_Cy_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_Cy_roll_b1' []
+    + 'Ford_Cy_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cy_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cy_roll_b4' [] * 'Roll' [deg]
+    + 'Ford_Cy_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cy_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cy_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_Cy_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cy_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_Cy_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CyF_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_CyF_roll_b1' []
+    + 'Ford_CyF_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyF_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyF_roll_b4' [] * 'Roll' [deg]
+    + 'Ford_CyF_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyF_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyF_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_CyF_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyF_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_CyF_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CyR_roll" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_CyR_roll_b1' []
+    + 'Ford_CyR_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyR_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyR_roll_b4' [] * 'Roll' [deg]
+    + 'Ford_CyR_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyR_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyR_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_CyR_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyR_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_CyR_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- Ford — simplified fit no roll               -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="Ford_Cz" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_Cz_b1' []
+    + 'Ford_Cz_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cz_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cz_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cz_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cz_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_Cx" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_Cx_b1' []
+    + 'Ford_Cx_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cx_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cx_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cx_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cx_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CzF" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_CzF_b1' []
+    + 'Ford_CzF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzF_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzF_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzF_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CzR" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_CzR_b1' []
+    + 'Ford_CzR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzR_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzR_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzR_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_ABf" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_ABf_b1' []
+    + 'Ford_ABf_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_ABf_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_ABf_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_ABf_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_ABf_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_EFF" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_EFF_b1' []
+    + 'Ford_EFF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_EFF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_EFF_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_EFF_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_EFF_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_Cy" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_Cy_b1' []
+    + 'Ford_Cy_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cy_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cy_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cy_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cy_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CyF" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_CyF_b1' []
+    + 'Ford_CyF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyF_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyF_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyF_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CyR" DisplayDPS="4" DisplayColorIndex="2" Interpolate="1" Script="
+    'Ford_CyR_b1' []
+    + 'Ford_CyR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyR_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyR_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyR_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+ </MathExpressions>
+
+</Maths>

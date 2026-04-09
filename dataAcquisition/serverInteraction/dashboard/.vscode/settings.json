@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/5144495d-5260-445c-821d-68b030121bc7/resourceGroups/motorsportsdev/providers/Microsoft.Web/sites/V8SC-PITWALL",
+    "appService.deploySubpath": "."
+}

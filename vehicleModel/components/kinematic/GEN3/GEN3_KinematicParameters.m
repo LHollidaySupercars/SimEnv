@@ -1,13 +1,23 @@
 %% Front / Rear Tyre Info
 % Centre point found from cad, upright rotation plane to tyre midplane
 % point
-vehicle.ford.kinematcis.rear.tyrecenterPoint = [0, 63.7124, 327.9533]; %mm
-vehicle.ford.kinematcis.front.tyrecenterPoint = [0, 63.7124, 327.9533]; %mm
-vehicle.ford.kinematcis.rear.tyreRadius = norm(vehicle.ford.kinematcis.rear.tyrecenterPoint); %mm
-vehicle.ford.kinematcis.front.tyreRadius = norm(vehicle.ford.kinematcis.front.tyrecenterPoint); %mm
+vehicle.ford.kinematics.rear.tyrecenterPoint = [0, 63.7124, 327.9533]; %mm
+vehicle.ford.kinematics.front.tyrecenterPoint = [0, 63.7124, 327.9533]; %mm
+% have to remeasure
+vehicle.ford.kinematics.rear.tyrecenterPoint = [0, 23.3483, 327.9533]; %mm
+vehicle.ford.kinematics.front.tyrecenterPoint = [0, 23.3483, 327.9533]; %mm
+
+vehicle.ford.kinematics.rear.tyreGeometryInside = [0, 174, 327.9533]; %mm
+vehicle.ford.kinematics.front.tyreGeometryInside = [0, 174, 327.9533]; %mm
+
+vehicle.ford.kinematics.rear.tyreGeometryOutside = [0, 126, 327.9533]; %mm
+vehicle.ford.kinematics.front.tyreGeometryOutside = [0, 126, 327.9533]; %mm
+
+vehicle.ford.kinematics.rear.tyreRadius = norm(vehicle.ford.kinematics.rear.tyrecenterPoint); %mm
+vehicle.ford.kinematics.front.tyreRadius = norm(vehicle.ford.kinematics.front.tyrecenterPoint); %mm
 vehicle.ford.kinematics.rear.tyreWidth =  [0, 302, 0];
 vehicle.ford.kinematics.front.tyreWidth = [0, 302, 0];
-
+vehicle.ford.kinematics.body.trackWidth = 2760;
 %% Front / Rear Shims
 % Camber Shims
 vehicle.kinematics.front.camberShims_5219 = [0, 1.016, 0]; % CAD reference
@@ -17,7 +27,7 @@ vehicle.kinematics.front.camberShims_5222 = [0, 5.000, 0]; % CAD reference
 
 vehicle.kinematics.rear.camberShims_3127 = [0, 1.016, 0]; % CAD reference
 vehicle.kinematics.rear.camberShims_3140 = [0, 2.500, 0]; % CAD reference
-vehicle.kinematics.rear.camberShims_3141 = [0, 5.000, 0]; % CAD reference
+vehicle.kinematics.rear.camberShims_3141 = [0, 5.000, 0];    % CAD reference
 vehicle.kinematics.rear.camberShims_CAD_ERROR = [0, 1.6, 0]; % CAD reference
 
 % Clevis Shims
@@ -30,7 +40,6 @@ vehicle.kinematics.front.clevisShims_5116 = [0, 1.0, 0]; % CAD reference
 vehicle.kinematics.front.clevisShims_5129 = [0, 1.5, 0]; % CAD reference
 vehicle.kinematics.front.clevisShims_5117 = [0, 2.0, 0]; % CAD reference
 vehicle.kinematics.front.clevisShims_5118 = [0, 5.0, 0]; % CAD reference
-
 
 vehicle.ford.kinematics.front.clevis.POS1 = [0, 0 , 25.0];
 vehicle.ford.kinematics.front.clevis.POS2 = [0, 0 , 12.5];
@@ -72,6 +81,8 @@ vehicle.ford.kinematics.rear.upperAArm.UBJ_UPRIGHT_POS_5 = [0, 0, -15.];
 % 3 discrete points would be enough of a change
 
 vehicle.ford.kinematics.front.damper.chassisPickup = [-1948.9736, 420.5562, 562.2953];
+vehicle.ford.kinematics.front.rocker.damperPickup =  [-2008.8413, 718.7937 , 72.1863];
+vehicle.ford.kinematics.front.upright.wheelCenterDelta2KPI = [59.76, -64.2, 0]; 
 
 vehicle.ford.kinematics.front.upperAArm.fore =       [-2175,      466.5289 , 294.92476] + vehicle.ford.kinematics.front.clevis.yOffset; % done
 vehicle.ford.kinematics.front.upperAArm.ballJoint =  [-1949.2757, 702.919,   331.0431 ];  % done
@@ -103,6 +114,10 @@ vehicle.ford.kinematics.front.ARB.transferLinkRotationAxis =    [-2042.5, 415, 3
 vehicle.ford.kinematics.front.ARB.transferLinkHole =            [-2042.5, 473.8328, 367.6351]; % done
 vehicle.ford.kinematics.front.ARB.transferLinkAArm =            [-2050.2524, 680.5690, 93.5423]; % done
 
+vehicle.ford.kinematics.front.upright.wheelAxleOffsetToUpright =         [0, 9, 0]; % value in the upright's reference plane
+vehicle.ford.kinematics.front.upright.wheelCenterPlaneAlongUBJ2LBJAxis = [0, 0, 122.184];
+vehicle.ford.kinematics.front.upright.wheelCenterDelta2KPI =             [40.9762, -81.5576, 0];
+% vehicle.ford.kinematics.rear.upright.wheelCenterDelta2KPI = [59.7621, 63.981, 5.2712];vehicle.ford.kinematics.rear.upright.wheelMatingFace2RotatationalAxis = [0, 80.25, 0]; %upright reference plane
 vehicle.ford.kinematics.front.ARB.transferLinkAArm = [-2050.2524, 680.5690, 93.5423]; % done
 % 
 %% Rear Geometry
@@ -118,7 +133,7 @@ vehicle.ford.kinematics.rear.upperAArm.uprightBalljointAdjust = [0, 0, 15]; % me
 
 vehicle.ford.kinematics.rear.damper.chassisPickup = [680.5, 478.9772 , 588.8103];
 vehicle.ford.kinematics.rear.rocker.ARBPickup =     [680.4979, 689.9381 , 18.1861];
-vehicle.ford.kinematics.rear.rocker.damperPickup =  [680.3829, 693.2815 , 78.0929];
+vehicle.ford.kinematics.rear.rocker.damperPickup =  [680.3829, 693.2589 , 79.3026];
 vehicle.ford.kinematics.rear.rocker.uprightPickup = [680.4974, 801.4376 , 41.009];
 
 vehicle.ford.kinematics.rear.upperAArm.fore = [530.5, 422, 296] + vehicle.ford.kinematics.rear.clevis.yOffset; % Face Reference parallel with x-z face
@@ -127,7 +142,7 @@ vehicle.ford.kinematics.rear.upperAArm.aft = [830.5, 422, 296] + vehicle.ford.ki
 % found by using the rear camber correction, but using -6.6 which is the
 % negation of the nominal length from the cad 
 
-vehicle.ford.kinematics.rear.upperAArm.ballJoint = [680.5, 688.7929 , 324.3043];
+vehicle.ford.kinematics.rear.upperAArm.ballJointCAD = [680.5, 688.7929 , 324.3043];
 % Connector piece and camber shim compensation are compelted through the
 % kinematic sweep function
 % Attempting to use the a arm place, central point :)
@@ -145,8 +160,9 @@ vehicle.ford.kinematics.rear.upright.rotationAxis = [740.5586, 773.1527, 190.687
 % distance from the KPI axis, mesurements are taken from cad in a plane
 % perpendicular to the KPI axis
 vehicle.ford.kinematics.rear.upright.wheelCenterPlaneAlongUBJ2LBJAxis = [0, 0, 149.0105];
-vehicle.ford.kinematics.rear.upright.wheelCenterDelta2KPI = [59.76, 64.2, 0]
-
+vehicle.ford.kinematics.rear.upright.wheelCenterDelta2KPI = [-59.76, -33, 0]
+% vehicle.ford.kinematics.rear.upright.wheelCenterDelta2KPI = [59.7621, 63.981, 5.2712];
+vehicle.ford.kinematics.rear.upright.wheelAxleOffsetToUpright = [0, 29.9, 0]; % value in the upright's reference plane
 vehicle.ford.kinematics.rear.upright.wheelMatingFace2RotatationalAxis = [0, 80.25, 0]; %upright reference plane
     
 vehicle.ford.steering.ratio = 58 / (2 * pi); % reference from tickford

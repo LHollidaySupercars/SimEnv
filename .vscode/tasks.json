@@ -1,0 +1,49 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "sqlproj: Build V8_SC_Pitwall",
+			"type": "process",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"c:/SimEnv/dataAcquisition/serverInteraction/SQL_server/V8_SC_Pitwall/V8_SC_Pitwall.sqlproj"
+			],
+			"problemMatcher": "$sqlproj-problem-matcher",
+			"isBackground": true,
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "Builds the V8_SC_Pitwall SQL project"
+		},
+		{
+			"type": "func",
+			"label": "func: host start",
+			"command": "host start",
+			"problemMatcher": "$func-node-watch",
+			"isBackground": true,
+			"dependsOn": "npm install (functions)",
+			"options": {
+				"cwd": "${workspaceFolder}/dataAcquisition\\serverInteraction\\function_getLapStats"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "npm install (functions)",
+			"command": "npm install",
+			"options": {
+				"cwd": "${workspaceFolder}/dataAcquisition\\serverInteraction\\function_getLapStats"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "npm prune (functions)",
+			"command": "npm prune --production",
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}/dataAcquisition\\serverInteraction\\function_getLapStats"
+			}
+		}
+	]
+}

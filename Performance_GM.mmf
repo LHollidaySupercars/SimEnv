@@ -1,0 +1,406 @@
+<?xml version="1.0"?>
+<Maths Locale="English_Australia.1252" DefaultLocale="C" Id="Performance_GM" Condition="'Vehicle Id' == &quot;Camaro&quot;">
+
+ <MathConstants>
+
+  <!-- ======================================== -->
+  <!-- GM — full fit with roll                   -->
+  <!-- ======================================== -->
+
+  <!-- GM_Cz_roll -->
+  <MathConstant Name="GM_Cz_roll_b1" Value="0.06350842" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b2" Value="-0.00300416" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b3" Value="-0.00822952" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b4" Value="0.08304422" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b5" Value="0.00001558" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b6" Value="0.00002107" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b7" Value="0.01038294" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b8" Value="-0.00001107" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b9" Value="-0.00083555" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b10" Value="0.00006332" Unit=""/>
+
+  <!-- GM_Cx_roll -->
+  <MathConstant Name="GM_Cx_roll_b1" Value="0.65486566" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b2" Value="0.00316369" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b3" Value="0.00121295" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b4" Value="-0.02228896" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b5" Value="-0.00000739" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b6" Value="-0.00000104" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b7" Value="0.00052904" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b8" Value="-0.00000152" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b9" Value="0.00016399" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b10" Value="0.00002809" Unit=""/>
+
+  <!-- GM_CzF_roll -->
+  <MathConstant Name="GM_CzF_roll_b1" Value="0.34006211" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b2" Value="0.00035100" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b3" Value="-0.00645274" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b4" Value="0.01295054" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b5" Value="0.00001562" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b6" Value="0.00001530" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b7" Value="0.00237571" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b8" Value="-0.00001445" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b9" Value="-0.00018615" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b10" Value="0.00004929" Unit=""/>
+
+  <!-- GM_CzR_roll -->
+  <MathConstant Name="GM_CzR_roll_b1" Value="-0.27655369" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b2" Value="-0.00335517" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b3" Value="-0.00177678" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b4" Value="0.07009369" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b5" Value="-0.00000004" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b6" Value="0.00000577" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b7" Value="0.00800723" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b8" Value="0.00000337" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b9" Value="-0.00064941" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b10" Value="0.00001403" Unit=""/>
+
+  <!-- GM_ABf_roll -->
+  <MathConstant Name="GM_ABf_roll_b1" Value="-65.80838181" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b2" Value="-0.14768235" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b3" Value="1.28132472" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b4" Value="1.15599039" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b5" Value="-0.00116652" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b6" Value="-0.00402802" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b7" Value="-0.12508241" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b8" Value="0.00146618" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b9" Value="0.00191161" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b10" Value="-0.00918952" Unit=""/>
+
+  <!-- GM_EFF_roll -->
+  <MathConstant Name="GM_EFF_roll_b1" Value="-0.18039883" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b2" Value="-0.00034074" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b3" Value="-0.00808829" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b4" Value="0.05441289" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b5" Value="0.00000770" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b6" Value="0.00002262" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b7" Value="0.01054246" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b8" Value="-0.00000892" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b9" Value="-0.00062771" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b10" Value="0.00010280" Unit=""/>
+
+  <!-- GM_Cy_roll -->
+  <MathConstant Name="GM_Cy_roll_b1" Value="-0.34571930" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b2" Value="0.00572150" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b3" Value="-0.00160718" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b4" Value="-0.17077655" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b5" Value="-0.00003319" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b6" Value="-0.00001169" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b7" Value="-0.01475085" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b8" Value="0.00003532" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b9" Value="0.00245008" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b10" Value="-0.00048433" Unit=""/>
+
+  <!-- GM_CyF_roll -->
+  <MathConstant Name="GM_CyF_roll_b1" Value="-0.17303325" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b2" Value="0.00286011" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b3" Value="-0.00080513" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b4" Value="-0.08544841" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b5" Value="-0.00001658" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b6" Value="-0.00000584" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b7" Value="-0.00738797" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b8" Value="0.00001766" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b9" Value="0.00122721" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b10" Value="-0.00024285" Unit=""/>
+
+  <!-- GM_CyR_roll -->
+  <MathConstant Name="GM_CyR_roll_b1" Value="-0.17268605" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b2" Value="0.00286139" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b3" Value="-0.00080205" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b4" Value="-0.08532814" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b5" Value="-0.00001661" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b6" Value="-0.00000585" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b7" Value="-0.00736288" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b8" Value="0.00001766" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b9" Value="0.00122287" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b10" Value="-0.00024148" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- GM — simplified fit no roll               -->
+  <!-- ======================================== -->
+
+  <!-- GM_Cz -->
+  <MathConstant Name="GM_Cz_b1" Value="-0.44574862" Unit=""/>
+  <MathConstant Name="GM_Cz_b2" Value="-0.00247898" Unit=""/>
+  <MathConstant Name="GM_Cz_b3" Value="-0.00221130" Unit=""/>
+  <MathConstant Name="GM_Cz_b4" Value="0.00002811" Unit=""/>
+  <MathConstant Name="GM_Cz_b5" Value="0.00000851" Unit=""/>
+  <MathConstant Name="GM_Cz_b6" Value="-0.00003120" Unit=""/>
+
+  <!-- GM_Cx -->
+  <MathConstant Name="GM_Cx_b1" Value="0.81064025" Unit=""/>
+  <MathConstant Name="GM_Cx_b2" Value="0.00255660" Unit=""/>
+  <MathConstant Name="GM_Cx_b3" Value="-0.00038456" Unit=""/>
+  <MathConstant Name="GM_Cx_b4" Value="-0.00000794" Unit=""/>
+  <MathConstant Name="GM_Cx_b5" Value="0.00000259" Unit=""/>
+  <MathConstant Name="GM_Cx_b6" Value="0.00000302" Unit=""/>
+
+  <!-- GM_CzF -->
+  <MathConstant Name="GM_CzF_b1" Value="0.06200946" Unit=""/>
+  <MathConstant Name="GM_CzF_b2" Value="0.00002399" Unit=""/>
+  <MathConstant Name="GM_CzF_b3" Value="-0.00266707" Unit=""/>
+  <MathConstant Name="GM_CzF_b4" Value="0.00002612" Unit=""/>
+  <MathConstant Name="GM_CzF_b5" Value="0.00000736" Unit=""/>
+  <MathConstant Name="GM_CzF_b6" Value="-0.00002705" Unit=""/>
+
+  <!-- GM_CzR -->
+  <MathConstant Name="GM_CzR_b1" Value="-0.50775808" Unit=""/>
+  <MathConstant Name="GM_CzR_b2" Value="-0.00250297" Unit=""/>
+  <MathConstant Name="GM_CzR_b3" Value="0.00045577" Unit=""/>
+  <MathConstant Name="GM_CzR_b4" Value="0.00000199" Unit=""/>
+  <MathConstant Name="GM_CzR_b5" Value="0.00000115" Unit=""/>
+  <MathConstant Name="GM_CzR_b6" Value="-0.00000415" Unit=""/>
+
+  <!-- GM_ABf -->
+  <MathConstant Name="GM_ABf_b1" Value="2.29128204" Unit=""/>
+  <MathConstant Name="GM_ABf_b2" Value="-0.29673617" Unit=""/>
+  <MathConstant Name="GM_ABf_b3" Value="0.47782495" Unit=""/>
+  <MathConstant Name="GM_ABf_b4" Value="-0.00162552" Unit=""/>
+  <MathConstant Name="GM_ABf_b5" Value="-0.00186976" Unit=""/>
+  <MathConstant Name="GM_ABf_b6" Value="0.00301029" Unit=""/>
+
+  <!-- GM_EFF -->
+  <MathConstant Name="GM_EFF_b1" Value="-0.55355585" Unit=""/>
+  <MathConstant Name="GM_EFF_b2" Value="-0.00045821" Unit=""/>
+  <MathConstant Name="GM_EFF_b3" Value="-0.00335068" Unit=""/>
+  <MathConstant Name="GM_EFF_b4" Value="0.00001967" Unit=""/>
+  <MathConstant Name="GM_EFF_b5" Value="0.00001246" Unit=""/>
+  <MathConstant Name="GM_EFF_b6" Value="-0.00002424" Unit=""/>
+
+  <!-- GM_Cy -->
+  <MathConstant Name="GM_Cy_b1" Value="1.59991613" Unit=""/>
+  <MathConstant Name="GM_Cy_b2" Value="-0.00655868" Unit=""/>
+  <MathConstant Name="GM_Cy_b3" Value="-0.01835123" Unit=""/>
+  <MathConstant Name="GM_Cy_b4" Value="-0.00000188" Unit=""/>
+  <MathConstant Name="GM_Cy_b5" Value="0.00003424" Unit=""/>
+  <MathConstant Name="GM_Cy_b6" Value="0.00006571" Unit=""/>
+
+  <!-- GM_CyF -->
+  <MathConstant Name="GM_CyF_b1" Value="0.80161125" Unit=""/>
+  <MathConstant Name="GM_CyF_b2" Value="-0.00329043" Unit=""/>
+  <MathConstant Name="GM_CyF_b3" Value="-0.00919380" Unit=""/>
+  <MathConstant Name="GM_CyF_b4" Value="-0.00000090" Unit=""/>
+  <MathConstant Name="GM_CyF_b5" Value="0.00001717" Unit=""/>
+  <MathConstant Name="GM_CyF_b6" Value="0.00003288" Unit=""/>
+
+  <!-- GM_CyR -->
+  <MathConstant Name="GM_CyR_b1" Value="0.79830488" Unit=""/>
+  <MathConstant Name="GM_CyR_b2" Value="-0.00326826" Unit=""/>
+  <MathConstant Name="GM_CyR_b3" Value="-0.00915743" Unit=""/>
+  <MathConstant Name="GM_CyR_b4" Value="-0.00000098" Unit=""/>
+  <MathConstant Name="GM_CyR_b5" Value="0.00001707" Unit=""/>
+  <MathConstant Name="GM_CyR_b6" Value="0.00003283" Unit=""/>
+
+ </MathConstants>
+
+ <MathExpressions>
+
+  <!-- ======================================== -->
+  <!-- GM — full fit with roll                   -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="GM_Cz_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cz_roll_b1' []
+    + 'GM_Cz_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cz_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cz_roll_b4' [] * 'Roll' [deg]
+    + 'GM_Cz_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cz_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cz_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_Cz_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cz_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_Cz_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cx_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cx_roll_b1' []
+    + 'GM_Cx_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cx_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cx_roll_b4' [] * 'Roll' [deg]
+    + 'GM_Cx_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cx_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cx_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_Cx_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cx_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_Cx_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzF_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CzF_roll_b1' []
+    + 'GM_CzF_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzF_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzF_roll_b4' [] * 'Roll' [deg]
+    + 'GM_CzF_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzF_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzF_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_CzF_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzF_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_CzF_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzR_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CzR_roll_b1' []
+    + 'GM_CzR_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzR_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzR_roll_b4' [] * 'Roll' [deg]
+    + 'GM_CzR_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzR_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzR_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_CzR_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzR_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_CzR_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_ABf_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_ABf_roll_b1' []
+    + 'GM_ABf_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_ABf_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_ABf_roll_b4' [] * 'Roll' [deg]
+    + 'GM_ABf_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_ABf_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_ABf_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_ABf_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_ABf_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_ABf_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_EFF_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_EFF_roll_b1' []
+    + 'GM_EFF_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_EFF_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_EFF_roll_b4' [] * 'Roll' [deg]
+    + 'GM_EFF_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_EFF_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_EFF_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_EFF_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_EFF_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_EFF_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cy_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cy_roll_b1' []
+    + 'GM_Cy_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cy_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cy_roll_b4' [] * 'Roll' [deg]
+    + 'GM_Cy_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cy_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cy_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_Cy_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cy_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_Cy_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyF_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CyF_roll_b1' []
+    + 'GM_CyF_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyF_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyF_roll_b4' [] * 'Roll' [deg]
+    + 'GM_CyF_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyF_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyF_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_CyF_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyF_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_CyF_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyR_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CyR_roll_b1' []
+    + 'GM_CyR_roll_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyR_roll_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyR_roll_b4' [] * 'Roll' [deg]
+    + 'GM_CyR_roll_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyR_roll_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyR_roll_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_CyR_roll_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyR_roll_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_CyR_roll_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- GM — simplified fit no roll               -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="GM_Cz" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cz_b1' []
+    + 'GM_Cz_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cz_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cz_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cz_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cz_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cx" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cx_b1' []
+    + 'GM_Cx_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cx_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cx_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cx_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cx_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzF" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CzF_b1' []
+    + 'GM_CzF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzF_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzF_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzF_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzR" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CzR_b1' []
+    + 'GM_CzR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzR_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzR_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzR_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_ABf" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_ABf_b1' []
+    + 'GM_ABf_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_ABf_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_ABf_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_ABf_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_ABf_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_EFF" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_EFF_b1' []
+    + 'GM_EFF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_EFF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_EFF_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_EFF_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_EFF_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cy" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cy_b1' []
+    + 'GM_Cy_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cy_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cy_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cy_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cy_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyF" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CyF_b1' []
+    + 'GM_CyF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyF_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyF_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyF_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyR" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CyR_b1' []
+    + 'GM_CyR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyR_b4' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyR_b5' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyR_b6' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+  " SampleRate="0" Unit=""/>
+
+ </MathExpressions>
+
+</Maths>

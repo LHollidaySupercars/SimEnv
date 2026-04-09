@@ -1,0 +1,227 @@
+%% SMP_LAUNCH
+% V8SC Pit Wall — unified launcher
+%
+% TARGET controls where lap stats are pushed:
+%   'pocketbase'   — existing local PocketBase (default, no changes to existing flow)
+%   'azure_local'  — local SQL Server Express (motorsport_local db, Windows Auth)
+%   'azure_online' — Motorsport Azure SQL (Entra ID MFA, browser popup on first use)
+%
+% Set RUN_UPLOAD = false to skip the data upload (e.g. data already loaded)
+% =========================================================
+
+%% ── CONFIG ──────────────────────────────────────────────────────────────
+
+TARGET         = 'azure_online';   % 'pocketbase' | 'azure_local' | 'azure_online'
+RUN_UPLOAD     = true;             % set false to skip flatten + upload
+
+EVENT_NAME     = 'AGP';
+TOP_LEVEL_DIR  = 'E:\2026\02_AGP\_TeamData';
+SESSION_FILTER = {'RA4', 'RA5', 'RA6'};
+
+% PocketBase settings (used when TARGET = 'pocketbase')
+POCKETBASE_EXE = 'C:\PocketBase\pocketbase.exe';
+LOCAL_URL      = 'http://127.0.0.1:8090';
+NGROK_EXE      = 'C:\ngrok\ngrok.exe';
+NGROK_URL      = 'https://medicolegal-premundane-vincenzo.ngrok-free.dev';
+PB_PORT        = 8090;
+
+% Upload settings
+BATCH_SIZE     = 100;
+OVERWRITE      = true;
+
+%% ── STEP 1: Start services ───────────────────────────────────────────────
+
+fprintf('\n========================================\n');
+fprintf('  V8SC PIT WALL — LAUNCHER\n');
+fprintf('  TARGET: %s\n', upper(TARGET));
+fprintf('========================================\n\n');
+
+switch lower(TARGET)
+    case 'pocketbase'
+        fprintf('[1/4] Starting PocketBase...\n');
+        [~, pb_check] = system('tasklist /FI "IMAGENAME eq pocketbase.exe" /NH');
+        if contains(pb_check, 'pocketbase.exe')
+            fprintf('      PocketBase already running — skipping.\n');
+        else
+            pb_cmd = sprintf('start /B "" "%s" serve --origins=*', POCKETBASE_EXE);
+            system(pb_cmd);
+            pause(2);
+            fprintf('      PocketBase started at %s\n', LOCAL_URL);
+        end
+
+    case {'azure_local', 'azure_online'}
+        fprintf('[1/4] SQL target selected — no local services to start.\n');
+        fprintf('      Connection will be established during upload step.\n');
+end
+
+%% ── STEP 2: Upload data ──────────────────────────────────────────────────
+
+if RUN_UPLOAD
+    fprintf('\n[2/4] Uploading data...\n');
+    fprintf('      Event    : %s\n', EVENT_NAME);
+    fprintf('      Sessions : %s\n', strjoin(SESSION_FILTER, ', '));
+    fprintf('      Source   : %s\n\n', TOP_LEVEL_DIR);
+
+    % Load and flatten cache (same for all targets)
+    cache = smp_cache_load(TOP_LEVEL_DIR, SESSION_FILTER);
+
+    if ~isfield(cache, 'stats') || isempty(fieldnames(cache.stats))
+        warning('Cache is empty — skipping upload. Run smp_compile_event first.');
+    else
+        fprintf('      Cache: %d manifest rows, %d group keys.\n', ...
+            height(cache.manifest), numel(fieldnames(cache.stats)));
+
+        T = smp_flatten_stats(cache, EVENT_NAME);
+        if ismember('id', T.Properties.VariableNames)
+            T = removevars(T, 'id');
+        end
+
+        if isempty(T) || height(T) == 0
+            warning('Flatten produced no rows — skipping upload.');
+        else
+            switch lower(TARGET)
+
+                % ── PocketBase ────────────────────────────────────────────
+                case 'pocketbase'
+                    opts_pb            = struct();
+                    opts_pb.batch      = BATCH_SIZE;
+                    opts_pb.overwrite  = OVERWRITE;
+                    opts_pb.dry_run    = false;
+                    result = smp_push_to_pocketbase_fn(T, LOCAL_URL, BATCH_SIZE, OVERWRITE);
+                    fprintf('\n      Upload complete: %d rows, %d failed.\n', ...
+                        result.n_uploaded, result.n_failed);
+
+                % ── Azure Local or Online ─────────────────────────────────
+                case {'azure_local', 'azure_online'}
+                    fprintf('      Connecting to SQL (%s)...\n', TARGET);
+                    if strcmpi(TARGET, 'azure_online')
+                        fprintf('      >> Browser MFA popup may appear.\n');
+                    end
+
+                    conn = smp_sql_connect(TARGET);
+
+                    opts_sql           = struct();
+                    opts_sql.batch     = BATCH_SIZE;
+                    opts_sql.overwrite = OVERWRITE;
+                    opts_sql.dry_run   = false;
+
+                    result = smp_push_to_sql(T, conn, opts_sql);
+
+                    fprintf('\n      Upload complete: %d rows, %d failed.\n', ...
+                        result.n_uploaded, result.n_failed);
+
+                    % Leave connection open for the session
+                    % Call conn.close() in smp_shutdown.m or manually
+                    assignin('base', 'sql_conn', conn);
+                    fprintf('      Connection stored in workspace as ''sql_conn''.\n');
+            end
+        end
+    end
+else
+    fprintf('\n[2/4] Upload skipped (RUN_UPLOAD = false)\n');
+end
+
+%% ── STEP 3: Start ngrok (PocketBase only) ────────────────────────────────
+
+if strcmpi(TARGET, 'pocketbase')
+    fprintf('\n[3/4] Starting ngrok tunnel...\n');
+    [~, ng_check] = system('tasklist /FI "IMAGENAME eq ngrok.exe" /NH');
+    if contains(ng_check, 'ngrok.exe')
+        fprintf('      ngrok already running — skipping.\n');
+    else
+        ng_cmd = sprintf('start /B "" "%s" http 127.0.0.1:%d', NGROK_EXE, PB_PORT);
+        system(ng_cmd);
+        pause(3);
+        fprintf('      ngrok tunnel established.\n');
+    end
+else
+    fprintf('\n[3/4] ngrok not needed for SQL targets — skipping.\n');
+end
+
+%% ── STEP 4: Print status ─────────────────────────────────────────────────
+
+fprintf('\n[4/4] V8SC Pit Wall is live.\n');
+fprintf('\n----------------------------------------\n');
+switch lower(TARGET)
+    case 'pocketbase'
+        fprintf('  TARGET     : POCKETBASE\n');
+        fprintf('  LOCAL URL  : %s\n', LOCAL_URL);
+        fprintf('  REMOTE URL : %s\n', NGROK_URL);
+        fprintf('  PIN        : 7896\n');
+    case 'azure_local'
+        fprintf('  TARGET     : AZURE LOCAL (SQL Express)\n');
+        fprintf('  SERVER     : localhost\\SQLEXPRESS\n');
+        fprintf('  DATABASE   : motorsport_local\n');
+    case 'azure_online'
+        fprintf('  TARGET     : AZURE ONLINE (Motorsport SQL)\n');
+        fprintf('  DATABASE   : YOUR_DATABASE_NAME\n');
+end
+fprintf('----------------------------------------\n');
+fprintf('To shut down, run smp_shutdown.m\n\n');
+
+
+% ======================================================================= %
+%  INLINE POCKETBASE UPLOAD (unchanged from original)
+% ======================================================================= %
+function result = smp_push_to_pocketbase_fn(T, pb_url, batch_size, overwrite)
+
+    import matlab.net.http.*
+    import matlab.net.http.io.*
+
+    endpoint   = [pb_url '/api/collections/lap_stats/records'];
+    col_names  = T.Properties.VariableNames;
+    n_rows     = height(T);
+    result.n_uploaded = 0;
+    result.n_failed   = 0;
+
+    if overwrite
+        fprintf('      Clearing existing records...\n');
+        get_req  = RequestMessage('GET', []);
+        get_resp = get_req.send([endpoint '?perPage=500']);
+        if double(get_resp.StatusCode) == 200 && ~isempty(get_resp.Body.Data.items)
+            items = get_resp.Body.Data.items;
+            for k = 1:numel(items)
+                del_url = sprintf('%s/%s', endpoint, items(k).id);
+                del_req = RequestMessage('DELETE', []);
+                del_req.send(del_url);
+            end
+            fprintf('      Deleted %d existing rows.\n', numel(items));
+        end
+    end
+
+    fprintf('      Uploading %d rows...\n', n_rows);
+    t_start = tic;
+
+    for ri = 1:n_rows
+        s = struct();
+        for ci = 1:numel(col_names)
+            col = col_names{ci};
+            val = T.(col)(ri);
+            if iscell(val), val = val{1}; end
+            if isstring(val), val = char(val); end
+            if isnumeric(val) && ~isempty(val) && ~isfinite(val), val = 0; end
+            s.(col) = val;
+        end
+
+        body = StringProvider(jsonencode(s));
+        req  = RequestMessage('POST', HeaderField('Content-Type','application/json'), body);
+        resp = req.send(endpoint);
+        status = double(resp.StatusCode);
+
+        if status == 200 || status == 201
+            result.n_uploaded = result.n_uploaded + 1;
+        else
+            result.n_failed = result.n_failed + 1;
+            if result.n_failed <= 3
+                fprintf('      [ERROR] Row %d: HTTP %d\n', ri, status);
+            end
+        end
+
+        if mod(ri, 100) == 0
+            elapsed = toc(t_start);
+            rate    = ri / elapsed;
+            eta     = (n_rows - ri) / rate;
+            fprintf('      %d/%d  (%.0f rows/s  ETA %.0fs)\n', ri, n_rows, rate, eta);
+        end
+    end
+end

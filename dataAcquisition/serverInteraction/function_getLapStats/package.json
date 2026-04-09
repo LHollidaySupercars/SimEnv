@@ -1,0 +1,14 @@
+{
+  "name": "v8sc-pitwall-functions",
+  "version": "1.0.0",
+  "description": "V8SC Pit Wall — Azure Functions API",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {
+    "mssql": "^10.0.4"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

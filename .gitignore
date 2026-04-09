@@ -1,0 +1,22 @@
+# ── MATLAB ──────────────────────────────────────────────
+*.asv           # autosave files
+*.mex*          # compiled MEX binaries
+slprj/          # Simulink cache
+*.slxc
+*.autosave
+
+# ── Data files ──────────────────────────────────────────
+*.ld            # MoTeC binary data - too large for git         # Excel config files (optional - remove this line if you want them tracked)
+
+# ── OS / editor ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/settings.json
+
+# ── Output folders ──────────────────────────────────────
+output/
+reports/
+figures/
+*.png
+*.pdf

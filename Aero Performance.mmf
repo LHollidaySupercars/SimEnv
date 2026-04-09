@@ -1,0 +1,711 @@
+<?xml version="1.0"?>
+<Maths Locale="English_Australia.1252" DefaultLocale="C" Id="User">
+
+ <MathConstants>
+
+  <!-- ======================================== -->
+  <!-- GM                                        -->
+  <!-- ======================================== -->
+
+  <!-- GM_Cz -->
+  <MathConstant Name="GM_Cz_b1" Value="0.06350842" Unit=""/>
+  <MathConstant Name="GM_Cz_b2" Value="-0.00300416" Unit=""/>
+  <MathConstant Name="GM_Cz_b3" Value="-0.00822952" Unit=""/>
+  <MathConstant Name="GM_Cz_b4" Value="0.08304422" Unit=""/>
+  <MathConstant Name="GM_Cz_b5" Value="0.00001558" Unit=""/>
+  <MathConstant Name="GM_Cz_b6" Value="0.00002107" Unit=""/>
+  <MathConstant Name="GM_Cz_b7" Value="0.01038294" Unit=""/>
+  <MathConstant Name="GM_Cz_b8" Value="-0.00001107" Unit=""/>
+  <MathConstant Name="GM_Cz_b9" Value="-0.00083555" Unit=""/>
+  <MathConstant Name="GM_Cz_b10" Value="0.00006332" Unit=""/>
+
+  <!-- GM_Cx -->
+  <MathConstant Name="GM_Cx_b1" Value="0.65486566" Unit=""/>
+  <MathConstant Name="GM_Cx_b2" Value="0.00316369" Unit=""/>
+  <MathConstant Name="GM_Cx_b3" Value="0.00121295" Unit=""/>
+  <MathConstant Name="GM_Cx_b4" Value="-0.02228896" Unit=""/>
+  <MathConstant Name="GM_Cx_b5" Value="-0.00000739" Unit=""/>
+  <MathConstant Name="GM_Cx_b6" Value="-0.00000104" Unit=""/>
+  <MathConstant Name="GM_Cx_b7" Value="0.00052904" Unit=""/>
+  <MathConstant Name="GM_Cx_b8" Value="-0.00000152" Unit=""/>
+  <MathConstant Name="GM_Cx_b9" Value="0.00016399" Unit=""/>
+  <MathConstant Name="GM_Cx_b10" Value="0.00002809" Unit=""/>
+
+  <!-- GM_CzF -->
+  <MathConstant Name="GM_CzF_b1" Value="0.34006211" Unit=""/>
+  <MathConstant Name="GM_CzF_b2" Value="0.00035100" Unit=""/>
+  <MathConstant Name="GM_CzF_b3" Value="-0.00645274" Unit=""/>
+  <MathConstant Name="GM_CzF_b4" Value="0.01295054" Unit=""/>
+  <MathConstant Name="GM_CzF_b5" Value="0.00001562" Unit=""/>
+  <MathConstant Name="GM_CzF_b6" Value="0.00001530" Unit=""/>
+  <MathConstant Name="GM_CzF_b7" Value="0.00237571" Unit=""/>
+  <MathConstant Name="GM_CzF_b8" Value="-0.00001445" Unit=""/>
+  <MathConstant Name="GM_CzF_b9" Value="-0.00018615" Unit=""/>
+  <MathConstant Name="GM_CzF_b10" Value="0.00004929" Unit=""/>
+
+  <!-- GM_CzR -->
+  <MathConstant Name="GM_CzR_b1" Value="-0.27655369" Unit=""/>
+  <MathConstant Name="GM_CzR_b2" Value="-0.00335517" Unit=""/>
+  <MathConstant Name="GM_CzR_b3" Value="-0.00177678" Unit=""/>
+  <MathConstant Name="GM_CzR_b4" Value="0.07009369" Unit=""/>
+  <MathConstant Name="GM_CzR_b5" Value="-0.00000004" Unit=""/>
+  <MathConstant Name="GM_CzR_b6" Value="0.00000577" Unit=""/>
+  <MathConstant Name="GM_CzR_b7" Value="0.00800723" Unit=""/>
+  <MathConstant Name="GM_CzR_b8" Value="0.00000337" Unit=""/>
+  <MathConstant Name="GM_CzR_b9" Value="-0.00064941" Unit=""/>
+  <MathConstant Name="GM_CzR_b10" Value="0.00001403" Unit=""/>
+
+  <!-- GM_ABf -->
+  <MathConstant Name="GM_ABf_b1" Value="-65.80838181" Unit=""/>
+  <MathConstant Name="GM_ABf_b2" Value="-0.14768235" Unit=""/>
+  <MathConstant Name="GM_ABf_b3" Value="1.28132472" Unit=""/>
+  <MathConstant Name="GM_ABf_b4" Value="1.15599039" Unit=""/>
+  <MathConstant Name="GM_ABf_b5" Value="-0.00116652" Unit=""/>
+  <MathConstant Name="GM_ABf_b6" Value="-0.00402802" Unit=""/>
+  <MathConstant Name="GM_ABf_b7" Value="-0.12508241" Unit=""/>
+  <MathConstant Name="GM_ABf_b8" Value="0.00146618" Unit=""/>
+  <MathConstant Name="GM_ABf_b9" Value="0.00191161" Unit=""/>
+  <MathConstant Name="GM_ABf_b10" Value="-0.00918952" Unit=""/>
+
+  <!-- GM_EFF -->
+  <MathConstant Name="GM_EFF_b1" Value="-0.18039883" Unit=""/>
+  <MathConstant Name="GM_EFF_b2" Value="-0.00034074" Unit=""/>
+  <MathConstant Name="GM_EFF_b3" Value="-0.00808829" Unit=""/>
+  <MathConstant Name="GM_EFF_b4" Value="0.05441289" Unit=""/>
+  <MathConstant Name="GM_EFF_b5" Value="0.00000770" Unit=""/>
+  <MathConstant Name="GM_EFF_b6" Value="0.00002262" Unit=""/>
+  <MathConstant Name="GM_EFF_b7" Value="0.01054246" Unit=""/>
+  <MathConstant Name="GM_EFF_b8" Value="-0.00000892" Unit=""/>
+  <MathConstant Name="GM_EFF_b9" Value="-0.00062771" Unit=""/>
+  <MathConstant Name="GM_EFF_b10" Value="0.00010280" Unit=""/>
+
+  <!-- GM_Cy -->
+  <MathConstant Name="GM_Cy_b1" Value="-0.34571930" Unit=""/>
+  <MathConstant Name="GM_Cy_b2" Value="0.00572150" Unit=""/>
+  <MathConstant Name="GM_Cy_b3" Value="-0.00160718" Unit=""/>
+  <MathConstant Name="GM_Cy_b4" Value="-0.17077655" Unit=""/>
+  <MathConstant Name="GM_Cy_b5" Value="-0.00003319" Unit=""/>
+  <MathConstant Name="GM_Cy_b6" Value="-0.00001169" Unit=""/>
+  <MathConstant Name="GM_Cy_b7" Value="-0.01475085" Unit=""/>
+  <MathConstant Name="GM_Cy_b8" Value="0.00003532" Unit=""/>
+  <MathConstant Name="GM_Cy_b9" Value="0.00245008" Unit=""/>
+  <MathConstant Name="GM_Cy_b10" Value="-0.00048433" Unit=""/>
+
+  <!-- GM_CyF -->
+  <MathConstant Name="GM_CyF_b1" Value="-0.17303325" Unit=""/>
+  <MathConstant Name="GM_CyF_b2" Value="0.00286011" Unit=""/>
+  <MathConstant Name="GM_CyF_b3" Value="-0.00080513" Unit=""/>
+  <MathConstant Name="GM_CyF_b4" Value="-0.08544841" Unit=""/>
+  <MathConstant Name="GM_CyF_b5" Value="-0.00001658" Unit=""/>
+  <MathConstant Name="GM_CyF_b6" Value="-0.00000584" Unit=""/>
+  <MathConstant Name="GM_CyF_b7" Value="-0.00738797" Unit=""/>
+  <MathConstant Name="GM_CyF_b8" Value="0.00001766" Unit=""/>
+  <MathConstant Name="GM_CyF_b9" Value="0.00122721" Unit=""/>
+  <MathConstant Name="GM_CyF_b10" Value="-0.00024285" Unit=""/>
+
+  <!-- GM_CyR -->
+  <MathConstant Name="GM_CyR_b1" Value="-0.17268605" Unit=""/>
+  <MathConstant Name="GM_CyR_b2" Value="0.00286139" Unit=""/>
+  <MathConstant Name="GM_CyR_b3" Value="-0.00080205" Unit=""/>
+  <MathConstant Name="GM_CyR_b4" Value="-0.08532814" Unit=""/>
+  <MathConstant Name="GM_CyR_b5" Value="-0.00001661" Unit=""/>
+  <MathConstant Name="GM_CyR_b6" Value="-0.00000585" Unit=""/>
+  <MathConstant Name="GM_CyR_b7" Value="-0.00736288" Unit=""/>
+  <MathConstant Name="GM_CyR_b8" Value="0.00001766" Unit=""/>
+  <MathConstant Name="GM_CyR_b9" Value="0.00122287" Unit=""/>
+  <MathConstant Name="GM_CyR_b10" Value="-0.00024148" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- Toyota                                        -->
+  <!-- ======================================== -->
+
+  <!-- Toyota_Cz -->
+  <MathConstant Name="Toyota_Cz_b1" Value="0.78344028" Unit=""/>
+  <MathConstant Name="Toyota_Cz_b2" Value="-0.01248005" Unit=""/>
+  <MathConstant Name="Toyota_Cz_b3" Value="-0.01141026" Unit=""/>
+  <MathConstant Name="Toyota_Cz_b4" Value="0.01708677" Unit=""/>
+  <MathConstant Name="Toyota_Cz_b5" Value="0.00008495" Unit=""/>
+  <MathConstant Name="Toyota_Cz_b6" Value="0.00003567" Unit=""/>
+  <MathConstant Name="Toyota_Cz_b7" Value="0.02399041" Unit=""/>
+  <MathConstant Name="Toyota_Cz_b8" Value="-0.00003621" Unit=""/>
+  <MathConstant Name="Toyota_Cz_b9" Value="0.00008860" Unit=""/>
+  <MathConstant Name="Toyota_Cz_b10" Value="-0.00015541" Unit=""/>
+
+  <!-- Toyota_Cx -->
+  <MathConstant Name="Toyota_Cx_b1" Value="0.68503790" Unit=""/>
+  <MathConstant Name="Toyota_Cx_b2" Value="0.00364387" Unit=""/>
+  <MathConstant Name="Toyota_Cx_b3" Value="0.00058677" Unit=""/>
+  <MathConstant Name="Toyota_Cx_b4" Value="-0.00521259" Unit=""/>
+  <MathConstant Name="Toyota_Cx_b5" Value="-0.00000971" Unit=""/>
+  <MathConstant Name="Toyota_Cx_b6" Value="0.00000018" Unit=""/>
+  <MathConstant Name="Toyota_Cx_b7" Value="-0.00051384" Unit=""/>
+  <MathConstant Name="Toyota_Cx_b8" Value="-0.00000113" Unit=""/>
+  <MathConstant Name="Toyota_Cx_b9" Value="0.00015012" Unit=""/>
+  <MathConstant Name="Toyota_Cx_b10" Value="-0.00006304" Unit=""/>
+
+  <!-- Toyota_CzF -->
+  <MathConstant Name="Toyota_CzF_b1" Value="0.86481821" Unit=""/>
+  <MathConstant Name="Toyota_CzF_b2" Value="-0.00595153" Unit=""/>
+  <MathConstant Name="Toyota_CzF_b3" Value="-0.00878098" Unit=""/>
+  <MathConstant Name="Toyota_CzF_b4" Value="-0.00263223" Unit=""/>
+  <MathConstant Name="Toyota_CzF_b5" Value="0.00006199" Unit=""/>
+  <MathConstant Name="Toyota_CzF_b6" Value="0.00002539" Unit=""/>
+  <MathConstant Name="Toyota_CzF_b7" Value="0.01176345" Unit=""/>
+  <MathConstant Name="Toyota_CzF_b8" Value="-0.00003161" Unit=""/>
+  <MathConstant Name="Toyota_CzF_b9" Value="0.00026909" Unit=""/>
+  <MathConstant Name="Toyota_CzF_b10" Value="-0.00015914" Unit=""/>
+
+  <!-- Toyota_CzR -->
+  <MathConstant Name="Toyota_CzR_b1" Value="-0.08137794" Unit=""/>
+  <MathConstant Name="Toyota_CzR_b2" Value="-0.00652853" Unit=""/>
+  <MathConstant Name="Toyota_CzR_b3" Value="-0.00262928" Unit=""/>
+  <MathConstant Name="Toyota_CzR_b4" Value="0.01971900" Unit=""/>
+  <MathConstant Name="Toyota_CzR_b5" Value="0.00002296" Unit=""/>
+  <MathConstant Name="Toyota_CzR_b6" Value="0.00001028" Unit=""/>
+  <MathConstant Name="Toyota_CzR_b7" Value="0.01222696" Unit=""/>
+  <MathConstant Name="Toyota_CzR_b8" Value="-0.00000460" Unit=""/>
+  <MathConstant Name="Toyota_CzR_b9" Value="-0.00018049" Unit=""/>
+  <MathConstant Name="Toyota_CzR_b10" Value="0.00000372" Unit=""/>
+
+  <!-- Toyota_ABf -->
+  <MathConstant Name="Toyota_ABf_b1" Value="-258.55022257" Unit=""/>
+  <MathConstant Name="Toyota_ABf_b2" Value="0.46563443" Unit=""/>
+  <MathConstant Name="Toyota_ABf_b3" Value="3.43778693" Unit=""/>
+  <MathConstant Name="Toyota_ABf_b4" Value="-1.11675211" Unit=""/>
+  <MathConstant Name="Toyota_ABf_b5" Value="-0.00502832" Unit=""/>
+  <MathConstant Name="Toyota_ABf_b6" Value="-0.01152386" Unit=""/>
+  <MathConstant Name="Toyota_ABf_b7" Value="-1.19106619" Unit=""/>
+  <MathConstant Name="Toyota_ABf_b8" Value="0.00262499" Unit=""/>
+  <MathConstant Name="Toyota_ABf_b9" Value="-0.01747559" Unit=""/>
+  <MathConstant Name="Toyota_ABf_b10" Value="0.01639131" Unit=""/>
+
+  <!-- Toyota_EFF -->
+  <MathConstant Name="Toyota_EFF_b1" Value="0.53052919" Unit=""/>
+  <MathConstant Name="Toyota_EFF_b2" Value="-0.00860668" Unit=""/>
+  <MathConstant Name="Toyota_EFF_b3" Value="-0.01191959" Unit=""/>
+  <MathConstant Name="Toyota_EFF_b4" Value="0.00314149" Unit=""/>
+  <MathConstant Name="Toyota_EFF_b5" Value="0.00007024" Unit=""/>
+  <MathConstant Name="Toyota_EFF_b6" Value="0.00003850" Unit=""/>
+  <MathConstant Name="Toyota_EFF_b7" Value="0.02268033" Unit=""/>
+  <MathConstant Name="Toyota_EFF_b8" Value="-0.00003258" Unit=""/>
+  <MathConstant Name="Toyota_EFF_b9" Value="0.00022193" Unit=""/>
+  <MathConstant Name="Toyota_EFF_b10" Value="-0.00014930" Unit=""/>
+
+  <!-- Toyota_Cy -->
+  <MathConstant Name="Toyota_Cy_b1" Value="0.05190121" Unit=""/>
+  <MathConstant Name="Toyota_Cy_b2" Value="0.00075473" Unit=""/>
+  <MathConstant Name="Toyota_Cy_b3" Value="-0.00288458" Unit=""/>
+  <MathConstant Name="Toyota_Cy_b4" Value="-0.14128769" Unit=""/>
+  <MathConstant Name="Toyota_Cy_b5" Value="-0.00001782" Unit=""/>
+  <MathConstant Name="Toyota_Cy_b6" Value="-0.00000973" Unit=""/>
+  <MathConstant Name="Toyota_Cy_b7" Value="-0.01148710" Unit=""/>
+  <MathConstant Name="Toyota_Cy_b8" Value="0.00004291" Unit=""/>
+  <MathConstant Name="Toyota_Cy_b9" Value="0.00197640" Unit=""/>
+  <MathConstant Name="Toyota_Cy_b10" Value="-0.00034538" Unit=""/>
+
+  <!-- Toyota_CyF -->
+  <MathConstant Name="Toyota_CyF_b1" Value="0.02590739" Unit=""/>
+  <MathConstant Name="Toyota_CyF_b2" Value="0.00037541" Unit=""/>
+  <MathConstant Name="Toyota_CyF_b3" Value="-0.00144417" Unit=""/>
+  <MathConstant Name="Toyota_CyF_b4" Value="-0.07061305" Unit=""/>
+  <MathConstant Name="Toyota_CyF_b5" Value="-0.00000887" Unit=""/>
+  <MathConstant Name="Toyota_CyF_b6" Value="-0.00000485" Unit=""/>
+  <MathConstant Name="Toyota_CyF_b7" Value="-0.00574638" Unit=""/>
+  <MathConstant Name="Toyota_CyF_b8" Value="0.00002143" Unit=""/>
+  <MathConstant Name="Toyota_CyF_b9" Value="0.00098965" Unit=""/>
+  <MathConstant Name="Toyota_CyF_b10" Value="-0.00017343" Unit=""/>
+
+  <!-- Toyota_CyR -->
+  <MathConstant Name="Toyota_CyR_b1" Value="0.02599382" Unit=""/>
+  <MathConstant Name="Toyota_CyR_b2" Value="0.00037932" Unit=""/>
+  <MathConstant Name="Toyota_CyR_b3" Value="-0.00144041" Unit=""/>
+  <MathConstant Name="Toyota_CyR_b4" Value="-0.07067465" Unit=""/>
+  <MathConstant Name="Toyota_CyR_b5" Value="-0.00000894" Unit=""/>
+  <MathConstant Name="Toyota_CyR_b6" Value="-0.00000488" Unit=""/>
+  <MathConstant Name="Toyota_CyR_b7" Value="-0.00574072" Unit=""/>
+  <MathConstant Name="Toyota_CyR_b8" Value="0.00002149" Unit=""/>
+  <MathConstant Name="Toyota_CyR_b9" Value="0.00098675" Unit=""/>
+  <MathConstant Name="Toyota_CyR_b10" Value="-0.00017195" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- Ford                                        -->
+  <!-- ======================================== -->
+
+  <!-- Ford_Cz -->
+  <MathConstant Name="Ford_Cz_b1" Value="0.76277706" Unit=""/>
+  <MathConstant Name="Ford_Cz_b2" Value="-0.00631062" Unit=""/>
+  <MathConstant Name="Ford_Cz_b3" Value="-0.01337709" Unit=""/>
+  <MathConstant Name="Ford_Cz_b4" Value="0.19038367" Unit=""/>
+  <MathConstant Name="Ford_Cz_b5" Value="0.00001381" Unit=""/>
+  <MathConstant Name="Ford_Cz_b6" Value="0.00002842" Unit=""/>
+  <MathConstant Name="Ford_Cz_b7" Value="0.01297483" Unit=""/>
+  <MathConstant Name="Ford_Cz_b8" Value="0.00000644" Unit=""/>
+  <MathConstant Name="Ford_Cz_b9" Value="-0.00178736" Unit=""/>
+  <MathConstant Name="Ford_Cz_b10" Value="0.00000978" Unit=""/>
+
+  <!-- Ford_Cx -->
+  <MathConstant Name="Ford_Cx_b1" Value="0.66927291" Unit=""/>
+  <MathConstant Name="Ford_Cx_b2" Value="0.00307168" Unit=""/>
+  <MathConstant Name="Ford_Cx_b3" Value="0.00124766" Unit=""/>
+  <MathConstant Name="Ford_Cx_b4" Value="-0.02441405" Unit=""/>
+  <MathConstant Name="Ford_Cx_b5" Value="-0.00000521" Unit=""/>
+  <MathConstant Name="Ford_Cx_b6" Value="0.00000006" Unit=""/>
+  <MathConstant Name="Ford_Cx_b7" Value="0.00109920" Unit=""/>
+  <MathConstant Name="Ford_Cx_b8" Value="-0.00000577" Unit=""/>
+  <MathConstant Name="Ford_Cx_b9" Value="0.00020966" Unit=""/>
+  <MathConstant Name="Ford_Cx_b10" Value="0.00000801" Unit=""/>
+
+  <!-- Ford_CzF -->
+  <MathConstant Name="Ford_CzF_b1" Value="0.86769045" Unit=""/>
+  <MathConstant Name="Ford_CzF_b2" Value="-0.00234238" Unit=""/>
+  <MathConstant Name="Ford_CzF_b3" Value="-0.01038185" Unit=""/>
+  <MathConstant Name="Ford_CzF_b4" Value="0.06877855" Unit=""/>
+  <MathConstant Name="Ford_CzF_b5" Value="0.00002891" Unit=""/>
+  <MathConstant Name="Ford_CzF_b6" Value="0.00002644" Unit=""/>
+  <MathConstant Name="Ford_CzF_b7" Value="0.00504336" Unit=""/>
+  <MathConstant Name="Ford_CzF_b8" Value="-0.00001719" Unit=""/>
+  <MathConstant Name="Ford_CzF_b9" Value="-0.00072462" Unit=""/>
+  <MathConstant Name="Ford_CzF_b10" Value="0.00005995" Unit=""/>
+
+  <!-- Ford_CzR -->
+  <MathConstant Name="Ford_CzR_b1" Value="-0.10491339" Unit=""/>
+  <MathConstant Name="Ford_CzR_b2" Value="-0.00396823" Unit=""/>
+  <MathConstant Name="Ford_CzR_b3" Value="-0.00299524" Unit=""/>
+  <MathConstant Name="Ford_CzR_b4" Value="0.12160512" Unit=""/>
+  <MathConstant Name="Ford_CzR_b5" Value="-0.00001510" Unit=""/>
+  <MathConstant Name="Ford_CzR_b6" Value="0.00000198" Unit=""/>
+  <MathConstant Name="Ford_CzR_b7" Value="0.00793147" Unit=""/>
+  <MathConstant Name="Ford_CzR_b8" Value="0.00002363" Unit=""/>
+  <MathConstant Name="Ford_CzR_b9" Value="-0.00106274" Unit=""/>
+  <MathConstant Name="Ford_CzR_b10" Value="-0.00005018" Unit=""/>
+
+  <!-- Ford_ABf -->
+  <MathConstant Name="Ford_ABf_b1" Value="-240.10596782" Unit=""/>
+  <MathConstant Name="Ford_ABf_b2" Value="0.32516220" Unit=""/>
+  <MathConstant Name="Ford_ABf_b3" Value="3.23454491" Unit=""/>
+  <MathConstant Name="Ford_ABf_b4" Value="-0.62271845" Unit=""/>
+  <MathConstant Name="Ford_ABf_b5" Value="-0.00277893" Unit=""/>
+  <MathConstant Name="Ford_ABf_b6" Value="-0.01028217" Unit=""/>
+  <MathConstant Name="Ford_ABf_b7" Value="-0.76737297" Unit=""/>
+  <MathConstant Name="Ford_ABf_b8" Value="0.00087735" Unit=""/>
+  <MathConstant Name="Ford_ABf_b9" Value="0.04399458" Unit=""/>
+  <MathConstant Name="Ford_ABf_b10" Value="-0.02936724" Unit=""/>
+
+  <!-- Ford_EFF -->
+  <MathConstant Name="Ford_EFF_b1" Value="0.53750596" Unit=""/>
+  <MathConstant Name="Ford_EFF_b2" Value="-0.00399395" Unit=""/>
+  <MathConstant Name="Ford_EFF_b3" Value="-0.01311125" Unit=""/>
+  <MathConstant Name="Ford_EFF_b4" Value="0.15528929" Unit=""/>
+  <MathConstant Name="Ford_EFF_b5" Value="0.00000947" Unit=""/>
+  <MathConstant Name="Ford_EFF_b6" Value="0.00003098" Unit=""/>
+  <MathConstant Name="Ford_EFF_b7" Value="0.01357645" Unit=""/>
+  <MathConstant Name="Ford_EFF_b8" Value="0.00000415" Unit=""/>
+  <MathConstant Name="Ford_EFF_b9" Value="-0.00151943" Unit=""/>
+  <MathConstant Name="Ford_EFF_b10" Value="0.00004975" Unit=""/>
+
+  <!-- Ford_Cy -->
+  <MathConstant Name="Ford_Cy_b1" Value="-0.33219023" Unit=""/>
+  <MathConstant Name="Ford_Cy_b2" Value="0.00524762" Unit=""/>
+  <MathConstant Name="Ford_Cy_b3" Value="-0.00186913" Unit=""/>
+  <MathConstant Name="Ford_Cy_b4" Value="-0.20203926" Unit=""/>
+  <MathConstant Name="Ford_Cy_b5" Value="-0.00003082" Unit=""/>
+  <MathConstant Name="Ford_Cy_b6" Value="-0.00000969" Unit=""/>
+  <MathConstant Name="Ford_Cy_b7" Value="-0.01531151" Unit=""/>
+  <MathConstant Name="Ford_Cy_b8" Value="0.00003460" Unit=""/>
+  <MathConstant Name="Ford_Cy_b9" Value="0.00248150" Unit=""/>
+  <MathConstant Name="Ford_Cy_b10" Value="-0.00029249" Unit=""/>
+
+  <!-- Ford_CyF -->
+  <MathConstant Name="Ford_CyF_b1" Value="-0.16634482" Unit=""/>
+  <MathConstant Name="Ford_CyF_b2" Value="0.00262190" Unit=""/>
+  <MathConstant Name="Ford_CyF_b3" Value="-0.00093185" Unit=""/>
+  <MathConstant Name="Ford_CyF_b4" Value="-0.10095241" Unit=""/>
+  <MathConstant Name="Ford_CyF_b5" Value="-0.00001537" Unit=""/>
+  <MathConstant Name="Ford_CyF_b6" Value="-0.00000484" Unit=""/>
+  <MathConstant Name="Ford_CyF_b7" Value="-0.00765516" Unit=""/>
+  <MathConstant Name="Ford_CyF_b8" Value="0.00001726" Unit=""/>
+  <MathConstant Name="Ford_CyF_b9" Value="0.00124153" Unit=""/>
+  <MathConstant Name="Ford_CyF_b10" Value="-0.00014682" Unit=""/>
+
+  <!-- Ford_CyR -->
+  <MathConstant Name="Ford_CyR_b1" Value="-0.16584541" Unit=""/>
+  <MathConstant Name="Ford_CyR_b2" Value="0.00262571" Unit=""/>
+  <MathConstant Name="Ford_CyR_b3" Value="-0.00093728" Unit=""/>
+  <MathConstant Name="Ford_CyR_b4" Value="-0.10108685" Unit=""/>
+  <MathConstant Name="Ford_CyR_b5" Value="-0.00001545" Unit=""/>
+  <MathConstant Name="Ford_CyR_b6" Value="-0.00000485" Unit=""/>
+  <MathConstant Name="Ford_CyR_b7" Value="-0.00765635" Unit=""/>
+  <MathConstant Name="Ford_CyR_b8" Value="0.00001734" Unit=""/>
+  <MathConstant Name="Ford_CyR_b9" Value="0.00123997" Unit=""/>
+  <MathConstant Name="Ford_CyR_b10" Value="-0.00014567" Unit=""/>
+
+ </MathConstants>
+
+ <MathExpressions>
+
+  <!-- ======================================== -->
+  <!-- GM                                        -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="GM_Cz" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'GM_Cz_b1' []
+    + 'GM_Cz_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cz_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cz_b4' [] * 'Roll' [deg]
+    + 'GM_Cz_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cz_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cz_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_Cz_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cz_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_Cz_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cx" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'GM_Cx_b1' []
+    + 'GM_Cx_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cx_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cx_b4' [] * 'Roll' [deg]
+    + 'GM_Cx_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cx_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cx_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_Cx_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cx_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_Cx_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'GM_CzF_b1' []
+    + 'GM_CzF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzF_b4' [] * 'Roll' [deg]
+    + 'GM_CzF_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzF_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzF_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_CzF_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzF_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_CzF_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzR" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'GM_CzR_b1' []
+    + 'GM_CzR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzR_b4' [] * 'Roll' [deg]
+    + 'GM_CzR_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CzR_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzR_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_CzR_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CzR_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_CzR_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_ABf" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'GM_ABf_b1' []
+    + 'GM_ABf_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_ABf_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_ABf_b4' [] * 'Roll' [deg]
+    + 'GM_ABf_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_ABf_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_ABf_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_ABf_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_ABf_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_ABf_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_EFF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'GM_EFF_b1' []
+    + 'GM_EFF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_EFF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_EFF_b4' [] * 'Roll' [deg]
+    + 'GM_EFF_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_EFF_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_EFF_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_EFF_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_EFF_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_EFF_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cy" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'GM_Cy_b1' []
+    + 'GM_Cy_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cy_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cy_b4' [] * 'Roll' [deg]
+    + 'GM_Cy_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_Cy_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cy_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_Cy_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_Cy_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_Cy_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'GM_CyF_b1' []
+    + 'GM_CyF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyF_b4' [] * 'Roll' [deg]
+    + 'GM_CyF_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyF_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyF_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_CyF_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyF_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_CyF_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyR" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'GM_CyR_b1' []
+    + 'GM_CyR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyR_b4' [] * 'Roll' [deg]
+    + 'GM_CyR_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'GM_CyR_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyR_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'GM_CyR_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'GM_CyR_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'GM_CyR_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- Toyota                                        -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="Toyota_Cz" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Toyota_Cz_b1' []
+    + 'Toyota_Cz_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_Cz_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_Cz_b4' [] * 'Roll' [deg]
+    + 'Toyota_Cz_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_Cz_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_Cz_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Toyota_Cz_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_Cz_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Toyota_Cz_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Toyota_Cx" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Toyota_Cx_b1' []
+    + 'Toyota_Cx_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_Cx_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_Cx_b4' [] * 'Roll' [deg]
+    + 'Toyota_Cx_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_Cx_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_Cx_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Toyota_Cx_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_Cx_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Toyota_Cx_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Toyota_CzF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Toyota_CzF_b1' []
+    + 'Toyota_CzF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_CzF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CzF_b4' [] * 'Roll' [deg]
+    + 'Toyota_CzF_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_CzF_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CzF_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Toyota_CzF_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CzF_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Toyota_CzF_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Toyota_CzR" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Toyota_CzR_b1' []
+    + 'Toyota_CzR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_CzR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CzR_b4' [] * 'Roll' [deg]
+    + 'Toyota_CzR_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_CzR_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CzR_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Toyota_CzR_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CzR_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Toyota_CzR_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Toyota_ABf" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Toyota_ABf_b1' []
+    + 'Toyota_ABf_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_ABf_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_ABf_b4' [] * 'Roll' [deg]
+    + 'Toyota_ABf_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_ABf_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_ABf_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Toyota_ABf_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_ABf_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Toyota_ABf_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Toyota_EFF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Toyota_EFF_b1' []
+    + 'Toyota_EFF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_EFF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_EFF_b4' [] * 'Roll' [deg]
+    + 'Toyota_EFF_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_EFF_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_EFF_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Toyota_EFF_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_EFF_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Toyota_EFF_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Toyota_Cy" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Toyota_Cy_b1' []
+    + 'Toyota_Cy_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_Cy_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_Cy_b4' [] * 'Roll' [deg]
+    + 'Toyota_Cy_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_Cy_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_Cy_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Toyota_Cy_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_Cy_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Toyota_Cy_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Toyota_CyF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Toyota_CyF_b1' []
+    + 'Toyota_CyF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_CyF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CyF_b4' [] * 'Roll' [deg]
+    + 'Toyota_CyF_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_CyF_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CyF_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Toyota_CyF_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CyF_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Toyota_CyF_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Toyota_CyR" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Toyota_CyR_b1' []
+    + 'Toyota_CyR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_CyR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CyR_b4' [] * 'Roll' [deg]
+    + 'Toyota_CyR_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Toyota_CyR_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CyR_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Toyota_CyR_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Toyota_CyR_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Toyota_CyR_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- Ford                                        -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="Ford_Cz" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Ford_Cz_b1' []
+    + 'Ford_Cz_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cz_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cz_b4' [] * 'Roll' [deg]
+    + 'Ford_Cz_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cz_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cz_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_Cz_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cz_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_Cz_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_Cx" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Ford_Cx_b1' []
+    + 'Ford_Cx_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cx_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cx_b4' [] * 'Roll' [deg]
+    + 'Ford_Cx_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cx_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cx_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_Cx_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cx_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_Cx_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CzF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Ford_CzF_b1' []
+    + 'Ford_CzF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzF_b4' [] * 'Roll' [deg]
+    + 'Ford_CzF_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzF_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzF_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_CzF_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzF_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_CzF_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CzR" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Ford_CzR_b1' []
+    + 'Ford_CzR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzR_b4' [] * 'Roll' [deg]
+    + 'Ford_CzR_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CzR_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzR_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_CzR_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CzR_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_CzR_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_ABf" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Ford_ABf_b1' []
+    + 'Ford_ABf_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_ABf_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_ABf_b4' [] * 'Roll' [deg]
+    + 'Ford_ABf_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_ABf_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_ABf_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_ABf_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_ABf_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_ABf_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_EFF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Ford_EFF_b1' []
+    + 'Ford_EFF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_EFF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_EFF_b4' [] * 'Roll' [deg]
+    + 'Ford_EFF_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_EFF_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_EFF_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_EFF_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_EFF_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_EFF_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_Cy" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Ford_Cy_b1' []
+    + 'Ford_Cy_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cy_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cy_b4' [] * 'Roll' [deg]
+    + 'Ford_Cy_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_Cy_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cy_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_Cy_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_Cy_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_Cy_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CyF" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Ford_CyF_b1' []
+    + 'Ford_CyF_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyF_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyF_b4' [] * 'Roll' [deg]
+    + 'Ford_CyF_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyF_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyF_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_CyF_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyF_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_CyF_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="Ford_CyR" DisplayDPS="4" DisplayColorIndex="1" Interpolate="1" Script="
+    'Ford_CyR_b1' []
+    + 'Ford_CyR_b2' [] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyR_b3' [] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyR_b4' [] * 'Roll' [deg]
+    + 'Ford_CyR_b5' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Front' [mm]
+    + 'Ford_CyR_b6' [] * 'Laser Ride Height Rear' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyR_b7' [] * 'Roll' [deg] * 'Roll' [deg]
+    + 'Ford_CyR_b8' [] * 'Laser Ride Height Front' [mm] * 'Laser Ride Height Rear' [mm]
+    + 'Ford_CyR_b9' [] * 'Laser Ride Height Front' [mm] * 'Roll' [deg]
+    + 'Ford_CyR_b10' [] * 'Laser Ride Height Rear' [mm] * 'Roll' [deg]
+  " SampleRate="0" Unit=""/>
+
+ </MathExpressions>
+
+</Maths>

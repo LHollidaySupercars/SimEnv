@@ -1,0 +1,1095 @@
+<?xml version="1.0"?>
+<Maths Locale="English_Australia.1252" DefaultLocale="C" Id="Performance_GM" Condition="'Vehicle Id' == &quot;GEN3 Camaro&quot;">
+
+ <MathConstants>
+
+  <!-- ======================================== -->
+  <!-- Filter cutoff frequencies                -->
+  <!-- ======================================== -->
+
+  <MathConstant Name="filt_FRH" Value="10.0" Unit="Hz"/>
+  <MathConstant Name="filt_RRH" Value="10.0" Unit="Hz"/>
+  <MathConstant Name="filt_YAW" Value="2.0" Unit="Hz"/>
+
+  <!-- ======================================== -->
+  <!-- GM — roll fit (degree 3)                 -->
+  <!-- ======================================== -->
+
+  <!-- GM_Cz_roll -->
+  <MathConstant Name="GM_Cz_roll_b1" Value="1.10036372" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b2" Value="-0.00316455" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b3" Value="-0.03260972" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b4" Value="-0.17746950" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b5" Value="-0.00004109" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b6" Value="0.00019340" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b7" Value="-0.04719685" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b8" Value="0.00004756" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b9" Value="0.00210374" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b10" Value="0.00150595" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b11" Value="0.00000070" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b12" Value="-0.00000058" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b13" Value="0.00895583" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b14" Value="-0.00000109" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b15" Value="-0.00002595" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b16" Value="0.00000060" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b17" Value="-0.00001017" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b18" Value="0.00104936" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b19" Value="-0.00080257" Unit=""/>
+  <MathConstant Name="GM_Cz_roll_b20" Value="0.00002124" Unit=""/>
+
+  <!-- GM_Cx_roll -->
+  <MathConstant Name="GM_Cx_roll_b1" Value="0.31949586" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b2" Value="0.00745609" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b3" Value="0.00655244" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b4" Value="-0.02898107" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b5" Value="-0.00004573" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b6" Value="-0.00004138" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b7" Value="-0.01925898" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b8" Value="-0.00000972" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b9" Value="0.00057307" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b10" Value="0.00025795" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b11" Value="0.00000014" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b12" Value="0.00000008" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b13" Value="0.00085967" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b14" Value="-0.00000006" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b15" Value="-0.00000012" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b16" Value="0.00000008" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b17" Value="-0.00000014" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b18" Value="-0.00004028" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b19" Value="0.00014183" Unit=""/>
+  <MathConstant Name="GM_Cx_roll_b20" Value="-0.00000396" Unit=""/>
+
+  <!-- GM_CzF_roll -->
+  <MathConstant Name="GM_CzF_roll_b1" Value="-0.35267927" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b2" Value="0.02221839" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b3" Value="-0.00877278" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b4" Value="-0.29534092" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b5" Value="-0.00017551" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b6" Value="0.00006715" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b7" Value="-0.06925602" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b8" Value="-0.00006593" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b9" Value="0.00565670" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b10" Value="0.00049098" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b11" Value="0.00000099" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b12" Value="-0.00000034" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b13" Value="-0.00895238" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b14" Value="-0.00000082" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b15" Value="-0.00003257" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b16" Value="0.00000078" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b17" Value="-0.00000659" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b18" Value="0.00064416" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b19" Value="0.00011905" Unit=""/>
+  <MathConstant Name="GM_CzF_roll_b20" Value="0.00000895" Unit=""/>
+
+  <!-- GM_CzR_roll -->
+  <MathConstant Name="GM_CzR_roll_b1" Value="1.45304299" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b2" Value="-0.02538294" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b3" Value="-0.02383694" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b4" Value="0.11787143" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b5" Value="0.00013442" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b6" Value="0.00012626" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b7" Value="0.02205916" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b8" Value="0.00011348" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b9" Value="-0.00355296" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b10" Value="0.00101497" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b11" Value="-0.00000029" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b12" Value="-0.00000024" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b13" Value="0.01790821" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b14" Value="-0.00000027" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b15" Value="0.00000662" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b16" Value="-0.00000019" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b17" Value="-0.00000358" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b18" Value="0.00040520" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b19" Value="-0.00092162" Unit=""/>
+  <MathConstant Name="GM_CzR_roll_b20" Value="0.00001229" Unit=""/>
+
+  <!-- GM_ABf_roll -->
+  <MathConstant Name="GM_ABf_roll_b1" Value="11.13875604" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b2" Value="-3.59931589" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b3" Value="2.86924922" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b4" Value="55.78951353" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b5" Value="0.01719276" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b6" Value="-0.02732361" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b7" Value="0.82742131" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b8" Value="0.02296940" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b9" Value="-0.60484706" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b10" Value="-0.31879532" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b11" Value="-0.00006646" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b12" Value="0.00008302" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b13" Value="1.43082970" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b14" Value="0.00001887" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b15" Value="0.00239440" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b16" Value="-0.00008680" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b17" Value="0.00094446" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b18" Value="-0.04198313" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b19" Value="-0.00374509" Unit=""/>
+  <MathConstant Name="GM_ABf_roll_b20" Value="0.00065915" Unit=""/>
+
+  <!-- GM_EFF_roll -->
+  <MathConstant Name="GM_EFF_roll_b1" Value="0.64231693" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b2" Value="0.00212082" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b3" Value="-0.02894968" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b4" Value="-0.22168088" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b5" Value="-0.00006501" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b6" Value="0.00017231" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b7" Value="-0.05832706" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b8" Value="0.00003365" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b9" Value="0.00268212" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b10" Value="0.00189733" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b11" Value="0.00000074" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b12" Value="-0.00000054" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b13" Value="0.00906880" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b14" Value="-0.00000106" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b15" Value="-0.00002478" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b16" Value="0.00000064" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b17" Value="-0.00001015" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b18" Value="0.00094811" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b19" Value="-0.00064560" Unit=""/>
+  <MathConstant Name="GM_EFF_roll_b20" Value="0.00001547" Unit=""/>
+
+  <!-- GM_Cy_roll -->
+  <MathConstant Name="GM_Cy_roll_b1" Value="-12.03861017" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b2" Value="0.25104271" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b3" Value="0.06753382" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b4" Value="-3.86070230" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b5" Value="-0.00134481" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b6" Value="0.00009380" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b7" Value="-0.17242435" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b8" Value="-0.00152379" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b9" Value="0.03943247" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b10" Value="0.02416214" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b11" Value="0.00000331" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b12" Value="-0.00000128" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b13" Value="-0.17755361" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b14" Value="0.00000178" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b15" Value="-0.00014545" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b16" Value="0.00000413" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b17" Value="-0.00007884" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b18" Value="0.00208658" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b19" Value="0.00383655" Unit=""/>
+  <MathConstant Name="GM_Cy_roll_b20" Value="-0.00006808" Unit=""/>
+
+  <!-- GM_CyF_roll -->
+  <MathConstant Name="GM_CyF_roll_b1" Value="-6.02969676" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b2" Value="0.12573361" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b3" Value="0.03382701" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b4" Value="-1.93362463" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b5" Value="-0.00067351" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b6" Value="0.00004698" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b7" Value="-0.08612042" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b8" Value="-0.00076327" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b9" Value="0.01974483" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b10" Value="0.01210205" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b11" Value="0.00000166" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b12" Value="-0.00000064" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b13" Value="-0.08893850" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b14" Value="0.00000089" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b15" Value="-0.00007285" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b16" Value="0.00000207" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b17" Value="-0.00003949" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b18" Value="0.00104550" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b19" Value="0.00191983" Unit=""/>
+  <MathConstant Name="GM_CyF_roll_b20" Value="-0.00003406" Unit=""/>
+
+  <!-- GM_CyR_roll -->
+  <MathConstant Name="GM_CyR_roll_b1" Value="-6.00891341" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b2" Value="0.12530910" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b3" Value="0.03370680" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b4" Value="-1.92707767" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b5" Value="-0.00067130" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b6" Value="0.00004681" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b7" Value="-0.08630393" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b8" Value="-0.00076053" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b9" Value="0.01968764" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b10" Value="0.01206009" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b11" Value="0.00000165" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b12" Value="-0.00000064" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b13" Value="-0.08861511" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b14" Value="0.00000089" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b15" Value="-0.00007260" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b16" Value="0.00000206" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b17" Value="-0.00003935" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b18" Value="0.00104107" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b19" Value="0.00191672" Unit=""/>
+  <MathConstant Name="GM_CyR_roll_b20" Value="-0.00003402" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- GM — simplified fit no roll (degree 3)   -->
+  <!-- ======================================== -->
+
+  <!-- GM_Cz -->
+  <MathConstant Name="GM_Cz_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_Cz_b2" Value="0.03904371" Unit=""/>
+  <MathConstant Name="GM_Cz_b3" Value="-0.04976722" Unit=""/>
+  <MathConstant Name="GM_Cz_b4" Value="-0.00020008" Unit=""/>
+  <MathConstant Name="GM_Cz_b5" Value="0.00042312" Unit=""/>
+  <MathConstant Name="GM_Cz_b6" Value="-0.00021413" Unit=""/>
+  <MathConstant Name="GM_Cz_b7" Value="0.00000051" Unit=""/>
+  <MathConstant Name="GM_Cz_b8" Value="-0.00000107" Unit=""/>
+  <MathConstant Name="GM_Cz_b9" Value="0.00000027" Unit=""/>
+  <MathConstant Name="GM_Cz_b10" Value="0.00000040" Unit=""/>
+
+  <!-- GM_Cx -->
+  <MathConstant Name="GM_Cx_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_Cx_b2" Value="0.01685070" Unit=""/>
+  <MathConstant Name="GM_Cx_b3" Value="0.00456422" Unit=""/>
+  <MathConstant Name="GM_Cx_b4" Value="-0.00005246" Unit=""/>
+  <MathConstant Name="GM_Cx_b5" Value="0.00001958" Unit=""/>
+  <MathConstant Name="GM_Cx_b6" Value="-0.00012061" Unit=""/>
+  <MathConstant Name="GM_Cx_b7" Value="-0.00000009" Unit=""/>
+  <MathConstant Name="GM_Cx_b8" Value="-0.00000004" Unit=""/>
+  <MathConstant Name="GM_Cx_b9" Value="0.00000053" Unit=""/>
+  <MathConstant Name="GM_Cx_b10" Value="-0.00000001" Unit=""/>
+
+  <!-- GM_CzF -->
+  <MathConstant Name="GM_CzF_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CzF_b2" Value="0.03067841" Unit=""/>
+  <MathConstant Name="GM_CzF_b3" Value="-0.02917052" Unit=""/>
+  <MathConstant Name="GM_CzF_b4" Value="-0.00013924" Unit=""/>
+  <MathConstant Name="GM_CzF_b5" Value="0.00026158" Unit=""/>
+  <MathConstant Name="GM_CzF_b6" Value="-0.00017499" Unit=""/>
+  <MathConstant Name="GM_CzF_b7" Value="0.00000029" Unit=""/>
+  <MathConstant Name="GM_CzF_b8" Value="-0.00000060" Unit=""/>
+  <MathConstant Name="GM_CzF_b9" Value="0.00000048" Unit=""/>
+  <MathConstant Name="GM_CzF_b10" Value="0.00000006" Unit=""/>
+
+  <!-- GM_CzR -->
+  <MathConstant Name="GM_CzR_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CzR_b2" Value="0.00836530" Unit=""/>
+  <MathConstant Name="GM_CzR_b3" Value="-0.02059670" Unit=""/>
+  <MathConstant Name="GM_CzR_b4" Value="-0.00006083" Unit=""/>
+  <MathConstant Name="GM_CzR_b5" Value="0.00016154" Unit=""/>
+  <MathConstant Name="GM_CzR_b6" Value="-0.00003914" Unit=""/>
+  <MathConstant Name="GM_CzR_b7" Value="0.00000022" Unit=""/>
+  <MathConstant Name="GM_CzR_b8" Value="-0.00000047" Unit=""/>
+  <MathConstant Name="GM_CzR_b9" Value="-0.00000020" Unit=""/>
+  <MathConstant Name="GM_CzR_b10" Value="0.00000034" Unit=""/>
+
+  <!-- GM_ABf -->
+  <MathConstant Name="GM_ABf_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_ABf_b2" Value="-3.10355285" Unit=""/>
+  <MathConstant Name="GM_ABf_b3" Value="3.17629052" Unit=""/>
+  <MathConstant Name="GM_ABf_b4" Value="0.00357427" Unit=""/>
+  <MathConstant Name="GM_ABf_b5" Value="-0.03438065" Unit=""/>
+  <MathConstant Name="GM_ABf_b6" Value="0.03304788" Unit=""/>
+  <MathConstant Name="GM_ABf_b7" Value="0.00002358" Unit=""/>
+  <MathConstant Name="GM_ABf_b8" Value="0.00008184" Unit=""/>
+  <MathConstant Name="GM_ABf_b9" Value="-0.00009687" Unit=""/>
+  <MathConstant Name="GM_ABf_b10" Value="-0.00002141" Unit=""/>
+
+  <!-- GM_EFF -->
+  <MathConstant Name="GM_EFF_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_EFF_b2" Value="0.03433717" Unit=""/>
+  <MathConstant Name="GM_EFF_b3" Value="-0.04677365" Unit=""/>
+  <MathConstant Name="GM_EFF_b4" Value="-0.00018628" Unit=""/>
+  <MathConstant Name="GM_EFF_b5" Value="0.00037825" Unit=""/>
+  <MathConstant Name="GM_EFF_b6" Value="-0.00015986" Unit=""/>
+  <MathConstant Name="GM_EFF_b7" Value="0.00000059" Unit=""/>
+  <MathConstant Name="GM_EFF_b8" Value="-0.00000098" Unit=""/>
+  <MathConstant Name="GM_EFF_b9" Value="-0.00000006" Unit=""/>
+  <MathConstant Name="GM_EFF_b10" Value="0.00000051" Unit=""/>
+
+  <!-- GM_Cy -->
+  <MathConstant Name="GM_Cy_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_Cy_b2" Value="-0.00580166" Unit=""/>
+  <MathConstant Name="GM_Cy_b3" Value="0.00441132" Unit=""/>
+  <MathConstant Name="GM_Cy_b4" Value="0.00020189" Unit=""/>
+  <MathConstant Name="GM_Cy_b5" Value="0.00007577" Unit=""/>
+  <MathConstant Name="GM_Cy_b6" Value="-0.00024862" Unit=""/>
+  <MathConstant Name="GM_Cy_b7" Value="-0.00000105" Unit=""/>
+  <MathConstant Name="GM_Cy_b8" Value="-0.00000015" Unit=""/>
+  <MathConstant Name="GM_Cy_b9" Value="0.00000122" Unit=""/>
+  <MathConstant Name="GM_Cy_b10" Value="-0.00000013" Unit=""/>
+
+  <!-- GM_CyF -->
+  <MathConstant Name="GM_CyF_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CyF_b2" Value="-0.00289158" Unit=""/>
+  <MathConstant Name="GM_CyF_b3" Value="0.00219810" Unit=""/>
+  <MathConstant Name="GM_CyF_b4" Value="0.00010092" Unit=""/>
+  <MathConstant Name="GM_CyF_b5" Value="0.00003796" Unit=""/>
+  <MathConstant Name="GM_CyF_b6" Value="-0.00012442" Unit=""/>
+  <MathConstant Name="GM_CyF_b7" Value="-0.00000052" Unit=""/>
+  <MathConstant Name="GM_CyF_b8" Value="-0.00000008" Unit=""/>
+  <MathConstant Name="GM_CyF_b9" Value="0.00000061" Unit=""/>
+  <MathConstant Name="GM_CyF_b10" Value="-0.00000007" Unit=""/>
+
+  <!-- GM_CyR -->
+  <MathConstant Name="GM_CyR_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CyR_b2" Value="-0.00291008" Unit=""/>
+  <MathConstant Name="GM_CyR_b3" Value="0.00221323" Unit=""/>
+  <MathConstant Name="GM_CyR_b4" Value="0.00010097" Unit=""/>
+  <MathConstant Name="GM_CyR_b5" Value="0.00003781" Unit=""/>
+  <MathConstant Name="GM_CyR_b6" Value="-0.00012421" Unit=""/>
+  <MathConstant Name="GM_CyR_b7" Value="-0.00000052" Unit=""/>
+  <MathConstant Name="GM_CyR_b8" Value="-0.00000008" Unit=""/>
+  <MathConstant Name="GM_CyR_b9" Value="0.00000061" Unit=""/>
+  <MathConstant Name="GM_CyR_b10" Value="-0.00000006" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- GM — yaw fit (degree 3, 19 terms)         -->
+  <!-- ======================================== -->
+
+  <!-- GM_Cz_yaw -->
+  <MathConstant Name="GM_Cz_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b3" Value="-0.01010826" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b4" Value="0.11383351" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b5" Value="0.00005857" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b6" Value="0.00004714" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b7" Value="-0.00003431" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b8" Value="-0.00918196" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b9" Value="-0.00243500" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b10" Value="0.00195644" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b11" Value="-0.00000022" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b12" Value="-0.00000011" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b13" Value="0.00000014" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b14" Value="0.00000001" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b15" Value="0.00000111" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b16" Value="0.00000046" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b17" Value="-0.00000104" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b18" Value="0.00028855" Unit=""/>
+  <MathConstant Name="GM_Cz_yaw_b19" Value="-0.00021193" Unit=""/>
+
+  <!-- GM_Cx_yaw -->
+  <MathConstant Name="GM_Cx_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b3" Value="0.00640562" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b4" Value="0.12553395" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b5" Value="-0.00001622" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b6" Value="-0.00001386" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b7" Value="0.00001124" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b8" Value="-0.01464210" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b9" Value="0.00075514" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b10" Value="-0.00272280" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b11" Value="0.00000008" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b12" Value="0.00000003" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b13" Value="-0.00000010" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b14" Value="0.00000001" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b15" Value="0.00000033" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b16" Value="0.00000040" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b17" Value="0.00000284" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b18" Value="-0.00016534" Unit=""/>
+  <MathConstant Name="GM_Cx_yaw_b19" Value="0.00027726" Unit=""/>
+
+  <!-- GM_CzF_yaw -->
+  <MathConstant Name="GM_CzF_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b3" Value="-0.00583772" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b4" Value="0.19311626" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b5" Value="0.00002607" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b6" Value="0.00002659" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b7" Value="-0.00000353" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b8" Value="-0.03457867" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b9" Value="-0.00112343" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b10" Value="0.00032021" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b11" Value="-0.00000003" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b12" Value="-0.00000005" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b13" Value="-0.00000001" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b14" Value="0.00000002" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b15" Value="-0.00000293" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b16" Value="-0.00000076" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b17" Value="-0.00000144" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b18" Value="0.00023708" Unit=""/>
+  <MathConstant Name="GM_CzF_yaw_b19" Value="0.00003977" Unit=""/>
+
+  <!-- GM_CzR_yaw -->
+  <MathConstant Name="GM_CzR_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b3" Value="-0.00427053" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b4" Value="-0.07928276" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b5" Value="0.00003250" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b6" Value="0.00002055" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b7" Value="-0.00003078" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b8" Value="0.02539671" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b9" Value="-0.00131157" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b10" Value="0.00163623" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b11" Value="-0.00000019" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b12" Value="-0.00000006" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b13" Value="0.00000014" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b14" Value="-0.00000001" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b15" Value="0.00000404" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b16" Value="0.00000123" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b17" Value="0.00000040" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b18" Value="0.00005147" Unit=""/>
+  <MathConstant Name="GM_CzR_yaw_b19" Value="-0.00025170" Unit=""/>
+
+  <!-- GM_ABf_yaw -->
+  <MathConstant Name="GM_ABf_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b3" Value="1.10246241" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b4" Value="-27.48498750" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b5" Value="-0.00001994" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b6" Value="-0.01010752" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b7" Value="0.00224746" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b8" Value="6.61537068" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b9" Value="-0.17783644" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b10" Value="0.12468140" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b11" Value="-0.00000256" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b12" Value="0.00002395" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b13" Value="-0.00000325" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b14" Value="-0.00001120" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b15" Value="0.00032386" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b16" Value="0.00027818" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b17" Value="0.00088035" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b18" Value="-0.00220780" Unit=""/>
+  <MathConstant Name="GM_ABf_yaw_b19" Value="-0.04102594" Unit=""/>
+
+  <!-- GM_EFF_yaw -->
+  <MathConstant Name="GM_EFF_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b3" Value="-0.00961036" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b4" Value="0.07331786" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b5" Value="0.00004455" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b6" Value="0.00004176" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b7" Value="-0.00001866" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b8" Value="0.00095718" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b9" Value="-0.00195449" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b10" Value="0.00165907" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b11" Value="-0.00000015" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b12" Value="-0.00000009" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b13" Value="0.00000005" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b14" Value="0.00000002" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b15" Value="0.00000145" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b16" Value="0.00000044" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b17" Value="0.00000028" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b18" Value="0.00018579" Unit=""/>
+  <MathConstant Name="GM_EFF_yaw_b19" Value="-0.00020118" Unit=""/>
+
+  <!-- GM_Cy_yaw -->
+  <MathConstant Name="GM_Cy_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b3" Value="-0.00443260" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b4" Value="0.16831137" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b5" Value="-0.00000912" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b6" Value="-0.00000670" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b7" Value="0.00006441" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b8" Value="-0.02891302" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b9" Value="-0.00209881" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b10" Value="0.00072693" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b11" Value="0.00000011" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b12" Value="0.00000004" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b13" Value="-0.00000019" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b14" Value="-0.00000004" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b15" Value="0.00000068" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b16" Value="-0.00000090" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b17" Value="-0.00000255" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b18" Value="0.00028991" Unit=""/>
+  <MathConstant Name="GM_Cy_yaw_b19" Value="-0.00001662" Unit=""/>
+
+  <!-- GM_CyF_yaw -->
+  <MathConstant Name="GM_CyF_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b3" Value="-0.00219985" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b4" Value="0.08331868" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b5" Value="-0.00000457" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b6" Value="-0.00000334" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b7" Value="0.00003197" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b8" Value="-0.01434880" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b9" Value="-0.00103935" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b10" Value="0.00036174" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b11" Value="0.00000005" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b12" Value="0.00000002" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b13" Value="-0.00000010" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b14" Value="-0.00000002" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b15" Value="0.00000034" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b16" Value="-0.00000045" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b17" Value="-0.00000127" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b18" Value="0.00014379" Unit=""/>
+  <MathConstant Name="GM_CyF_yaw_b19" Value="-0.00000818" Unit=""/>
+
+  <!-- GM_CyR_yaw -->
+  <MathConstant Name="GM_CyR_yaw_b1" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b2" Value="0.00000000" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b3" Value="-0.00223275" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b4" Value="0.08499270" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b5" Value="-0.00000455" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b6" Value="-0.00000336" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b7" Value="0.00003244" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b8" Value="-0.01456422" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b9" Value="-0.00105946" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b10" Value="0.00036519" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b11" Value="0.00000005" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b12" Value="0.00000002" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b13" Value="-0.00000010" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b14" Value="-0.00000002" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b15" Value="0.00000035" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b16" Value="-0.00000045" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b17" Value="-0.00000128" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b18" Value="0.00014613" Unit=""/>
+  <MathConstant Name="GM_CyR_yaw_b19" Value="-0.00000844" Unit=""/>
+
+ </MathConstants>
+
+ <MathExpressions>
+
+  <!-- ======================================== -->
+  <!-- Roll channel definition                  -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="Roll" DisplayUnit="deg" DisplayDPS="2" DisplayColorIndex="0" Interpolate="1" Script="(atan2('C1_Damper Pos FL' [mm] -'C1_Damper Pos FR' [mm], 1600) + atan2('C1_Damper Pos RL' [mm] -'C1_Damper Pos RR' [mm], 1600)) /2" SampleRate="0" Unit="rad"/>
+
+  <!-- ======================================== -->
+  <!-- Filtered input channels                  -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="Laser Ride Height Front_filt" DisplayDPS="2" DisplayColorIndex="0" Interpolate="1" Script="filter_lp('Laser Ride Height Front' [mm], 'filt_FRH' [])" SampleRate="0" Unit="mm"/>
+
+  <MathExpression Id="Laser Ride Height Rear_filt" DisplayDPS="2" DisplayColorIndex="0" Interpolate="1" Script="filter_lp('Laser Ride Height Rear' [mm], 'filt_RRH' [])" SampleRate="0" Unit="mm"/>
+
+  <MathExpression Id="YawPitot Yaw Angle_filt" DisplayDPS="2" DisplayColorIndex="0" Interpolate="1" Script="abs(filter_lp('YawPitot Yaw Angle' [deg], 'filt_YAW' []))" SampleRate="0" Unit="deg"/>
+
+  <!-- ======================================== -->
+  <!-- GM — roll fit (degree 3)                 -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="GM_Cz_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cz_roll_b1' []
+    + 'GM_Cz_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cz_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_roll_b4' [] * abs('Roll' [deg])
+    + 'GM_Cz_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cz_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_Cz_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cz_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cz_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cz_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_Cz_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cz_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cz_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cz_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cz_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cx_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cx_roll_b1' []
+    + 'GM_Cx_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cx_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_roll_b4' [] * abs('Roll' [deg])
+    + 'GM_Cx_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cx_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_Cx_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cx_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cx_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cx_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_Cx_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cx_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cx_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cx_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cx_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzF_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CzF_roll_b1' []
+    + 'GM_CzF_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzF_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_roll_b4' [] * abs('Roll' [deg])
+    + 'GM_CzF_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzF_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_CzF_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CzF_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CzF_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzF_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_CzF_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CzF_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzF_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CzF_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzF_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzR_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CzR_roll_b1' []
+    + 'GM_CzR_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzR_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_roll_b4' [] * abs('Roll' [deg])
+    + 'GM_CzR_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzR_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_CzR_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CzR_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CzR_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzR_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_CzR_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CzR_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzR_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CzR_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzR_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_ABf_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_ABf_roll_b1' []
+    + 'GM_ABf_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_ABf_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_roll_b4' [] * abs('Roll' [deg])
+    + 'GM_ABf_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_ABf_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_ABf_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_ABf_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_ABf_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_ABf_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_ABf_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_ABf_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_ABf_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_ABf_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_ABf_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_EFF_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_EFF_roll_b1' []
+    + 'GM_EFF_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_EFF_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_roll_b4' [] * abs('Roll' [deg])
+    + 'GM_EFF_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_EFF_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_EFF_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_EFF_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_EFF_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_EFF_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_EFF_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_EFF_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_EFF_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_EFF_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_EFF_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cy_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cy_roll_b1' []
+    + 'GM_Cy_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cy_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_roll_b4' [] * abs('Roll' [deg])
+    + 'GM_Cy_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cy_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_Cy_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cy_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cy_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cy_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_Cy_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cy_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cy_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_Cy_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cy_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyF_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CyF_roll_b1' []
+    + 'GM_CyF_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyF_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_roll_b4' [] * abs('Roll' [deg])
+    + 'GM_CyF_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyF_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_CyF_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CyF_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CyF_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyF_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_CyF_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CyF_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyF_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CyF_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyF_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyR_roll" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CyR_roll_b1' []
+    + 'GM_CyR_roll_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyR_roll_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_roll_b4' [] * abs('Roll' [deg])
+    + 'GM_CyR_roll_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyR_roll_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_roll_b7' [] * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_CyR_roll_b8' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_roll_b9' [] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CyR_roll_b10' [] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CyR_roll_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyR_roll_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_roll_b13' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * abs('Roll' [deg])
+    + 'GM_CyR_roll_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_roll_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CyR_roll_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyR_roll_b17' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+    + 'GM_CyR_roll_b18' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyR_roll_b19' [] * abs('Roll' [deg]) * abs('Roll' [deg]) * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_roll_b20' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * abs('Roll' [deg])
+  " SampleRate="0" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- GM — simplified fit no roll (degree 3)   -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="GM_Cz" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cz_b1' []
+    + 'GM_Cz_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cz_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cz_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cz_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cz_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cx" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cx_b1' []
+    + 'GM_Cx_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cx_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cx_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cx_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cx_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzF" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CzF_b1' []
+    + 'GM_CzF_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzF_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzF_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzF_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzF_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzR" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CzR_b1' []
+    + 'GM_CzR_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzR_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzR_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CzR_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CzR_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_ABf" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_ABf_b1' []
+    + 'GM_ABf_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_ABf_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_ABf_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_ABf_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_ABf_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_EFF" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_EFF_b1' []
+    + 'GM_EFF_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_EFF_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_EFF_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_EFF_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_EFF_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cy" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_Cy_b1' []
+    + 'GM_Cy_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cy_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cy_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_Cy_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_Cy_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyF" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CyF_b1' []
+    + 'GM_CyF_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyF_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyF_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyF_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyF_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyR" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    'GM_CyR_b1' []
+    + 'GM_CyR_b2' [] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyR_b3' [] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_b4' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyR_b5' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_b6' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm]
+    + 'GM_CyR_b8' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+    + 'GM_CyR_b10' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm]
+  " SampleRate="0" Unit=""/>
+
+  <!-- ======================================== -->
+  <!-- GM — yaw fit (degree 3, Cy=0 at yaw=0)    -->
+  <!-- ======================================== -->
+
+  <MathExpression Id="GM_Cz_yaw" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'GM_Cz_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cz_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cx_yaw" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'GM_Cx_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cx_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzF_yaw" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'GM_CzF_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzF_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CzR_yaw" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'GM_CzR_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CzR_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_ABf_yaw" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'GM_ABf_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_ABf_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_EFF_yaw" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'GM_EFF_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_EFF_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_Cy_yaw" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'GM_Cy_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_Cy_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyF_yaw" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'GM_CyF_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyF_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+  <MathExpression Id="GM_CyR_yaw" DisplayDPS="4" DisplayColorIndex="0" Interpolate="1" Script="
+    sgn('YawPitot Yaw Angle' [deg]) * (
+    'GM_CyR_yaw_b1' [] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b2' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b3' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b4' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b5' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b6' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b7' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b8' [] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b9' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b10' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b11' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b12' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b13' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b14' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b15' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b16' [] * 'Laser Ride Height Rear_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b17' [] * 'Laser Ride Height Front_filt' [mm] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b18' [] * 'Laser Ride Height Front_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    + 'GM_CyR_yaw_b19' [] * 'Laser Ride Height Rear_filt' [mm] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg] * 'YawPitot Yaw Angle_filt' [deg]
+    )
+  " SampleRate="0" Unit=""/>
+
+ </MathExpressions>
+
+</Maths>
