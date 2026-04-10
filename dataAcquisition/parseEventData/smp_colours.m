@@ -42,6 +42,7 @@ function cfg = smp_colours()
     %  Fallback colour (grey) when no match found
     % ------------------------------------------------------------------ %
     cfg.fallback = [0.55  0.55  0.55];
+    
 end
 
 
