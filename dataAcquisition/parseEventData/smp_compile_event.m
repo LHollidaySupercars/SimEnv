@@ -749,6 +749,8 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
 %     .verbose          (default: true)
 %     .date_from        datetime/datenum — only load files on or after this date
 %                       e.g. datetime(2026,3,5)  (default: [] = all files)
+%     .detect_pitlane   enable pit-lane detection via beacon channel (default: false)
+%     .fcy_channel      FCY flag channel name (default: 'FCY_Flag')
 %
 % Output:
 %   cache   - compiled cache struct (stats + traces in stream mode,
@@ -768,9 +770,11 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
     date_from     = get_opt(opts, 'date_from',       []);
 %     saveCache     = get_opt(opts, 'saveCache',       true);
     saveCache     = get_opt(opts, 'saveCache',      true);
-    channel_rules = get_opt(opts, 'channel_rules',  []);
-    save_mode     = get_opt(opts, 'save_mode',       'legacy');
-    session_filter = get_opt(opts, 'session_filter', {});
+    channel_rules  = get_opt(opts, 'channel_rules',   []);
+    save_mode      = get_opt(opts, 'save_mode',        'legacy');
+    session_filter = get_opt(opts, 'session_filter',   {});
+    detect_pitlane = get_opt(opts, 'detect_pitlane',   false);
+    fcy_channel    = get_opt(opts, 'fcy_channel',      'FCY_Flag');
 
     % ------------------------------------------------------------------
     %  Lap time limits from season overview
@@ -891,7 +895,8 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
     if strcmp(mode, 'stream')
         cache = process_stream(cache, groups, channels_to_extract, ...
                                min_lt, max_lt, max_traces, dist_npts, ...
-                               dist_ch, driver_map, verbose, channel_rules);
+                               dist_ch, driver_map, verbose, channel_rules, ...
+                               detect_pitlane, fcy_channel);
     else
         cache = process_bulk(cache, groups, channels_to_extract, verbose);
     end
@@ -917,11 +922,18 @@ end
 %                                  dist_ch, driver_map, verbose)
 function cache = process_stream(cache, groups, channels_to_extract, ...
                                  min_lt, max_lt, max_traces, dist_npts, ...
-                                 dist_ch, driver_map, verbose, channel_rules)
-    if nargin < 11, channel_rules = []; end
-    lap_opts.min_lap_time = min_lt;
-    lap_opts.max_lap_time = max_lt;
-    lap_opts.verbose      = false;
+                                 dist_ch, driver_map, verbose, channel_rules, ...
+                                 detect_pitlane, fcy_channel)
+    if nargin < 11, channel_rules  = [];        end
+    if nargin < 12, detect_pitlane = false;     end
+    if nargin < 13, fcy_channel    = 'FCY_Flag'; end
+    MYLAPS_CH_DEFAULT        = 'MyLaps X2TRA DeviceShortId';
+    lap_opts.min_lap_time    = min_lt;
+    lap_opts.max_lap_time    = max_lt;
+    lap_opts.detect_pitlane  = detect_pitlane;
+    lap_opts.fcy_channel     = fcy_channel;
+    lap_opts.mylaps_channel  = MYLAPS_CH_DEFAULT;
+    lap_opts.verbose         = false;
 
     dist_opts.distance_channel = dist_ch;
     dist_opts.resolution       = [];
@@ -936,8 +948,18 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
             g, n_groups, grp.team_acronym, grp.driver, grp.session, grp.n_files);
 
         % ---- Load and concatenate stints ----
+        % Inject beacon/FCY channels into the extraction list so
+        % filter_channels doesn't strip them before lap_slicer runs.
+        required_ch = {};
+        if detect_pitlane
+            required_ch{end+1} = lap_opts.mylaps_channel;
+        end
+        if ~isempty(fcy_channel)
+            required_ch{end+1} = fcy_channel;
+        end
+        ch_extract_full = unique([channels_to_extract(:); required_ch(:)]);
         try
-            session = load_and_concat(grp.files, channels_to_extract, verbose);
+            session = load_and_concat(grp.files, ch_extract_full, verbose);
         catch ME
             fprintf('  [ERROR] Load failed: %s\n', ME.message);
             cache = add_failed_entries(cache, grp, ME.message);
@@ -1196,7 +1218,34 @@ function merged = concat_sessions(sessions)
         else
             t_offset = t_offset + 0.02;   % 50Hz default gap
         end
-
+        % Trim overlap from s2: MoTeC splits files mid-lap, so each file
+        % starts by repeating the lap number that was in progress at the
+        % split point.  We keep the split lap owned by merged (earlier file)
+        % and strip any samples from s2 that belong to laps already present.
+        % Lap -1 (init) and -2 (race pre-grid) are excluded from the max so
+        % they don't pollute the comparison.
+        if isfield(merged, 'Lap_Number') && isfield(s2, 'Lap_Number')
+            merged_ln  = round(merged.Lap_Number.data);
+            ln_max     = max(merged_ln(merged_ln >= 0));
+            if isnan(ln_max), ln_max = 0; end
+            s2_ln      = round(s2.Lap_Number.data);
+            first_new  = find(s2_ln > ln_max, 1, 'first');
+            if isempty(first_new)
+                % s2 contains no laps beyond what merged already has — skip
+                continue;
+            end
+            trim_t = s2.Lap_Number.time(first_new);
+            % Trim every channel in s2 to start at trim_t
+            s2_fields = fieldnames(s2);
+            for tf = 1:numel(s2_fields)
+                fn2 = s2_fields{tf};
+                if isfield(s2.(fn2), 'time') && ~isempty(s2.(fn2).time)
+                    keep2 = s2.(fn2).time >= trim_t;
+                    s2.(fn2).data = s2.(fn2).data(keep2);
+                    s2.(fn2).time = s2.(fn2).time(keep2);
+                end
+            end
+        end
         % Concatenate each channel
         for c = 1:numel(ch_fields)
             fn = ch_fields{c};

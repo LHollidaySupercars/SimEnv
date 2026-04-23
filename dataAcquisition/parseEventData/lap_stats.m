@@ -92,6 +92,7 @@ function stats = lap_stats(laps, channels, opts)
         res = struct();
         res.lap_numbers = zeros(1, n_laps);
         res.lap_times   = zeros(1, n_laps);
+        res.lap_types   = cell(1, n_laps);
         for op = operations(:)'
             res.(sanitise_fieldname(op{1})) = NaN(1, n_laps);
         end
@@ -107,6 +108,11 @@ function stats = lap_stats(laps, channels, opts)
         for k = 1:n_laps
             res.lap_numbers(k) = laps(k).lap_number;
             res.lap_times(k)   = laps(k).lap_time;
+            if isfield(laps(k), 'lap_type')
+                res.lap_types{k} = laps(k).lap_type;
+            else
+                res.lap_types{k} = '';
+            end
 
             ch   = laps(k).channels.(ch_field);
             d    = ch.data;
