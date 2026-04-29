@@ -1,5 +1,8 @@
 % verticalStiffness script
-verticalStiffness = readtable("C:\SimEnv\tyreGrowthFzVsRL.csv");
+
+tyrePath = "C:\SimEnv\validation\tyreGrowthFzVsRL.csv";
+
+verticalStiffness = readtable(tyrePath);
 vWheel = linspace(0, 250, 250);
 rollingRadius = verticalStiffness.RL;
 verticalForce = verticalStiffness.FZ;
@@ -7,18 +10,23 @@ wheelSpeed = verticalStiffness.N;
 groundVelocity = verticalStiffness.V;
 pressure = verticalStiffness.P;
 RLvsFZ = polyfit(verticalForce, rollingRadius, 1);
-verticalStiffness = verticalStiffness((verticalStiffness.N > 857 && verticalStiffness.N < 1367) || (verticalStiffness.N > 1455 && verticalStiffness.N < 1925))
 %%
-% verticalStiffness = verticalStiffness((verticalStiffness.N > 857 .* verticalStiffness.N < 1367) + (verticalStiffness.N > 1455 .* verticalStiffness.N < 1925));
-temp = (verticalStiffness.N > 857 .* verticalStiffness.N < 1367) + (verticalStiffness.N > 1455 .* verticalStiffness.N < 1925)
-groundVelocity((temp >= 1))
+            
+                temp = ((verticalStiffness.N > 857 & verticalStiffness.N < 1367) ...
+                | (verticalStiffness.N > 1455 & verticalStiffness.N < 1925) ...
+                );
+            
+verticalStiffness = verticalStiffness(temp,:);
 %%
-rowMask = (verticalStiffness.N > 857 & verticalStiffness.N < 1367) | (verticalStiffness.N > 1455 & verticalStiffness.N < 1925);
+% % verticalStiffness = verticalStiffness((verticalStiffness.N > 857 .* verticalStiffness.N < 1367) + (verticalStiffness.N > 1455 .* verticalStiffness.N < 1925));
+% temp = (verticalStiffness.N > 857 .* verticalStiffness.N < 1367) + (verticalStiffness.N > 1455 .* verticalStiffness.N < 1925)
+% groundVelocity((temp >= 1))
+% %%
+% rowMask = (verticalStiffness.N > 857 & verticalStiffness.N < 1367) | (verticalStiffness.N > 1455 & verticalStiffness.N < 1925);
 verticalStiffness = verticalStiffness(rowMask, :);
 %%
 
 RLvsN = polyfit(wheelSpeed, rollingRadius, 1);
-
 
 RLvsP = polyfit(pressure, rollingRadius, 1);
 
@@ -61,7 +69,7 @@ calcedRadius = RLvsP(2) - (RLvsN(1) * vWheel) - (RLvsFZ(1) .* 1/2 .* rho .* vWhe
 % KPH = RPM * pi * RL * 60 / 1000
 % groundVelocity = groundVelocity((temp > 1))
 %% Rolling Radius with Respect to Pressure
-wheelSpeed = verticalStiffness.N;
+wheelSpeed     = verticalStiffness.N;
 groundVelocity = verticalStiffness.V;
 figure
 % wheelSpeed = wheelSpeed(temp >2)
@@ -78,8 +86,9 @@ figure
 scatter(wheelSpeed, (0.5 .* groundVelocity .* 1000) ./ (60 .* pi() .* wheelSpeed), [], verticalStiffness.FZ, 'filled');
 colorbar;
 ylabel(colorbar, 'Vertical Force');
+
 %% Table look up and poly fit for rolling radius based on pressure
-verticalStiffness_Pressure = readtable("C:\SimEnv\tyreGrowthFzVsRL.csv");
+verticalStiffness_Pressure = readtable(tyrePath);
 % filtering out for load, RPM, IA, 
 rowMask = ...
 (verticalStiffness_Pressure.FZ < -6000 & verticalStiffness_Pressure.FZ > -6500) & ...
@@ -89,6 +98,9 @@ rowMask = ...
 (verticalStiffness_Pressure.SA < 0.5) ;
 verticalStiffnessPressure_FZ_Bin1 = verticalStiffness_Pressure(rowMask, :); 
 
+% linear fit 
+
+polyfit(verticalStiffnessPressure_FZ_Bin1.P, verticalStiffnessPressure_FZ_Bin1.RL, 1)
 
 figure;
 
@@ -164,7 +176,7 @@ plot(P_range, RL_fit_Bin2, 'b-', 'LineWidth', 2);
 title('Simplifying Tyre Model');
 xlabel('Pressure [Psi]');
 ylabel('Rolling Radius [cm]');
-legend('FZ 4000-5000N', 'FZ 6000-6500N', 'Fit Bin1', 'Fit Bin2', 'Location', 'northwest');
+legend('FZ 6000-6500N', 'FZ 4000-5000N', 'Fit Bin1', 'Fit Bin2', 'Location', 'northwest');
 
 % --- Print coefficients ---
 fprintf('Bin1 (4000-5000N): RL = %.4f * P + %.4f\n', pFit_Bin1(1), pFit_Bin1(2));
@@ -268,3 +280,50 @@ fprintf('R² = %.4f\n', 1 - SS_res/SS_tot);
 
 % RL = a0 + a1*P + a2*FZ + a3*P*FZ
 X = [ones(size(P_all)), P_all, FZ_all, P_all.*FZ_all];
+%% ========================================================================
+%  SECTION 2: Track-Side Rolling Radius Debug Plots
+%  (merged from helper/debuggingScript/tyreRadius/tyreRadiusPlots.m)
+%
+%  Requires a MoTeC session already loaded into `data` struct, e.g.:
+%    data = motec_ld_reader('path\to\session.ld', channels);
+%  and the following variables pre-computed in the workspace:
+%    ref           - reference speed channel struct (e.g. data.vCar_VCH)
+%    rollingRadius - static rolling radius (m)
+%    FZ            - vertical force channel data (array)
+%    wheelSpeed    - wheel speed channel data (array)
+% =========================================================================
+
+%% Compare virtual channel RL against raw FZ and wheel speed
+figure
+hold on
+yyaxis right
+plot(data.rTyreFL_VCH_P_FZ_C.time, data.rTyreFL_VCH_P_FZ_C.data)
+plot(data.rTyreFL_VCH_P_FZ_C.time, wheelSpeed)
+
+yyaxis left
+plot(data.rTyreFL_VCH_P_FZ_C.time, FZ)
+hold off
+
+%% Compare wheel speeds using modified rolling radius
+rollingRadius2 = data.rTyreFL_VCH_P_FZ_C.data / 1000;
+nWheel = ((ref.data) / (rollingRadius * 2 * pi())); % rad/s
+newSpeed = nWheel .* rollingRadius2 * 2 * pi();
+
+figure
+hold on
+yyaxis left
+plot(data.rTyreFL_VCH_P_FZ_C.time, newSpeed, 'color', 'b')
+plot(data.rTyreFL_VCH_P_FZ_C.time, ref.data,  'color', 'r')
+
+yyaxis right
+ylim([0, 300])
+plot(data.Throttle_Pedal.time,       data.Throttle_Pedal.data,          'color', 'g')
+plot(data.Brake_Pressure_Front.time, data.Brake_Pressure_Front.data/10, 'color', 'r')
+hold off
+
+%% Compare VCH wheel speed against raw sensor channel
+figure
+hold on
+plot(data.vWheel_VCH_FL.time,         data.vWheel_VCH_FL.data,          'color', 'b')
+plot(data.Wheel_Speed_Front_Left.time, data.Wheel_Speed_Front_Left.data, 'color', 'r')
+hold off

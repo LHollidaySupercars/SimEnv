@@ -1,4 +1,4 @@
-function data = smp_custom_channels(data)
+function data = smp_custom_channels(data, varargin)
 % SMP_CUSTOM_CHANNELS  Compute derived channels from loaded MoTeC data.
 %
 % Call immediately after motec_ld_reader(), before caching.
@@ -14,6 +14,13 @@ function data = smp_custom_channels(data)
 %   2. The field name becomes how you reference it everywhere downstream
 %      e.g. data.Brake_Bias_Front -> plot config yAxis = 'Brake_Bias_Front'
 
+    p = inputParser();
+    addRequired(p,  'data');
+    addParameter(p, 'startingValues', struct());
+    parse(p, data, varargin{:});
+
+    startingValues = p.Results.startingValues;
+    
     fprintf('smp_custom_channels: computing derived channels...\n');
 
     % ==================================================================
@@ -43,6 +50,8 @@ function data = smp_custom_channels(data)
     %  EXAMPLE 1: Brake Bias (Front %)
     %  Requires: Brake_Pressure_Front, Brake_Pressure_Rear
     % ==================================================================
+%% Gating Section
+    
     if isfield(data, 'Brake_Pressure_Front') && isfield(data, 'Brake_Pressure_Rear')
         f     = data.Brake_Pressure_Front.data;
         r     = data.Brake_Pressure_Rear.data;
@@ -59,10 +68,10 @@ function data = smp_custom_channels(data)
     %  EXAMPLE 2: Drive Index  (Throttle x Speed / 100)
     %  A simple aggression metric — higher = more throttle at higher speed
     % ==================================================================
+%     if isfield(data, 'Acceleration_X_Filt') && isfield(data, 'Acceleration_Y_Filt')
     if isfield(data, 'ADR_Acceleration_X') && isfield(data, 'ADR_Acceleration_Y')
-
-        long     = data.ADR_Acceleration_X.data;   % longitudinal G  (+ = accel, - = brake)
-        lat      = data.ADR_Acceleration_Y.data;   % lateral G
+        long     = data.Acceleration_X_Filt.data;   % longitudinal G  (+ = accel, - = brake)
+        lat      = data.Acceleration_Y_Filt.data;   % lateral G
         absLat   = abs(lat);
         throttle = data.Throttle_Pedal.data;
 
@@ -96,7 +105,7 @@ function data = smp_custom_channels(data)
         
     end
 
-    if isfield(data, 'ADR_Acceleration_Y')
+    if isfield(data, 'ADR_Acceleration_X') && isfield(data, 'ADR_Acceleration_Y') && exist('midCornerMask', 'var')
         %% Average Cornering Acceleration
            % longitudinal G  (+ = accel, - = brake)
         averageLat = data.ADR_Acceleration_Y.data .* midCornerMask;   % lateral G
@@ -132,10 +141,9 @@ function data = smp_custom_channels(data)
         %% --- build averaged rear channel on the ground speed time base ---
         if isfield(data, 'Wheel_Speed_Rear_Left') 
             rl = interp1(data.Wheel_Speed_Rear_Left.time,  data.Wheel_Speed_Rear_Left.data,  gnd_ch.time, 'linear', 'extrap');
-           
             rear_avg = rl;
-        elseif isfield(data, 'Wheel_Speed_Rear_Left')
-            rear_avg = interp1(data.Wheel_Speed_Rear_Left.time, data.Wheel_Speed_Rear_Left.data, gnd_ch.time, 'linear', 'extrap');
+        elseif isfield(data, 'Wheel_Speed_Rear_Right')
+            rear_avg = interp1(data.Wheel_Speed_Rear_Right.time, data.Wheel_Speed_Rear_Right.data, gnd_ch.time, 'linear', 'extrap');
         else
             rear_avg = [];
         end
@@ -209,7 +217,6 @@ function data = smp_custom_channels(data)
     end
         
     if isfield(data, 'Wheel_Speed_Rear_Left')  && ...
-       isfield(data, 'Wheel_Speed_Rear_Right') && ...
        isfield(data, 'Wheel_Speed_Front_Left') && ...
        isfield(data, 'Wheel_Speed_Front_Right')
 
@@ -223,7 +230,7 @@ function data = smp_custom_channels(data)
         rl = data.Wheel_Speed_Rear_Left.data;
 
         denom   = max(car_spd, 1.0);
-        rl_slip = (rl - car_spd) ./ denom * 100;
+        rl_slip = (rl - car_spd) ./ car_spd * 100;
         
         if isfield(data, 'exitGateVCH')
             gate = logical(data.exitGateVCH.data);
@@ -238,7 +245,6 @@ function data = smp_custom_channels(data)
     %% Air Jack Timer
    
     %%
-    
     if isfield(data, 'Air_Jack_Timer_Switch') && ...
        isfield(data, 'Wheel_Speed_Rear_Left') && ...
        isfield(data, 'Clutch_Pressure')       && ...
@@ -284,6 +290,261 @@ function data = smp_custom_channels(data)
         
     end
 
+    %% Tyre Radius Estimation (Pressure + Load + Speed Correction)
+% Model:  r = (28.2200 + 0.0505*P + -0.000340*FZ + 0.0004*rotSpeed) * 10  [mm]
+% Source: CALSPAN data
+% Aero load split: 50% front, applied per corner
+
+if isfield(data, 'Wheel_Speed_Front_Left')  && ...
+   isfield(data, 'Wheel_Speed_Front_Right') && ...
+   isfield(data, 'Wheel_Speed_Rear_Left')       % BUG FIX: was checking FL three times
+
+    rollingRadius = (2.090 / pi) / 2;  % static tyre radius [m]
+
+    % ------------------------------------------------------------------ %
+    %  Shared aero & load constants
+    % ------------------------------------------------------------------ %
+    totalMass    = 1300;   % kg
+    cornerMass   = (totalMass - 140) * 10 / 4;   % unsprung-corrected corner load [N]
+    frontCL_coef = [-0.002087248, -0.196832152];  % [slope, intercept]
+    rearCL_coef  = [-0.000202926, -0.745339228];
+
+    % ------------------------------------------------------------------ %
+    %  Front Left
+    % ------------------------------------------------------------------ %
+    if isfield(data, 'Wheel_Speed_Front_Left') && isfield(data, 'TPM1S_FL_WS_PRESS')
+
+        channel = 'Wheel_Speed_Front_Left';
+        ref     = data.(channel);
+        spd     = ref.data;                         % km/h
+
+        rotSpeed = (spd / 3.6) / rollingRadius;     % rad/s
+        rotSpeedRAD = rotSpeed;
+        rotSpeed = rotSpeed * 60 / (2 * pi);        % RPM  BUG FIX: was 60/2*pi (operator precedence)
+
+        % Vertical load
+        if isfield(data, 'Acceleration_Z_Filt')
+            gVert = align_to(data.Acceleration_Z_Filt, ref);
+        else
+            gVert = 0;
+        end
+        gRef = mean(get_starting_val(startingValues, 'startingValue_gVert', 0));
+        
+        FZ   = (1 + (gVert - gRef)) .* cornerMass;
+
+        % Aero contribution (front axle, split per corner)
+        frontCL = frontCL_coef(1) .* spd + frontCL_coef(2);
+        aeroFZ  = 0.5 .* spd.^2 .* frontCL / 2;   % per corner [N]  NOTE: spd in km/h — confirm air density scaling
+        FZ      = FZ + aeroFZ;
+
+        P = align_to(data.TPM1S_FL_WS_PRESS, ref);
+
+        rTyreFL = (28.2200 + 0.0505.*P + -0.000340.*FZ + 0.0004.*rotSpeed) * 10;  % mm
+        data.rTyreFL_VCH_P_FZ_C = make_channel(rTyreFL, ref, 'mm', 'rTyreFL_VCH_P_FZ_C');
+        fprintf('  [+] rTyreFL_VCH_P_FZ_C\n');
+        data.vWheel_VCH_FL = make_channel((data.rTyreFL_VCH_P_FZ_C.data/1000) .* rotSpeedRAD * 3.6, ref, 'km/h', 'vWheel_VCH_FL');
+        fprintf('  [+] vWheel_VCH_FL\n');
+    end
+
+    % ------------------------------------------------------------------ %
+    %  Front Right
+    % ------------------------------------------------------------------ %
+    if isfield(data, 'Wheel_Speed_Front_Right') && isfield(data, 'TPM1S_FR_WS_PRESS')
+        channel = 'Wheel_Speed_Front_Right';
+        ref     = data.(channel);
+        spd     = ref.data;  
+        rotSpeedRAD = (spd / 3.6) / rollingRadius;
+        rotSpeed = (spd / 3.6) / rollingRadius * 60 / (2 * pi);  % RPM
+
+        if isfield(data, 'Acceleration_Z_Filt')
+            gVert = align_to(data.Acceleration_Z_Filt, ref);
+        else
+            gVert = 0;
+        end
+        gRef = mean(get_starting_val(startingValues, 'startingValue_gVert', 0));
+        FZ   = (1 + (gVert - gRef)) .* cornerMass;
+
+        frontCL = frontCL_coef(1) .* spd + frontCL_coef(2);
+        aeroFZ  = 0.5 .* spd.^2 .* frontCL / 2;
+        FZ      = FZ + aeroFZ;
+
+        P = align_to(data.TPM1S_FR_WS_PRESS, ref);
+
+        rTyreFR = (28.2200 + 0.0505.*P + -0.000340.*FZ + 0.0004.*rotSpeed) * 10;
+        data.rTyreFR_VCH_P_FZ_C = make_channel(rTyreFR, ref, 'mm', 'rTyreFR_VCH_P_FZ_C');
+        fprintf('  [+] rTyreFR_VCH_P_FZ_C\n');
+        data.vWheel_VCH_FR = make_channel((data.rTyreFR_VCH_P_FZ_C.data/1000) .* rotSpeedRAD * 3.6, ref, 'km/h', 'vWheel_VCH_FR');
+        fprintf('  [+] vWheel_VCH_FR\n');
+    end
+
+    % ------------------------------------------------------------------ %
+    %  Rear Left
+    % ------------------------------------------------------------------ %
+    if isfield(data, 'Wheel_Speed_Rear_Left') && isfield(data, 'TPM1S_RL_WS_PRESS')
+
+        channel = 'Wheel_Speed_Rear_Left';
+        ref     = data.(channel);
+        spd     = ref.data;  
+        rotSpeedRAD = (spd / 3.6) / rollingRadius;
+        rotSpeed = (spd / 3.6) / rollingRadius * 60 / (2 * pi);  % RPM
+
+        if isfield(data, 'Acceleration_Z_Filt')
+            gVert = align_to(data.Acceleration_Z_Filt, ref);
+        else
+            gVert = 0;
+        end
+        gRef = mean(get_starting_val(startingValues, 'startingValue_gVert', 0));
+        FZ   = (1 + (gVert - gRef)) .* cornerMass;
+
+        rearCL = rearCL_coef(1) .* spd + rearCL_coef(2);  % NOTE: uses rearCL_coef, not frontCL_coef
+        aeroFZ = 0.5 .* spd.^2 .* rearCL / 2;
+        FZ     = FZ + aeroFZ;
+
+        P = align_to(data.TPM1S_RL_WS_PRESS, ref);
+
+        rTyreRL = (28.2200 + 0.0505.*P + -0.000340.*FZ + 0.0004.*rotSpeed) * 10;
+        data.rTyreRL_VCH_P_FZ_C = make_channel(rTyreRL, ref, 'mm', 'rTyreRL_VCH_P_FZ_C');
+        fprintf('  [+] rTyreRL_VCH_P_FZ_C\n');
+        data.vWheel_VCH_RL = make_channel((data.rTyreRL_VCH_P_FZ_C.data/1000) .* rotSpeedRAD * 3.6, ref, 'km/h', 'vWheel_VCH_RL');
+        fprintf('  [+] vWheel_VCH_RL\n');
+    end
+
+    % ------------------------------------------------------------------ %
+    %  Rear Right  — NOTE: block was missing entirely, added as placeholder
+    % ------------------------------------------------------------------ %
+    if isfield(data, 'Wheel_Speed_Rear_Right') && isfield(data, 'TPM1S_RR_WS_PRESS')
+
+        channel  = 'Wheel_Speed_Rear_Right';
+        ref      = data.(channel);
+        spd      = ref.data;
+
+        rotSpeed = (spd / 3.6) / rollingRadius * 60 / (2 * pi);  % RPM
+        FZ       = cornerMass;
+        P        = align_to(data.TPM1S_RR_WS_PRESS, ref);
+
+        rTyreRR = (28.2200 + 0.0505.*P + -0.000340.*FZ + 0.0004.*rotSpeed) * 10;  % mm
+        data.rTyreRR_VCH_P_FZ_C = make_channel(rTyreRR, ref, 'mm', 'rTyreRR_VCH_P_FZ_C');
+        fprintf('  [+] rTyreRR_VCH_P_FZ_C\n');
+    end
+end
+     %% Tyre Pressure Average Calcualtion
+     %% Rear axle
+     if isfield(data, 'TPM1S_RR_WS_PRESS') && ...
+        isfield(data, 'TPM1S_RL_WS_PRESS')
+        if length(data.TPM1S_RR_WS_PRESS.data) > ...
+                length(data.TPM1S_RL_WS_PRESS.data)
+            newChan = align_to(data.TPM1S_RL_WS_PRESS, data.TPM1S_RR_WS_PRESS);
+            refChan = data.TPM1S_RR_WS_PRESS;
+        else
+            newChan = align_to(data.TPM1S_RR_WS_PRESS, data.TPM1S_RL_WS_PRESS);
+            refChan = data.TPM1S_RL_WS_PRESS;
+        end
+        
+        tTyreRear_VCH_P = (newChan + refChan.data) ./ 2;
+        data.tTyreRear_VCH_P = make_channel(tTyreRear_VCH_P, refChan, 'psi', 'tTyreRear_VCH_P');
+        fprintf('  [+] tTyreRear_VCH_P\n');              
+
+     end 
+     if isfield(data, 'TPM1S_RR_WS_TEMP') && ...
+        isfield(data, 'TPM1S_RL_WS_TEMP')
+        if length(data.TPM1S_RR_WS_TEMP.data) > ...
+                length(data.TPM1S_RL_WS_TEMP.data)
+            newChan = align_to(data.TPM1S_RL_WS_TEMP, data.TPM1S_RR_WS_TEMP);
+            refChan = data.TPM1S_RR_WS_TEMP;
+        else
+            newChan = align_to(data.TPM1S_RR_WS_TEMP, data.TPM1S_RL_WS_TEMP);
+            refChan = data.TPM1S_RL_WS_TEMP;
+        end
+        
+        tTyreRear_VCH_T = (newChan + refChan.data) / 2;
+        data.tTyreRear_VCH_T = make_channel(tTyreRear_VCH_T, refChan, 'C', 'tTyreRear_VCH_T');
+        fprintf('  [+] tTyreRear_VCH_T\n');              
+
+     end 
+     if isfield(data, 'TPM1S_FR_WS_PRESS') && ...
+        isfield(data, 'TPM1S_FL_WS_PRESS')
+        if length(data.TPM1S_FR_WS_PRESS.data) > ...
+                length(data.TPM1S_FL_WS_PRESS.data)
+            newChan = align_to(data.TPM1S_FL_WS_PRESS, data.TPM1S_FR_WS_PRESS);
+            refChan = data.TPM1S_FR_WS_PRESS;
+        else
+            newChan = align_to(data.TPM1S_FR_WS_PRESS, data.TPM1S_FL_WS_PRESS);
+            refChan = data.TPM1S_FL_WS_PRESS;
+        end
+        
+        tTyreFront_VCH_P = (newChan + refChan.data) / 2;
+        data.tTyreFront_VCH_P = make_channel(tTyreFront_VCH_P, refChan, 'psi', 'tTyreFront_VCH_P');
+        fprintf('  [+] tTyreFront_VCH_P\n');              
+
+     end 
+     
+     if isfield(data, 'TPM1S_FR_WS_TEMP') && ...
+        isfield(data, 'TPM1S_FL_WS_TEMP')
+        if length(data.TPM1S_FR_WS_TEMP.data) > ...
+                length(data.TPM1S_FL_WS_TEMP.data)
+            newChan = align_to(data.TPM1S_FL_WS_TEMP, data.TPM1S_FR_WS_TEMP);
+            refChan = data.TPM1S_FR_WS_TEMP;
+        else
+            newChan = align_to(data.TPM1S_FR_WS_TEMP, data.TPM1S_FL_WS_TEMP);
+            refChan = data.TPM1S_FL_WS_TEMP;
+        end
+        
+        tTyreFront_VCH_T = (newChan + refChan.data) / 2;
+        data.tTyreFront_VCH_T = make_channel(tTyreFront_VCH_T, refChan, 'C', 'tTyreFront_VCH_T');
+        fprintf('  [+] tTyreFront_VCH_T\n');              
+
+     end 
+%% Roll Calcualtion
+     if isfield(data, 'Linear Potentiometers')
+         
+         
+         
+         
+     end     
+     %% Laser Ride Height Method IMU
+     if isfield(data, 'Ride Height Lasers Front')
+         
+         
+         
+         
+     end
+     %% Laser Ride Height Method Pot Delta
+     if isfield(data, 'Ride Height Lasers Rear')
+         unsprungMass = 1
+         % WeightTransfer = unsprungMass * longAceeleration * CoG Height /
+         % Wheelbase
+         
+     end     
+
+     
+     %% new subfunction
+     % Needs to pull the channels excel, or a subset of additional math
+     % channels
+     % Use the gate as a gate and apply a non-zero mean
+     %% Fuel Desnity Calculation
+     if isfield(data, 'Fuel_Used_Mass') && ...
+             isfield(data, 'Fuel_Temperature')
+         
+         if length(data.Fuel_Temperature.data) > length(data.Fuel_Used_Mass.data)
+            ref = data.Fuel_Temperature;
+            x = data.Fuel_Temperature.data;
+         else 
+            x = align_to(data.Fuel_Temperature, data.Fuel_Used_Mass);
+            ref = data.Fuel_Used_Mass;
+         end
+         
+         linearDensity = -0.8104 * x + 805.9;
+         cubicDensity  = (-8.85 * 10 ^-7) * x.^3 + 0.0009464 * x.^2 -0.8774 * x + 807;
+         
+        fuelDensityCorrectedCubic = cubicDensity ./ (data.Fuel_Used_Mass.data * 1000);
+        fuelDensityCorrectedLinear = linearDensity ./ (data.Fuel_Used_Mass.data * 1000);
+
+        data.Fuel_Density_Corr_Cubic = make_channel(fuelDensityCorrectedCubic, ref, 'L', 'Fuel_Density_Corr_Cubic');
+        fprintf('  [+] Fuel_Density_Corr_Cubic\n');  
+        data.Fuel_Density_Corr_Linear = make_channel(fuelDensityCorrectedLinear, ref, 'L', 'Fuel_Density_Corr_Linear');
+        fprintf('  [+] Fuel_Density_Corr_Linear\n');  
+     end     
+     
 end
 
 
@@ -297,19 +558,11 @@ function ch = make_channel(values, reference_ch, units, name)
     ch.sample_rate = reference_ch.sample_rate;
     ch.raw_name    = name;
 end
-
-function out = align_to(source_ch, target_ch)
-    s_t = source_ch.time(:);
-    t_t = target_ch.time(:);
-    if numel(s_t) == numel(t_t) && max(abs(s_t - t_t)) < 1e-9
-        out = source_ch.data(:);
-        return;
+function val = get_starting_val(sv, field, default)
+    if isstruct(sv) && isfield(sv, field)
+        val = sv.(field);
+    else
+        fprintf('  [!] startingVal.%s not found — using default %.4f\n', field, default);
+        val = default;
     end
-    method = 'linear';
-    if isfield(source_ch, 'interp_method')
-        method = source_ch.interp_method;
-    end
-    t_q = min(max(t_t, s_t(1)), s_t(end));
-    out = interp1(s_t, source_ch.data(:), t_q, method, 'extrap');
-    out = out(:);
 end

@@ -10,15 +10,14 @@
 clear; clc;
 
 fprintf('=========================================\n');
-fprintf('  SMP Unit Tests\n');
-fprintf('  %s\n', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
+fprintf(' Unit Tests\n');
+fprintf(' %s\n', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
 fprintf('=========================================\n\n');
 
 test_dir = fullfile(fileparts(mfilename('fullpath')), 'unit');
 
 suite   = testsuite(test_dir);
-runner  = testrunner('textoutput');
-results = runner.run(suite);
+results = runtests(test_dir);
 
 fprintf('\n=========================================\n');
 fprintf('  Results: %d passed, %d failed, %d incomplete\n', ...

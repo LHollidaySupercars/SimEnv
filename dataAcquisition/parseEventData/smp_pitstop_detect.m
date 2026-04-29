@@ -59,7 +59,7 @@ function stops = smp_pitstop_detect(SMP)
             % Slice laps
             laps = lap_slicer(session, struct());
 
-            if isempty(laps)
+                if isempty(laps)
                 fprintf('  No laps found — skipping\n');
                 stops.(tm){r} = [];
                 continue;

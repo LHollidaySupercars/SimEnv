@@ -28,7 +28,7 @@ function [laps, session, info] = smp_test_load_and_slice(team_folder, opts)
     fprintf('[test] Loading: %s\n', ld_path);
 
     % Load via motec_ld_reader
-    [session, info] = motec_ld_reader(ld_path);
+    session = motec_ld_reader(ld_path);
 
     % Slice laps
     slice_opts.min_lap_time = min_lt;

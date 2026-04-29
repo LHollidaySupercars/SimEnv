@@ -18,10 +18,7 @@ fprintf('  %s\n', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
 fprintf('=========================================\n\n');
 
 test_dir = fullfile(fileparts(mfilename('fullpath')), 'integration');
-
-suite   = testsuite(test_dir);
-runner  = testrunner('textoutput');
-results = runner.run(suite);
+results = runtests(test_dir);
 
 fprintf('\n=========================================\n');
 fprintf('  Results: %d passed, %d failed, %d incomplete\n', ...
@@ -32,4 +29,6 @@ fprintf('=========================================\n\n');
 
 if sum([results.Failed]) > 0
     disp(table(results));
+    exit(1)
 end
+exit(0)

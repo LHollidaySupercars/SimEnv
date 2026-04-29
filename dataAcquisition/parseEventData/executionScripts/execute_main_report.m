@@ -35,10 +35,10 @@ t_script = tic;
 %  SECTION 1: PATHS
 % =========================================================
 
-TOP_LEVEL_DIR     = 'E:\2026\04_RUA\_TeamData';
+TOP_LEVEL_DIR     = 'E:\2025\07_TAS\_TeamData';
 
 CHANNELS_FILE     = 'C:\SimEnv\dataAcquisition\Motec_MP\channels\channels.xlsx';
-EVENT_ALIAS_FILE  = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\eventAlias.xlsx';
+EVENT_ALIAS_FILE  = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\eventAlias2025.xlsx';
 DRIVER_ALIAS_FILE = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\driverAlias.xlsx';
 PLOT_CONFIG_FILES  = {'C:\SimEnv\dataAcquisition\Motec_MP\plottingRequest\plottingRequest_SystemsReport.xlsx','C:\SimEnv\dataAcquisition\Motec_MP\plottingRequest\plottingRequest_PerformanceReport.xlsx'};
 SEASON_FILE       = 'C:\SimEnv\trackDB\seasonOverview.xlsx';
@@ -49,14 +49,15 @@ OUTPUT_DIR        = 'C:\SimEnv\dataAcquisition\Motec_MP\plot\output';
 %% =========================================================
 %  SECTION 2: EVENT CONFIG
 % =========================================================
-EVENT                 = 'E04';
-TRACK                 = 'RUA';
-EVENT_NAME            = 'RUA';
-TEAM_FILTER           = {'T8R'};           % {} = all teams, e.g. {'T8R', 'WAU'}
-SESSION_FILTER        = {'Q13'};
+EVENT                 = 'E07';
+TRACK                 = 'TAS';
+EVENT_NAME            = 'TAS';
+TEAM_FILTER           = {};           % {} = all teams, e.g. {'T8R', 'WAU'}
+SESSION_FILTER        = {'Q22'};
 CREATE_PITSTOP_REPORT = false;
 workshop              = false;        % true = no session filter on stint grouping
 SAVE_CACHE            = false;
+PLOTTING              = false;
 %% =========================================================
 %  SECTION 3: PROCESSING + UPLOAD OPTIONS
 % =========================================================
@@ -73,7 +74,7 @@ KEEP_WORKERS_OPEN  = false;   % false = cmd /c (auto-close on success)
 
 % ---- VCH recompute options ----
 RUN_RECOMPUTE_VCH = false;     % true = rerun channel math on all cached groups
-RECOMPUTE_MODE    = 'serial';  % 'serial' | 'parallel'
+RECOMPUTE_MODE    = 'parallel';  % 'serial' | 'parallel'
 
 % ---- VCH debug plot (active when RUN_RECOMPUTE_VCH = true) ----
 VCH_DEBUG_PLOT = true;         % true = plot VCH channels after recompute for inspection
@@ -98,7 +99,7 @@ compile_opts.max_traces     = 4;
 compile_opts.dist_n_points  = 1000;
 compile_opts.dist_channel   = 'Odometer';
 compile_opts.verbose        = true;
-compile_opts.date_from      = datetime(2026, 4, 10);
+compile_opts.date_from      = datetime(2025, 4, 10);
 compile_opts.saveCache      = true;
 compile_opts.save_mode      = 'session';   % 'legacy' | 'session'
 compile_opts.session_filter = SESSION_FILTER;
@@ -125,7 +126,7 @@ compile_opts.channel_rules   = channel_rules;
 compile_opts.detect_pitlane  = true;          % enable pit entry/exit classification
 compile_opts.fcy_channel     = 'Sw_State_SC';    % Full Course Yellow flag channel
 T_gated = readtable(CHANNELS_FILE, 'Sheet', 'gatedChannels', 'TextType', 'char');
-
+compile_opts.beacon_check = true;
 %% =========================================================
 %  SECTION 5: COMPILE
 %  Run this cell when you have new/changed .ld files.
@@ -668,35 +669,35 @@ end
 %% =========================================================
 %  SECTION 8: PLOTS + POWERPOINT (per config file)
 % =========================================================
+if PLOTTING
+    if iscell(SESSION_FILTER)
+        session_str = strjoin(SESSION_FILTER, '_');
+    else
+        session_str = SESSION_FILTER;
+    end
+    team_str         = strjoin(TEAM_FILTER, '_');
+    base_report_name = sprintf('26VCS_%s%s_%s', EVENT, TRACK, session_str);
 
-if iscell(SESSION_FILTER)
-    session_str = strjoin(SESSION_FILTER, '_');
-else
-    session_str = SESSION_FILTER;
-end
-team_str         = strjoin(TEAM_FILTER, '_');
-base_report_name = sprintf('26VCS_%s%s_%s', EVENT, TRACK, session_str);
-
-if ischar(PLOT_CONFIG_FILES)
-    PLOT_CONFIG_FILES = {PLOT_CONFIG_FILES};
-end
-
-for k = 1:numel(PLOT_CONFIG_FILES)
-    fprintf('\n=== Report %d/%d: %s ===\n', k, numel(PLOT_CONFIG_FILES), PLOT_CONFIG_FILES{k});
-
-    plots    = smp_plot_config_load(PLOT_CONFIG_FILES{k});
-    holdFigs = smp_plot_from_config(SMP_filtered, plots, cfg, driver_map, plot_opts);
-
-    for i = 1:numel(holdFigs)
-        if ~isempty(holdFigs{i}), set(holdFigs{i}, 'Visible', 'off'); end
+    if ischar(PLOT_CONFIG_FILES)
+        PLOT_CONFIG_FILES = {PLOT_CONFIG_FILES};
     end
 
-    smp_generate_pptx_report(holdFigs, plots, PPTX_TEMPLATE, OUTPUT_DIR, ...
-                              base_report_name, PLOT_CONFIG_FILES{k}, ...
-                              SESSION_FILTER, TEAM_FILTER, TRACK);
-    close all;
-end
+    for k = 1:numel(PLOT_CONFIG_FILES)
+        fprintf('\n=== Report %d/%d: %s ===\n', k, numel(PLOT_CONFIG_FILES), PLOT_CONFIG_FILES{k});
 
+        plots    = smp_plot_config_load(PLOT_CONFIG_FILES{k});
+        holdFigs = smp_plot_from_config(SMP_filtered, plots, cfg, driver_map, plot_opts);
+
+        for i = 1:numel(holdFigs)
+            if ~isempty(holdFigs{i}), set(holdFigs{i}, 'Visible', 'off'); end
+        end
+
+        smp_generate_pptx_report(holdFigs, plots, PPTX_TEMPLATE, OUTPUT_DIR, ...
+                                  base_report_name, PLOT_CONFIG_FILES{k}, ...
+                                  SESSION_FILTER, TEAM_FILTER, TRACK);
+        close all;
+    end
+end
 %% =========================================================
 %  SECTION 9: UPLOAD TO SQL / POCKETBASE
 % =========================================================

@@ -1,0 +1,18 @@
+SQL
+
+	Set up a database in the data warehouse
+		Setup for BV 
+	Has the ability to scale
+	1. Microsoft Azure SQL-dw 
+		Self scaling
+	2. Cloud hosting environment (no extra cost)
+		Microsoft authentication
+	10 gb fibre at each server
+		Process data in the cloud
+		
+	mid range scale
+	Manage the data from VS cde
+	
+
+Tom is configuring me into the data base
+

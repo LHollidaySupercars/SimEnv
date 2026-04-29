@@ -44,8 +44,18 @@ function filtered = smp_apply_plot_filter(run_list, groups)
         if ~isempty(grp.drv)
             drv_hit = false(1, n_runs);
             for r = 1:n_runs
+                entry_driver = lower(run_list(r).driver);
+                entry_tla    = '';
+                if isfield(run_list(r), 'tla') && ~isempty(run_list(r).tla)
+                    entry_tla = lower(run_list(r).tla);
+                end
+                entry_car = '';
+                if isfield(run_list(r), 'car') && ~isempty(run_list(r).car)
+                    entry_car = lower(run_list(r).car);
+                end
                 drv_hit(r) = any(cellfun(@(v) ...
-                    contains(lower(run_list(r).driver), lower(v)), grp.drv));
+                    strcmpi(entry_tla, v)              || ...
+                    strcmpi(entry_car, v), grp.drv));
             end
             grp_mask = grp_mask & drv_hit;
         end

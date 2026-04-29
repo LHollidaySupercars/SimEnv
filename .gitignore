@@ -12,6 +12,7 @@ slprj/          # Simulink cache
 .DS_Store
 Thumbs.db
 desktop.ini
+~$*            # Windows Office lock files
 .vscode/settings.json
 
 # ── Output folders ──────────────────────────────────────

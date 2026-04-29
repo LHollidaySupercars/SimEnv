@@ -26,10 +26,10 @@ t_script = tic;
 
 TOP_LEVEL_DIR     = 'E:\2026\03_TAU\_TeamData';
 
-CHANNELS_FILE     = 'C:\SimEnv\dataAcquisition\Motec_MP\channels.xlsx';
-EVENT_ALIAS_FILE  = 'C:\SimEnv\dataAcquisition\Motec_MP\eventAlias.xlsx';
-DRIVER_ALIAS_FILE = 'C:\SimEnv\dataAcquisition\Motec_MP\driverAlias.xlsx';
-PLOT_CONFIG_FILE  = 'C:\SimEnv\dataAcquisition\Motec_MP\plottingRequest_BV_recreate.xlsx';
+CHANNELS_FILE     = 'C:\SimEnv\dataAcquisition\Motec_MP\channels\channels.xlsx';
+EVENT_ALIAS_FILE  = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\eventAlias.xlsx';
+DRIVER_ALIAS_FILE = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\driverAlias.xlsx';
+PLOT_CONFIG_FILE  = 'C:\SimEnv\dataAcquisition\Motec_MP\plottingRequest\plottingRequest_BV_recreate.xlsx';
 SEASON_FILE       = 'C:\SimEnv\trackDB\seasonOverview.xlsx';
 
 PPTX_TEMPLATE     = 'C:\SimEnv\dataAcquisition\Motec_MP\plot\templates\SuperCars_PPT.pptx';
@@ -44,7 +44,7 @@ OUTPUT_FILENAME   = 'TAU_Report';
 TRACK                 = 'TAU';
 EVENT_NAME            = 'TAU';
 TEAM_FILTER           = {};           % {} = all teams, e.g. {'T8R', 'WAU'}
-SESSION_FILTER        = {'FP1', 'FP2'};
+SESSION_FILTER        = {'F01', 'F02', 'Q08', 'Q09', 'R08', 'R09'};
 CREATE_PITSTOP_REPORT = false;
 
 %% =========================================================

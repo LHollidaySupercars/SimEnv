@@ -48,6 +48,7 @@ function T = smp_flatten_stats(cache, event_name)
         'min',           'min';
         'mean',          'mean';
         'mean_non_zero', 'mean_nz';
+        'change',        'change',;
     };
     n_ops = size(OPS, 1);
 

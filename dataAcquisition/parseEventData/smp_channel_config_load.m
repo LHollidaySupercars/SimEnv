@@ -1,108 +1,3 @@
-% function channels = smp_channel_config_load(filepath)
-% % SMP_CHANNEL_CONFIG_LOAD  Load the list of channels to extract from .ld files.
-% %
-% % Reads channels.xlsx which has a 1 or 0 next to each channel name.
-% % Only channels marked with 1 are returned.
-% %
-% % The following channels are ALWAYS included regardless of the check value,
-% % because they are required for lap slicing, lap time filtering, and
-% % distance interpolation:
-% %   Lap_Number, Lap_Time, Odometer
-% %
-% % Expected Excel columns (case-insensitive):
-% %   CHANNEL_NAME   - MoTeC channel name string
-% %   check          - 1 to include, 0 to exclude
-% %
-% % Usage:
-% %   channels = smp_channel_config_load('C:\...\channels.xlsx')
-% %
-% % Output:
-% %   channels  - cell array of channel name strings to extract
-% 
-%     ALWAYS_INCLUDE = {'Lap_Number', 'Lap_Time', 'Odometer'};
-% 
-%     if ~exist(filepath, 'file')
-%         error('smp_channel_config_load: File not found: %s', filepath);
-%     end
-% 
-%     fprintf('Loading channel config: %s\n', filepath);
-%     T = readtable(filepath);
-% 
-%     % ------------------------------------------------------------------
-%     %  Detect column names (case-insensitive)
-%     % ------------------------------------------------------------------
-%     cols = T.Properties.VariableNames;
-%     name_col  = find_col(cols, {'CHANNEL_NAME','Channel_Name','channel_name','ChannelName','Name','name'});
-%     check_col = find_col(cols, {'check','Check','CHECK','include','Include','INCLUDE'});
-% 
-%     if isempty(name_col)
-%         error('smp_channel_config_load: Cannot find channel name column. Found: %s', ...
-%             strjoin(cols, ', '));
-%     end
-%     if isempty(check_col)
-%         error('smp_channel_config_load: Cannot find check column. Found: %s', ...
-%             strjoin(cols, ', '));
-%     end
-% 
-%     % ------------------------------------------------------------------
-%     %  Extract enabled channels
-%     % ------------------------------------------------------------------
-%     channels = {};
-% 
-%     for i = 1:height(T)
-%         raw_name = strtrim(char(string(T.(name_col)(i))));
-%         if isempty(raw_name), continue; end
-% 
-%         check_val = T.(check_col)(i);
-%         if isnumeric(check_val)
-%             enabled = check_val == 1;
-%         elseif islogical(check_val)
-%             enabled = check_val;
-%         else
-%             % Handle string '1'/'0' or 'true'/'false'
-%             enabled = strcmpi(strtrim(char(string(check_val))), '1') || ...
-%                       strcmpi(strtrim(char(string(check_val))), 'true');
-%         end
-% 
-%         if enabled
-%             channels{end+1} = raw_name; %#ok
-%         end
-%     end
-% 
-%     % ------------------------------------------------------------------
-%     %  Always include mandatory channels (append if not already present)
-%     % ------------------------------------------------------------------
-%     for i = 1:numel(ALWAYS_INCLUDE)
-%         required = ALWAYS_INCLUDE{i};
-%         already_in = any(strcmpi(channels, required));
-%         if ~already_in
-%             channels{end+1} = required; %#ok
-%             fprintf('  [AUTO] Adding required channel: %s\n', required);
-%         end
-%     end
-% 
-%     channels = channels(:);   % ensure column cell array
-% 
-%     fprintf('  %d channel(s) selected for extraction.\n', numel(channels));
-%     for i = 1:numel(channels)
-%         fprintf('    %s\n', channels{i});
-%     end
-%     fprintf('\n');
-% end
-% 
-% 
-% % ======================================================================= %
-% function col = find_col(all_cols, candidates)
-%     col = '';
-%     for i = 1:numel(candidates)
-%         if ismember(candidates{i}, all_cols)
-%             col = candidates{i};
-%             return;
-%         end
-%     end
-% end
-
-
 function [channels, channel_rules] = smp_channel_config_load(filepath)
 % SMP_CHANNEL_CONFIG_LOAD  Load the list of channels to extract from .ld files.
 %
@@ -143,7 +38,7 @@ function [channels, channel_rules] = smp_channel_config_load(filepath)
     end
 
     fprintf('Loading channel config: %s\n', filepath);
-    T = readtable(filepath);
+    T = readtable(filepath, 'Sheet', 'channels');
 
     % ------------------------------------------------------------------
     %  Detect column names (case-insensitive)

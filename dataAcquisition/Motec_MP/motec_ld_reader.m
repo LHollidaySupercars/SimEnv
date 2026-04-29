@@ -103,6 +103,14 @@ function data = motec_ld_reader(filepath, channels_to_extract)
                 current_ptr = next_ptr;
                 continue;
             end
+            if ~ismember(lower(name_str), filter_channels) && ...
+               ~ismember(field_candidate, filter_channels)
+                fprintf('  [SKIP] %s  (field: %s)\n', name_str, field_candidate);
+                current_ptr = next_ptr;
+                continue;
+            else
+                fprintf('  [KEEP] %s\n', name_str);
+            end
         end
 
         % --- Read and scale data ---

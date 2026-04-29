@@ -1,0 +1,9 @@
+{
+  "name": "speed-trap-extractor",
+  "version": "1.0.0",
+  "description": "Pit lane speed trap PDF extractor for SMP timing pipeline",
+  "main": "extract_speed_trap.js",
+  "dependencies": {
+    "pdf-parse": "^1.1.1"
+  }
+}

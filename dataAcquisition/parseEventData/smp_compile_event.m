@@ -775,6 +775,8 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
     session_filter = get_opt(opts, 'session_filter',   {});
     detect_pitlane = get_opt(opts, 'detect_pitlane',   false);
     fcy_channel    = get_opt(opts, 'fcy_channel',      'FCY_Flag');
+    beacon_check   = get_opt(opts, 'beacon_check',     false);
+    beacon_check   = get_opt(opts, 'beacon_check',     false);
 
     % ------------------------------------------------------------------
     %  Lap time limits from season overview
@@ -896,7 +898,7 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
         cache = process_stream(cache, groups, channels_to_extract, ...
                                min_lt, max_lt, max_traces, dist_npts, ...
                                dist_ch, driver_map, verbose, channel_rules, ...
-                               detect_pitlane, fcy_channel);
+                               detect_pitlane, fcy_channel, beacon_check);
     else
         cache = process_bulk(cache, groups, channels_to_extract, verbose);
     end
@@ -923,16 +925,18 @@ end
 function cache = process_stream(cache, groups, channels_to_extract, ...
                                  min_lt, max_lt, max_traces, dist_npts, ...
                                  dist_ch, driver_map, verbose, channel_rules, ...
-                                 detect_pitlane, fcy_channel)
+                                 detect_pitlane, fcy_channel, beacon_check)
     if nargin < 11, channel_rules  = [];        end
     if nargin < 12, detect_pitlane = false;     end
     if nargin < 13, fcy_channel    = 'FCY_Flag'; end
+    if nargin < 14, beacon_check   = false;     end
     MYLAPS_CH_DEFAULT        = 'MyLaps X2TRA DeviceShortId';
     lap_opts.min_lap_time    = min_lt;
     lap_opts.max_lap_time    = max_lt;
     lap_opts.detect_pitlane  = detect_pitlane;
     lap_opts.fcy_channel     = fcy_channel;
     lap_opts.mylaps_channel  = MYLAPS_CH_DEFAULT;
+    lap_opts.beacon_check    = beacon_check;
     lap_opts.verbose         = false;
 
     dist_opts.distance_channel = dist_ch;
@@ -973,6 +977,7 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
 
         % ---- Lap slice ----
         try
+            lap_opts.beacon_check_label = sprintf('%s | %s', grp.driver, grp.session);
             laps = lap_slicer(session, lap_opts);
         catch ME
             fprintf('  [ERROR] lap_slicer: %s\n', ME.message);
@@ -1011,22 +1016,29 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
             continue;
         end
 
-        % ---- Select top-N laps by lap time ----
-        lap_times = [laps.lap_time];
-        [~, sort_idx] = sort(lap_times, 'ascend');
-        n_keep = min(max_traces, numel(laps));
-        top_idx = sort_idx(1:n_keep);
-        top_laps = laps(top_idx);
+        % ---- Select top-N laps by lap time (flying laps only) ----
+        flying_mask = strcmp({laps.lap_type}, 'flying');
+        flying_laps = laps(flying_mask);
+        if isempty(flying_laps)
+            fprintf('  [WARN] No flying laps found — skipping traces.\n');
+            traces = struct('lap_times', [], 'lap_numbers', [], 'n_traces', 0);
+        else
+            lap_times = [flying_laps.lap_time];
+            [~, sort_idx] = sort(lap_times, 'ascend');
+            n_keep   = min(max_traces, numel(flying_laps));
+            top_idx  = sort_idx(1:n_keep);
+            top_laps = flying_laps(top_idx);
 
-        fprintf('  Top %d lap times: %s s\n', n_keep, ...
-            strjoin(arrayfun(@(t) sprintf('%.2f', t), [top_laps.lap_time], ...
-                             'UniformOutput', false), '  '));
+            fprintf('  Top %d lap times: %s s\n', n_keep, ...
+                strjoin(arrayfun(@(t) sprintf('%.2f', t), [top_laps.lap_time], ...
+                                 'UniformOutput', false), '  '));
 
-        % ---- Package traces (lap_slicer already enriched .dist on all channels) ----
-        traces = package_traces(top_laps, channels_to_extract);
-        traces.lap_times   = [top_laps.lap_time];
-        traces.lap_numbers = [top_laps.lap_number];
-        traces.n_traces    = n_keep;
+            % ---- Package traces ----
+            traces = package_traces(top_laps, channels_to_extract);
+            traces.lap_times   = [top_laps.lap_time];
+            traces.lap_numbers = [top_laps.lap_number];
+            traces.n_traces    = n_keep;
+        end
 
         % ---- Store stats and traces under group key ----
         group_key = matlab.lang.makeValidName(grp.key);
@@ -1188,74 +1200,8 @@ function session = filter_channels(session, channels_to_extract)
     end
 end
 
-function merged = concat_sessions(sessions)
-% Concatenate a cell array of session structs along their time axes.
-% The time axis of each subsequent stint is offset to follow the previous.
-
-    merged = sessions{1};
-    ch_fields = fieldnames(merged);
-
-    for s = 2:numel(sessions)
-        s2 = sessions{s};
-
-        % Find time offset: end of last session
-        % Use first available channel time axis
-        t_offset = 0;
-        for c = 1:numel(ch_fields)
-            fn = ch_fields{c};
-            if isfield(merged, fn) && isfield(merged.(fn), 'time') && ...
-               ~isempty(merged.(fn).time)
-                t_offset = merged.(fn).time(end);
-                break;
-            end
-        end
-
-        % Add a small gap (1 sample period) to avoid exact duplicate timestamps
-        % Use median sample period of Lap_Number channel as reference
-        if isfield(merged, 'Lap_Number') && numel(merged.Lap_Number.time) > 1
-            dt_ref = median(diff(merged.Lap_Number.time));
-            t_offset = t_offset + dt_ref;
-        else
-            t_offset = t_offset + 0.02;   % 50Hz default gap
-        end
-        % Trim overlap from s2: MoTeC splits files mid-lap, so each file
-        % starts by repeating the lap number that was in progress at the
-        % split point.  We keep the split lap owned by merged (earlier file)
-        % and strip any samples from s2 that belong to laps already present.
-        % Lap -1 (init) and -2 (race pre-grid) are excluded from the max so
-        % they don't pollute the comparison.
-        if isfield(merged, 'Lap_Number') && isfield(s2, 'Lap_Number')
-            merged_ln  = round(merged.Lap_Number.data);
-            ln_max     = max(merged_ln(merged_ln >= 0));
-            if isnan(ln_max), ln_max = 0; end
-            s2_ln      = round(s2.Lap_Number.data);
-            first_new  = find(s2_ln > ln_max, 1, 'first');
-            if isempty(first_new)
-                % s2 contains no laps beyond what merged already has — skip
-                continue;
-            end
-            trim_t = s2.Lap_Number.time(first_new);
-            % Trim every channel in s2 to start at trim_t
-            s2_fields = fieldnames(s2);
-            for tf = 1:numel(s2_fields)
-                fn2 = s2_fields{tf};
-                if isfield(s2.(fn2), 'time') && ~isempty(s2.(fn2).time)
-                    keep2 = s2.(fn2).time >= trim_t;
-                    s2.(fn2).data = s2.(fn2).data(keep2);
-                    s2.(fn2).time = s2.(fn2).time(keep2);
-                end
-            end
-        end
-        % Concatenate each channel
-        for c = 1:numel(ch_fields)
-            fn = ch_fields{c};
-            if ~isfield(s2, fn), continue; end
-
-            merged.(fn).data = [merged.(fn).data(:); s2.(fn).data(:)];
-            merged.(fn).time = [merged.(fn).time(:); s2.(fn).time(:) + t_offset];
-        end
-    end
-end
+% concat_sessions is defined in concat_sessions.m (parseEventData/).
+% Extracted to a top-level function file so it can be unit-tested directly.
 
 
 % ======================================================================= %
