@@ -61,6 +61,7 @@ compile_opts.date_from     = datetime(2026, 2, 20);
 compile_opts.saveCache     = true;
 compile_opts.save_mode     = 'session';   % 'legacy' or 'session'
 compile_opts.session_filter = SESSION_FILTER;
+compile_opts.uniqueFingerprint = true;    % skip duplicate/superset stints
 
 plot_opts.fig_width     = 1200;
 plot_opts.fig_height    = 650;

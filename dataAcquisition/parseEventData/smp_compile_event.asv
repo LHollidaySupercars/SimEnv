@@ -1,4 +1,4 @@
-﻿% function cache = smp_compile_event(top_level_dir, team_filter, ...
+% function cache = smp_compile_event(top_level_dir, team_filter, ...
 %                                     channels_to_extract, season, ...
 %                                     driver_map, alias, opts)
 % % SMP_COMPILE_EVENT  Scan, load, process and cache .ld files for an event.
@@ -776,7 +776,6 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
     detect_pitlane = get_opt(opts, 'detect_pitlane',   false);
     fcy_channel    = get_opt(opts, 'fcy_channel',      'FCY_Flag');
     br2_channel    = get_opt(opts, 'br2_channel',      'BR2_Beacon_Number');
-    br2_protocol   = get_opt(opts, 'br2_protocol',     'standard');
     beacon_check   = get_opt(opts, 'beacon_check',     false);
     unique_fp      = get_opt(opts, 'uniqueFingerprint', false);
     show_report    = get_opt(opts, 'showConcatReport',  false);
@@ -903,7 +902,6 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
                                min_lt, max_lt, max_traces, dist_npts, ...
                                dist_ch, driver_map, verbose, channel_rules, ...
                                detect_pitlane, fcy_channel, ...
-                               br2_channel, br2_protocol, ...
                                unique_fp, show_report, concat_csv_dir);
     else
         cache = process_bulk(cache, groups, channels_to_extract, verbose);
@@ -932,23 +930,18 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
                                  min_lt, max_lt, max_traces, dist_npts, ...
                                  dist_ch, driver_map, verbose, channel_rules, ...
                                  detect_pitlane, fcy_channel, ...
-                                 br2_channel, br2_protocol, ...
                                  unique_fp, show_report, concat_csv_dir)
-    if nargin < 11, channel_rules  = [];                  end
-    if nargin < 12, detect_pitlane = false;               end
-    if nargin < 13, fcy_channel    = 'FCY_Flag';          end
-    if nargin < 14, br2_channel    = 'BR2_Beacon_Number'; end
-    if nargin < 15, br2_protocol   = 'standard';          end
-    if nargin < 16, unique_fp      = false;               end
-    if nargin < 17, show_report    = false;               end
-    if nargin < 18, concat_csv_dir = '';                  end
+    if nargin < 11, channel_rules  = [];        end
+    if nargin < 12, detect_pitlane = false;     end
+    if nargin < 13, fcy_channel    = 'FCY_Flag'; end
+    if nargin < 14, unique_fp      = false;     end
+    if nargin < 15, show_report    = false;     end
+    if nargin < 16, concat_csv_dir = '';        end
     MYLAPS_CH_DEFAULT        = 'MyLaps X2TRA DeviceShortId';
     lap_opts.min_lap_time    = min_lt;
     lap_opts.max_lap_time    = max_lt;
     lap_opts.detect_pitlane  = detect_pitlane;
     lap_opts.fcy_channel     = fcy_channel;
-    lap_opts.br2_channel     = br2_channel;
-    lap_opts.br2_protocol    = br2_protocol;
     lap_opts.mylaps_channel  = MYLAPS_CH_DEFAULT;
     lap_opts.verbose         = false;
 
@@ -974,9 +967,6 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
         if ~isempty(fcy_channel)
             required_ch{end+1} = fcy_channel;
         end
-        if ~isempty(br2_channel)
-            required_ch{end+1} = br2_channel;
-        end
         ch_extract_full = unique([channels_to_extract(:); required_ch(:)]);
         try
             session = load_and_concat(grp.files, ch_extract_full, verbose);
@@ -994,10 +984,6 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
         % ---- Lap slice ----
         try
             opts.beacon_check       = true;
-%             opts                    = struct();
-opts.beacon_check       = true;
-opts.beacon_check_label = 'debug session';
-opts.verbose            = true;
             laps = lap_slicer(session, lap_opts);
         catch ME
             fprintf('  [ERROR] lap_slicer: %s\n', ME.message);

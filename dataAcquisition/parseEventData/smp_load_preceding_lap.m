@@ -64,12 +64,15 @@ function [preceding_lap, success] = smp_load_preceding_lap(cache, group_key, lap
     %  Channels to extract (keep minimal for speed)
     % ------------------------------------------------------------------
     channels_needed = {'Throttle_Pedal', 'Ground_Speed', 'Brake_Pressure_Front', ...
-                       'Odometer', 'Lap_Number', 'Lap_Distance'};
+                       'Odometer', 'Lap_Number', 'Lap_Distance', ...
+                       'MyLaps X2TRA DeviceShortId', 'BR2_Beacon_Number'};
 
     % Wide time limits — we want outlaps/inlaps too, not just flying laps
-    lap_opts.min_lap_time = 5;
-    lap_opts.max_lap_time = 3600;
-    lap_opts.verbose      = false;
+    lap_opts.min_lap_time    = 5;
+    lap_opts.max_lap_time    = 3600;
+    lap_opts.detect_pitlane  = true;
+    lap_opts.br2_channel     = 'BR2_Beacon_Number';
+    lap_opts.verbose         = false;
 
     % ------------------------------------------------------------------
     %  Try each .ld file — preceding lap may be in a different stint file

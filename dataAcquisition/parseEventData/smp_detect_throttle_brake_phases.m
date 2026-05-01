@@ -41,9 +41,16 @@ if isempty(distance)
 end
 distance = distance(:);
 
+if numel(distance) < 2
+    error('Distance channel has fewer than 2 samples — lap slice may be corrupt or too short to analyse.');
+end
+
 % --- Align throttle onto distance axis ---
 if ~isfield(lap.channels, 'Throttle_Pedal')
     warning('Lap missing Throttle_Pedal channel - using zero throttle');
+    throttle = zeros(size(distance));
+elseif numel(lap.channels.Throttle_Pedal.dist) < 2
+    warning('Throttle_Pedal channel has fewer than 2 samples after lap slice - using zero throttle');
     throttle = zeros(size(distance));
 else
     throttle = interp1(lap.channels.Throttle_Pedal.dist(:), ...
@@ -54,6 +61,9 @@ end
 % --- Align brake onto distance axis ---
 if ~isfield(lap.channels, 'Brake_Pressure_Front')
     warning('Lap missing Brake_Pressure_Front channel - using zero brake');
+    brake = zeros(size(distance));
+elseif numel(lap.channels.Brake_Pressure_Front.dist) < 2
+    warning('Brake_Pressure_Front channel has fewer than 2 samples after lap slice - using zero brake');
     brake = zeros(size(distance));
 else
     brake = interp1(lap.channels.Brake_Pressure_Front.dist(:), ...

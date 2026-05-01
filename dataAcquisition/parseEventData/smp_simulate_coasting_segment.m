@@ -66,8 +66,15 @@ v_safe   = max(speed_ms, 0.5);   % avoid div/0 at standstill
 time_arr = cumsum(dd ./ v_safe);
 
 %% --- 3. Find peak speed in sector & set coasting start -----------------
-% Peak speed = highest point in [distance_start, distance_end]
-seg_mask = distance >= segment.distance_start & distance <= segment.distance_end;
+% Peak speed = highest point in [distance_start, brake_marker].
+% Using brake_marker (not distance_end) prevents picking a secondary peak
+% after the first braking zone when a segment contains multiple corners.
+seg_upper = segment.brake_marker;
+seg_mask = distance >= segment.distance_start & distance <= seg_upper;
+if ~any(seg_mask)
+    % Fall back to full segment if brake_marker produces no samples
+    seg_mask = distance >= segment.distance_start & distance <= segment.distance_end;
+end
 if ~any(seg_mask)
     error('COAST_FAIL:noseg', 'No distance samples found within segment bounds.');
 end
@@ -95,18 +102,11 @@ v0_ms = interp1(distance, speed_ms, d_coast_start, 'pchip');
 % Coasting continues past d_peak_speed into the braking zone.
 % We search up to the local speed minimum after the peak (the corner apex),
 % not just to segment.distance_end which can be mid-braking zone.
-post_peak  = distance > d_peak_speed;
-pk_dist    = distance(post_peak);
-pk_spd     = speed_ms(post_peak);
-spd_diff   = diff(pk_spd);
-min_rel    = find(spd_diff >= 0, 1);   % first non-decreasing = local min
-if ~isempty(min_rel) && min_rel > 1
-    d_seg_end = pk_dist(min_rel);
-else
-    d_seg_end = segment.distance_end;
-end
-% Safety cap: don't search more than 600 m past the peak
-d_seg_end = min(d_seg_end, d_peak_speed + 600);
+% Search to segment end — the rejoin is wherever the hard-braking original
+% trace drops back below the coasting trace, which can be well into the
+% braking zone (up to segment.distance_end).
+% Safety cap: don't search more than 600 m past the peak.
+d_seg_end = min(segment.distance_end, d_peak_speed + 600);
 n_fine    = 8000;
 d_fine    = linspace(d_coast_start, d_seg_end, n_fine)';
 s_fine    = d_fine - d_coast_start;

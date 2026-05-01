@@ -1,4 +1,4 @@
-function LiftAndCoast(event, varargin)
+﻿function LiftAndCoast(event, varargin)
 % LIFTANDCOAST  Lift-and-coast analysis for a given event
 %
 % USAGE:
@@ -27,6 +27,11 @@ function LiftAndCoast(event, varargin)
 %                            For each target, finds the most time-efficient
 %                            combination and plots the full lap speed trace.
 %                            Empty = disabled.                        [default: []]
+%   compile        (logical) Run smp_compile_event on cache_dir before analysis.
+%                            Requires config files at hardcoded paths matching
+%                            execute_main_report. Default: false.
+%   concat_csv_dir (string)  Folder for concat_report CSV (passed to compile).
+%                            Empty = skip CSV.                        [default: '']
 %   visible        (logical) Show plots on screen.
 %                            false = all figures saved to disk only.  [default: true]
 
@@ -45,6 +50,10 @@ addParameter(p, 'run_diagnostic',false,                 @islogical);
 addParameter(p, 'time_budget',   NaN,                   @(x) isnumeric(x) && isscalar(x));
 addParameter(p, 'fuel_targets',  [],                    @isnumeric);
 addParameter(p, 'visible',       true,                  @islogical);
+addParameter(p, 'debug',         false,                 @islogical);
+addParameter(p, 'compile',       false,                 @islogical);
+addParameter(p, 'concat_csv_dir','',                    @ischar);
+addParameter(p, 'br2_protocol', 'standard',             @ischar);
 parse(p, event, varargin{:});
 
 r              = p.Results;
@@ -60,6 +69,10 @@ run_diagnostic = r.run_diagnostic;
 time_budget    = r.time_budget;
 fuel_targets   = r.fuel_targets;
 visible        = r.visible;
+debug          = r.debug;
+run_compile    = r.compile;
+concat_csv_dir = r.concat_csv_dir;
+br2_protocol   = r.br2_protocol;
 
 %% BUILD PATHS FROM EVENT + YEAR
 base_path  = fullfile('E:\', num2str(year_val), event);
@@ -91,13 +104,54 @@ fprintf('  Driver:      %s\n', ifelse(isempty(driver_tla), '(global fastest)', d
 fprintf('  Accel:       %.2f m/s²\n', accel);
 fprintf('  Fuel Rate:   %.4f kg/s\n', fuel_rate);
 fprintf('  Auto-Detect: %s\n', ifelse(auto_detect, 'Yes', 'No'));
-fprintf('  Plots:       %s\n\n', ifelse(visible, 'on screen', 'save to disk only'));
+fprintf('  Plots:       %s\n', ifelse(visible, 'on screen', 'save to disk only'));
+fprintf('  Debug:       %s\n\n', ifelse(debug, 'on', 'off'));
 
 %% OPTIONAL: Run diagnostic
 if run_diagnostic
     fprintf('\n>>> Running cache diagnostic...\n\n');
     smp_cache_inspect(cache_dir, session_id);
     fprintf('\n>>> Diagnostic complete. Continuing with analysis...\n\n');
+end
+
+%% OPTIONAL: Compile .ld files
+if run_compile
+    fprintf('\n>>> Running smp_compile_event...\n\n');
+    CHANNELS_FILE_LC      = 'C:\SimEnv\dataAcquisition\Motec_MP\channels\channels.xlsx';
+    EVENT_ALIAS_FILE_LC   = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\eventAlias2025.xlsx';
+    DRIVER_ALIAS_FILE_LC  = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\driverAlias.xlsx';
+    SEASON_FILE_LC        = 'C:\SimEnv\trackDB\seasonOverview.xlsx';
+
+    % Delete existing session cache file so smp_cache_diff sees the
+    % files as new and performs a full recompile (needed when an old
+    % cache exists but was built without traces).
+    sess_safe     = matlab.lang.makeValidName(session_id);
+    old_cache_pat = fullfile(cache_dir, sprintf('smp_cache_%s.mat', sess_safe));
+    if exist(old_cache_pat, 'file')
+        fprintf('  Removing stale cache: %s\n', old_cache_pat);
+        delete(old_cache_pat);
+    end
+
+    season_lc                   = smp_season_load(SEASON_FILE_LC);
+    [channels_lc, ch_rules_lc]  = smp_channel_config_load(CHANNELS_FILE_LC);
+    alias_lc                    = smp_alias_load(EVENT_ALIAS_FILE_LC);
+    driver_map_lc               = smp_driver_alias_load(DRIVER_ALIAS_FILE_LC);
+
+    c_opts = struct();
+    c_opts.mode             = 'stream';
+    c_opts.verbose          = true;
+    c_opts.saveCache        = true;
+    c_opts.save_mode        = 'session';
+    c_opts.session_filter   = {session_id};
+    c_opts.uniqueFingerprint= true;
+    c_opts.showConcatReport = true;
+    c_opts.concat_csv_dir   = concat_csv_dir;
+    c_opts.channel_rules    = ch_rules_lc;
+    c_opts.detect_pitlane   = true;
+    c_opts.br2_protocol     = br2_protocol;
+
+    smp_compile_event(cache_dir, {}, channels_lc, season_lc, driver_map_lc, alias_lc, c_opts);
+    fprintf('\n>>> Compile complete.\n\n');
 end
 
 %% RUN ANALYSIS
@@ -111,7 +165,8 @@ try
         'fuel_rate',  fuel_rate, ...
         'auto_detect',auto_detect, ...
         'config_file',config_file, ...
-        'rerun',      rerun);
+        'rerun',      rerun, ...
+        'debug',      debug);
 
     %% PRINT RESULTS SUMMARY
     fprintf('\n');
@@ -204,6 +259,7 @@ catch ME
 end
 
 end
+
 
 %% Helper: inline if-else
 function result = ifelse(condition, true_val, false_val)

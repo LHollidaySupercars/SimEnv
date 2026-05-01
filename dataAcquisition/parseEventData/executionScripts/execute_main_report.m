@@ -35,7 +35,7 @@ t_script = tic;
 %  SECTION 1: PATHS
 % =========================================================
 
-TOP_LEVEL_DIR     = 'E:\2025\07_TAS\_TeamData';
+TOP_LEVEL_DIR     = 'E:\2025\04_TAS\_TeamData';
 
 CHANNELS_FILE     = 'C:\SimEnv\dataAcquisition\Motec_MP\channels\channels.xlsx';
 EVENT_ALIAS_FILE  = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\eventAlias2025.xlsx';
@@ -49,14 +49,14 @@ OUTPUT_DIR        = 'C:\SimEnv\dataAcquisition\Motec_MP\plot\output';
 %% =========================================================
 %  SECTION 2: EVENT CONFIG
 % =========================================================
-EVENT                 = 'E07';
+EVENT                 = 'E04';
 TRACK                 = 'TAS';
 EVENT_NAME            = 'TAS';
 TEAM_FILTER           = {};           % {} = all teams, e.g. {'T8R', 'WAU'}
-SESSION_FILTER        = {'Q22'};
+SESSION_FILTER        = {'R13'};
 CREATE_PITSTOP_REPORT = false;
 workshop              = false;        % true = no session filter on stint grouping
-SAVE_CACHE            = false;
+SAVE_CACHE            = true;
 PLOTTING              = false;
 %% =========================================================
 %  SECTION 3: PROCESSING + UPLOAD OPTIONS
@@ -103,6 +103,10 @@ compile_opts.date_from      = datetime(2025, 4, 10);
 compile_opts.saveCache      = true;
 compile_opts.save_mode      = 'session';   % 'legacy' | 'session'
 compile_opts.session_filter = SESSION_FILTER;
+compile_opts.concat_csv_dir = OUTPUT_DIR;  % '' = skip CSV; non-empty = save concat report here
+compile_opts.showConcatReport = true;      % pop-up summary after each multi-file session group
+compile_opts.br2_channel    = 'BR2_Beacon_Number';
+compile_opts.br2_protocol   = 'TAS2025';  % 'standard' | 'TAS2025'
 
 % ---- Plot options ----
 plot_opts.fig_width     = 1200;

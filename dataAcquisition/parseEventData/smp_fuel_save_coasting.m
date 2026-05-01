@@ -74,6 +74,7 @@ addParameter(p, 'fuel_rate',  0.01, @isnumeric);
 addParameter(p, 'output_dir', './fuel_save_output', @ischar);
 addParameter(p, 'auto_detect', true, @islogical);
 addParameter(p, 'rerun',       false, @islogical);  % skip plot + reuse Excel if it exists
+addParameter(p, 'debug',       false, @islogical);  % show all laps + prompt for lap override
 parse(p, varargin{:});
 
 params = p.Results;
@@ -120,12 +121,45 @@ fprintf('  Trace groups available: %d\n', length(fieldnames(cache.traces)));
 
 % Step 2: Select fastest lap
 fprintf('\n[2/7] Selecting fastest lap...\n');
+
+if params.debug
+    all_laps = collect_all_laps(cache);
+    fprintf('\n[DEBUG] All available laps:\n');
+    fprintf('  %-5s  %-22s  %-6s  %-10s  %s\n', 'Entry', 'Group', 'LapIdx', 'Time (s)', 'Type');
+    fprintf('  %s\n', repmat('-', 1, 60));
+    for k = 1:numel(all_laps)
+        fprintf('  [%3d]  %-22s  %-6d  %-10.3f  %s\n', k, ...
+            all_laps(k).group_key, all_laps(k).lap_idx, ...
+            all_laps(k).lap_time,  all_laps(k).lap_type);
+    end
+    fprintf('\n');
+end
+
 try
     [lap, group_key, lap_idx] = smp_select_fastest_lap(cache, params.driver_tla);
     fprintf('Selected lap %d from group ''%s'' (time: %.2f s)\n', lap_idx, group_key, lap.lap_time);
 catch ME
     fprintf('\nERROR: Failed to select fastest lap: %s\n\n', ME.message);
     rethrow(ME);
+end
+
+if params.debug
+    auto_entry = find(strcmp({all_laps.group_key}, group_key) & [all_laps.lap_idx] == lap_idx, 1);
+    fprintf('[DEBUG] Auto-selected entry [%d] — Lap %d from ''%s'' (%.3f s)\n', ...
+        auto_entry, lap_idx, group_key, lap.lap_time);
+    str = input('[DEBUG] Enter entry number to use a different lap, or press Enter to accept: ', 's');
+    str = strtrim(str);
+    if ~isempty(str)
+        entry_num = round(str2double(str));
+        if ~isnan(entry_num) && entry_num >= 1 && entry_num <= numel(all_laps)
+            group_key = all_laps(entry_num).group_key;
+            lap_idx   = all_laps(entry_num).lap_idx;
+            lap       = smp_reconstruct_lap_from_cache(cache, group_key, lap_idx);
+            fprintf('[DEBUG] Using Lap %d from ''%s'' (%.3f s)\n', lap_idx, group_key, lap.lap_time);
+        else
+            fprintf('[DEBUG] Invalid entry — keeping auto-selected lap.\n');
+        end
+    end
 end
 
 % Step 2b: Load preceding lap for main-straight segment detection
@@ -319,21 +353,27 @@ function [lap, group_key, lap_idx] = smp_select_fastest_lap(cache, driver_tla)
         best_time = inf;
         best_group = '';
         best_idx = 0;
-        
+
         groups = fieldnames(cache.traces);
         for g = 1:length(groups)
             gk = groups{g};
             times = cache.traces.(gk).lap_times;
-            [t_best, idx_best] = min(times);
+            [t_best, idx_best] = pick_fastest_flying(times, cache.traces.(gk));
             if t_best < best_time
-                best_time = t_best;
+                best_time  = t_best;
                 best_group = gk;
-                best_idx = idx_best;
+                best_idx   = idx_best;
             end
         end
-        
+
+        if best_idx == 0
+            error(['No cached lap traces found. The cache was likely compiled without ' ...
+                   'flying-lap detection.\nRerun with compile=true and detect_pitlane enabled, ' ...
+                   'or use ''debug'',true to manually select a lap.']);
+        end
+
         group_key = best_group;
-        lap_idx = best_idx;
+        lap_idx   = best_idx;
     else
         % Find by driver TLA: search for group containing driver_tla
         groups = fieldnames(cache.traces);
@@ -342,9 +382,8 @@ function [lap, group_key, lap_idx] = smp_select_fastest_lap(cache, driver_tla)
             gk = groups{g};
             if contains(gk, driver_tla, 'IgnoreCase', true)
                 times = cache.traces.(gk).lap_times;
-                [~, idx_best] = min(times);
+                [~, lap_idx] = pick_fastest_flying(times, cache.traces.(gk));
                 group_key = gk;
-                lap_idx = idx_best;
                 found = true;
                 break;
             end
@@ -352,10 +391,51 @@ function [lap, group_key, lap_idx] = smp_select_fastest_lap(cache, driver_tla)
         if ~found
             error('Driver TLA ''%s'' not found in cache', driver_tla);
         end
+        if lap_idx == 0
+            error(['No cached lap traces found for driver ''%s''.\n' ...
+                   'Cache was likely compiled without detect_pitlane — all laps have lap_type='''' ' ...
+                   'so none qualify as flying.\nRerun with compile=true and detect_pitlane enabled.'], ...
+                   driver_tla);
+        end
     end
-    
+
     % Reconstruct lap struct from cache traces
     lap = smp_reconstruct_lap_from_cache(cache, group_key, lap_idx);
+end
+
+%% Helper: pick fastest flying lap index; falls back to fastest overall
+function [t_best, idx_best] = pick_fastest_flying(times, grp_traces)
+    % No traces stored for this group (e.g. compiled without flying laps)
+    if isempty(times)
+        t_best   = inf;
+        idx_best = 0;
+        return;
+    end
+    % Prefer flying laps when lap_types is stored in the cache
+    if isfield(grp_traces, 'lap_types') && ~isempty(grp_traces.lap_types)
+        flying_mask = strcmp(grp_traces.lap_types, 'flying');
+        if any(flying_mask)
+            flying_times = times;
+            flying_times(~flying_mask) = inf;
+            flying_times(times <= 0)   = inf;  % exclude invalid
+            [t_best, idx_best] = min(flying_times);
+            return;
+        end
+        % lap_types present but no flying laps — warn and fall back
+        fprintf('  [WARN] No flying laps in cache for this group — falling back to fastest overall.\n');
+    else
+        % Old cache without lap_types — fall back silently
+        fprintf('  [INFO] lap_types not in cache (old compile) — using fastest lap overall. Recompile to enable flying-lap filtering.\n');
+    end
+    valid_mask = times > 0;
+    if ~any(valid_mask)
+        t_best   = inf;
+        idx_best = 0;
+        return;
+    end
+    valid_times = times;
+    valid_times(~valid_mask) = inf;
+    [t_best, idx_best] = min(valid_times);
 end
 
 %% Helper: Reconstruct lap from cache
@@ -447,5 +527,29 @@ function lap = smp_reconstruct_lap_from_cache(cache, group_key, lap_idx)
     
     if channels_loaded < 2
         error('Too few channels loaded (%d). Cache structure may be invalid.', channels_loaded);
+    end
+end
+
+%% Helper: collect all laps from cache into a flat struct array
+function all_laps = collect_all_laps(cache)
+    groups   = fieldnames(cache.traces);
+    all_laps = struct('group_key', {}, 'lap_idx', {}, 'lap_time', {}, 'lap_type', {});
+    for g = 1:numel(groups)
+        gk  = groups{g};
+        grp = cache.traces.(gk);
+        times     = grp.lap_times;
+        has_types = isfield(grp, 'lap_types') && ~isempty(grp.lap_types);
+        for k = 1:numel(times)
+            if has_types && k <= numel(grp.lap_types)
+                lt = grp.lap_types{k};
+            else
+                lt = '?';
+            end
+            entry.group_key = gk;
+            entry.lap_idx   = k;
+            entry.lap_time  = times(k);
+            entry.lap_type  = lt;
+            all_laps(end+1) = entry;  %#ok<AGROW>
+        end
     end
 end

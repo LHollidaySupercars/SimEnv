@@ -1,7 +1,8 @@
 % debug_br2_detection.m
 % Standalone BR2 Mode B detection debugger.
 %
-% 1. Loads c:\SimEnv\debug_session.mat (auto-discovers session variable).
+% 1. Finds a .ld run from the SMP cache matching SESSION_ID (+ optional
+%    DRIVER_TLA / CAR_NUMBER filter), then loads it via motec_ld_reader.
 % 2. Runs Pass 1 (S/F + pit-in) and Pass 2 (garage runs) inline,
 %    printing a diagnostic table of every 999-run decision.
 % 3. Calls lap_slicer(session, opts) with beacon_check=true to generate
@@ -10,36 +11,109 @@
 clear; clc;
 
 % -----------------------------------------------------------------------
-% Add path to lap_slicer
+% CONFIGURATION — set these before running
+% -----------------------------------------------------------------------
+CACHE_DIR  = 'E:\2025\04_TAS\_TeamData';  % folder containing smp_cache*.mat
+SESSION_ID = 'Q12';                        % session name, e.g. 'Q13', 'RA1'
+DRIVER_TLA = 'Will_Brown';    % driver TLA filter, e.g. 'JAC' — '' = first run found
+CAR_NUMBER = '';    % car number filter, e.g. '8'   — '' = ignored
+% -----------------------------------------------------------------------
+
+% -----------------------------------------------------------------------
+% Add paths
 % -----------------------------------------------------------------------
 script_dir = fileparts(mfilename('fullpath'));
 addpath(fullfile(script_dir, '..', '..', 'dataAcquisition', 'parseEventData'));
+addpath(fullfile(script_dir, '..', '..', 'dataAcquisition', 'Motec_MP'));
 
 % -----------------------------------------------------------------------
-% Load debug_session.mat — discover session variable
+% Load cache and find the target .ld file
 % -----------------------------------------------------------------------
-MAT_PATH = 'c:\SimEnv\debug_session.mat';
-fprintf('Loading %s ...\n', MAT_PATH);
-S = load(MAT_PATH);
-vars = fieldnames(S);
+fprintf('Loading cache from: %s\n', CACHE_DIR);
+cache = smp_cache_load(CACHE_DIR, {SESSION_ID});
 
-session = [];
-session_var_name = '';
-for vi = 1:numel(vars)
-    v = S.(vars{vi});
-    if isstruct(v) && ~isempty(fieldnames(v))
-        f = fieldnames(v);
-        if isstruct(v.(f{1})) && isfield(v.(f{1}), 'data') && isfield(v.(f{1}), 'time')
-            session = v;
-            session_var_name = vars{vi};
-            break;
-        end
+% If cache is empty, compile the session first
+if height(cache.manifest) == 0
+    fprintf('[INFO] No cache found — compiling session ''%s''...\n\n', SESSION_ID);
+
+    CHANNELS_FILE  = 'C:\SimEnv\dataAcquisition\Motec_MP\channels\channels.xlsx';
+    EVENT_ALIAS    = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\eventAlias2025.xlsx';
+    DRIVER_ALIAS   = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\driverAlias.xlsx';
+    SEASON_FILE    = 'C:\SimEnv\trackDB\seasonOverview.xlsx';
+
+    season_s                = smp_season_load(SEASON_FILE);
+    [channels_s, ch_rules]  = smp_channel_config_load(CHANNELS_FILE);
+    alias_s                 = smp_alias_load(EVENT_ALIAS);
+    driver_map_s            = smp_driver_alias_load(DRIVER_ALIAS);
+
+    c_opts = struct();
+    c_opts.mode             = 'stream';
+    c_opts.verbose          = true;
+    c_opts.saveCache        = true;
+    c_opts.save_mode        = 'session';
+    c_opts.session_filter   = {SESSION_ID};
+    c_opts.uniqueFingerprint= true;
+    c_opts.channel_rules    = ch_rules;
+    c_opts.detect_pitlane   = true;
+
+    cache = smp_compile_event(CACHE_DIR, {}, channels_s, season_s, driver_map_s, alias_s, c_opts);
+    fprintf('\n>>> Compile complete.\n\n');
+end
+
+T = cache.manifest;
+if height(T) == 0
+    error('Cache is empty or session ''%s'' not found in %s.', SESSION_ID, CACHE_DIR);
+end
+
+% Filter by session
+sess_mask = strcmpi(string(T.Session), SESSION_ID);
+T = T(sess_mask, :);
+if height(T) == 0
+    available = unique(string(cache.manifest.Session));
+    error('Session ''%s'' not found.\nAvailable: %s', SESSION_ID, strjoin(available, ', '));
+end
+
+% Optional driver filter
+if ~isempty(DRIVER_TLA)
+    drv_mask = strcmpi(string(T.Driver), DRIVER_TLA);
+    if ~any(drv_mask)
+        available = unique(string(T.Driver));
+        error('Driver ''%s'' not found in session ''%s''.\nAvailable: %s', ...
+            DRIVER_TLA, SESSION_ID, strjoin(available, ', '));
     end
+    T = T(drv_mask, :);
 end
-if isempty(session)
-    error('No session struct found in %s.\nVariables present: %s', MAT_PATH, strjoin(vars, ', '));
+
+% Optional car number filter
+if ~isempty(CAR_NUMBER)
+    car_mask = strcmpi(string(T.CarNumber), CAR_NUMBER);
+    if ~any(car_mask)
+        available = unique(string(T.CarNumber));
+        error('Car #%s not found in session ''%s''.\nAvailable: %s', ...
+            CAR_NUMBER, SESSION_ID, strjoin(available, ', '));
+    end
+    T = T(car_mask, :);
 end
-fprintf('Session variable : ''%s''  (%d channels)\n\n', session_var_name, numel(fieldnames(session)));
+
+% Pick first matching run
+ld_path = char(T.Path(1));
+driver  = strtrim(char(string(T.Driver(1))));
+car_num = strtrim(char(string(T.CarNumber(1))));
+
+fprintf('Session   : %s\n', SESSION_ID);
+fprintf('Driver    : %s  |  Car: %s\n', driver, car_num);
+fprintf('File      : %s\n', ld_path);
+if height(T) > 1
+    fprintf('[INFO] %d runs matched — using first. Set DRIVER_TLA/CAR_NUMBER to narrow down.\n', height(T));
+end
+fprintf('\n');
+
+% -----------------------------------------------------------------------
+% Load .ld file
+% -----------------------------------------------------------------------
+fprintf('Loading .ld file ...\n');
+session = motec_ld_reader(ld_path);
+fprintf('Loaded %d channels\n\n', numel(fieldnames(session)));
 
 % -----------------------------------------------------------------------
 % Constants — must match lap_slicer.m exactly
@@ -177,7 +251,8 @@ end
 fprintf('\n--- Running lap_slicer (beacon_check=true) ---\n\n');
 opts                    = struct();
 opts.beacon_check       = true;
-opts.beacon_check_label = 'debug session';
+opts.beacon_check_label = sprintf('%s  %s #%s', SESSION_ID, driver, car_num);
+opts.br2_protocol = 'TAS2025'
 opts.verbose            = true;
 
 laps = lap_slicer(session, opts);

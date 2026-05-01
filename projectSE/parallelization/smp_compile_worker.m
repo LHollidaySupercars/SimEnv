@@ -84,9 +84,16 @@ function smp_compile_worker(worker_id, tmp_dir)
         lap_opts.min_lap_time = min_lt;
         lap_opts.max_lap_time = max_lt;
         lap_opts.verbose      = false;
-        if isfield(cfg, 'detect_pitlane'), lap_opts.detect_pitlane = cfg.detect_pitlane; end
+        if isfield(cfg, 'detect_pitlane'), lap_opts.detect_pitlane = cfg.detect_pitlane; else, lap_opts.detect_pitlane = true; end
         if isfield(cfg, 'fcy_channel'),    lap_opts.fcy_channel    = cfg.fcy_channel;    end
+        if isfield(cfg, 'br2_channel'),    lap_opts.br2_channel    = cfg.br2_channel;    else, lap_opts.br2_channel = 'BR2_Beacon_Number'; end
         if isfield(cfg, 'beacon_check'),   lap_opts.beacon_check   = cfg.beacon_check;   end
+
+        % Inject beacon channels so filter_channels doesn't strip them
+        MYLAPS_CH = 'MyLaps X2TRA DeviceShortId';
+        if isfield(cfg, 'mylaps_channel'), MYLAPS_CH = cfg.mylaps_channel; end
+        BR2_CH = lap_opts.br2_channel;
+        channels_to_extract = unique([channels_to_extract(:); {MYLAPS_CH}; {BR2_CH}]);
 
         stat_ops = {'max','min','mean','median','std','var','range','change', ...
             'max non zero','min non zero','mean non zero', ...
@@ -148,6 +155,7 @@ function smp_compile_worker(worker_id, tmp_dir)
                 traces        = package_traces(top_laps, channels_to_extract);
                 traces.lap_times   = [top_laps.lap_time];
                 traces.lap_numbers = [top_laps.lap_number];
+                traces.lap_types   = {top_laps.lap_type};
                 traces.n_traces    = n_keep;
 
                 % Store with dot notation — mirrors smp_compile_event line 282-283

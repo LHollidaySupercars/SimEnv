@@ -1,10 +1,10 @@
 %% Full — date filter + xref against both alias files + export
 clear opts
-opts.date_from        = datetime(2025, 4, 17);
+opts.date_from        = datetime(2025, 3, 17);
 opts.alias_file       = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\driverAlias.xlsx';
 opts.event_alias_file = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\eventAlias2025.xlsx';
-opts.xref_export      = 'C:\Reports\RUA_alias_check.xlsx';
-result = smp_discover_aliases('E:\2025\07_TAS\_TeamData', opts);
+opts.xref_export      = 'C:\Reports\TAS_alias_check.xlsx';
+result = smp_discover_aliases('E:\2025\04_TAS\_TeamData', opts);
 
 % -----------------------------------------------------------------------
 % Inspect raw strings (paste these into alias Excel files):
