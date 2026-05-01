@@ -66,15 +66,13 @@ function info = motec_ld_info(filepath)
     info.run        = fstr(hdr, 0x624,  32);
     info.team_name  = fstr(hdr, 0x694,  64);
 
-    % Car number — stored in device code field as e.g. "C185", strip the C
+    % Device code at 0x4A is the ECU serial (e.g. "C185" for Control Dash 185)
+    % — it is the same for every car using the same ECU hardware, so it is NOT
+    %   the race number.  Leave car_number empty here; it is populated
+    %   downstream from driver_map.(key).num (driverAlias.xlsx NUM column).
     raw_dev = fstr(hdr, 0x4A, 8);
-    info.car_number_raw = raw_dev;
-    tok_car = regexp(raw_dev, '^[A-Za-z]*(\d+)', 'tokens');
-    if ~isempty(tok_car)
-        info.car_number = tok_car{1}{1};
-    else
-        info.car_number = raw_dev;
-    end
+    info.car_number_raw = raw_dev;   % e.g. "C185" — ECU serial only
+    info.car_number     = '';        % filled by alias lookup downstream
 
     % Vehicle ID = first word of vehicle string
     if ~isempty(info.vehicle)

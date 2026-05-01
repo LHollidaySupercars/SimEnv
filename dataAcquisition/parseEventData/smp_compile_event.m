@@ -1344,21 +1344,43 @@ end
 
 
 function info_s = build_info_from_group(grp, driver_map)
-    info_s.driver     = grp.driver;
-    info_s.car_number = grp.car;
-    info_s.session    = grp.session;
-    info_s.venue      = '';
-    info_s.log_date   = '';
-    info_s.year       = '';
+    info_s.driver  = grp.driver;
+    info_s.session = grp.session;
 
-    % Look up manufacturer and team from driver_map using driver name as key.
-    % keyboard is called if the driver cannot be resolved so the user can
-    % add the missing alias to driverAlias.xlsx and recompile.
-    [mfr, team] = resolve_driver_meta(grp.driver, driver_map);
+    % Venue — from binary (resolved through alias in smp_append_stints)
+    info_s.venue = safe_grp(grp, 'venue', '');
+
+    % Date / time / run — binary header or filename-derived
+    info_s.log_date = safe_grp(grp, 'log_date', '');
+    info_s.time     = safe_grp(grp, 'time_str', '');
+    info_s.run      = safe_grp(grp, 'run_number', '');
+
+    % Year from log_date (YYYY-MM-DD)
+    ld = info_s.log_date;
+    if numel(ld) >= 4
+        info_s.year = ld(1:4);
+    else
+        info_s.year = '';
+    end
+
+    % date field formatted for smp_cache_add (DD/MM/YYYY -> keep raw)
+    info_s.date = info_s.log_date;
+
+    % Car number — from driver_map NUM column (race number).
+    % Fallback: raw binary device-code digits (same ECU serial for all cars).
+    [mfr, team, car_num] = resolve_driver_meta(grp.driver, driver_map);
+    if ~isempty(car_num)
+        info_s.car_number = car_num;
+    else
+        info_s.car_number = safe_grp(grp, 'car', '');
+        if ~isempty(info_s.car_number)
+            fprintf('  [WARN] car_number fallback to binary device-code for driver "%s"\n', grp.driver);
+        end
+    end
+
     info_s.manufacturer = mfr;
 
-    % Team: use alias file TM_TLA as source of truth.
-    % Fall back to folder acronym only if alias lookup returned nothing.
+    % Team: alias TM_TLA is source of truth; fallback to folder acronym.
     if ~isempty(team)
         info_s.team_name = team;
     else
@@ -1368,19 +1390,27 @@ end
 
 
 % ======================================================================= %
-function [mfr, team] = resolve_driver_meta(driver_name, driver_map)
-% Resolve manufacturer (MAN) and team (TM_TLA) for a driver.
+function v = safe_grp(grp, field, default)
+    if isfield(grp, field) && ~isempty(grp.(field))
+        v = grp.(field);
+    else
+        v = default;
+    end
+end
+
+
+% ======================================================================= %
+function [mfr, team, car_num] = resolve_driver_meta(driver_name, driver_map)
+% Resolve manufacturer (MAN), team (TM_TLA), and car number (NUM) for a driver.
 %
 % Lookup order:
-%   1. Direct struct key match  (driver_name IS the key from resolve_driver)
+%   1. Direct struct key match
 %   2. Strip-normalised key match
 %   3. Alias search
-%
-% If no match is found, keyboard is called so the user can fix the alias
-% file and recompile. The script will pause with a descriptive message.
 
-    mfr  = '';
-    team = '';
+    mfr     = '';
+    team    = '';
+    car_num = '';
 
     if isempty(driver_map) || ~isstruct(driver_map) || isempty(driver_name)
         return;
@@ -1440,6 +1470,11 @@ function [mfr, team] = resolve_driver_meta(driver_name, driver_map)
     % Extract team TLA
     if isfield(entry_found, 'team_tla') && ~isempty(entry_found.team_tla)
         team = entry_found.team_tla;
+    end
+
+    % Extract car race number from NUM column
+    if isfield(entry_found, 'num') && ~isempty(entry_found.num)
+        car_num = entry_found.num;
     end
 end
 

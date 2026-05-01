@@ -116,6 +116,40 @@ function result = smp_discover_aliases(data_dir, opts)
     end
 
     % ------------------------------------------------------------------ %
+    %  Pre-load driver alias map so CarNumber can be resolved per file
+    % ------------------------------------------------------------------ %
+    pre_driver_map = [];
+    pre_drv_lut    = containers.Map('KeyType','char','ValueType','char');
+    pre_num_lut    = containers.Map('KeyType','char','ValueType','char');
+    if ~isempty(alias_file) && exist(alias_file, 'file')
+        pre_driver_map = smp_driver_alias_load(alias_file);
+        drv_fields = fieldnames(pre_driver_map);
+        for i = 1:numel(drv_fields)
+            entry = pre_driver_map.(drv_fields{i});
+            if ~isstruct(entry) || ~isfield(entry,'canonical'), continue; end
+            canonical = entry.canonical;
+            num_str   = '';
+            if isfield(entry,'num'), num_str = entry.num; end
+            all_aliases = {};
+            if isfield(entry,'aliases'), all_aliases = entry.aliases; end
+            all_aliases{end+1} = lower(canonical);
+            if isfield(entry,'tla') && ~isempty(entry.tla)
+                all_aliases{end+1} = lower(entry.tla);
+            end
+            all_aliases = unique(all_aliases);
+            for j = 1:numel(all_aliases)
+                k = strtrim(all_aliases{j});
+                if ~isempty(k)
+                    if ~isKey(pre_drv_lut, k), pre_drv_lut(k) = canonical; end
+                    if ~isempty(num_str) && ~isKey(pre_num_lut, k)
+                        pre_num_lut(k) = num_str;
+                    end
+                end
+            end
+        end
+    end
+
+    % ------------------------------------------------------------------ %
     %  Pre-allocate manifest rows
     % ------------------------------------------------------------------ %
     paths       = cell(total_files, 1);
@@ -152,7 +186,18 @@ function result = smp_discover_aliases(data_dir, opts)
                 drivers{row}     = info.driver;
                 venues{row}      = info.venue;
                 sessions{row}    = info.session;
-                car_numbers{row} = info.car_number;
+                % CarNumber: resolve via alias NUM column; fallback to binary
+                drv_key = lower(strtrim(info.driver));
+                if isKey(pre_num_lut, drv_key)
+                    car_numbers{row} = pre_num_lut(drv_key);
+                elseif ~isempty(info.car_number)
+                    car_numbers{row} = info.car_number;
+                    if verbose
+                        fprintf('  [WARN] No alias NUM for "%s" — using binary device-code\n', info.driver);
+                    end
+                else
+                    car_numbers{row} = '';
+                end
                 vehicles{row}    = info.vehicle;
                 dates{row}       = info.date;
                 ok_flags(row)    = true;
@@ -252,7 +297,10 @@ function result = smp_discover_aliases(data_dir, opts)
             fprintf('\n--- Running alias cross-reference ---\n');
         end
 
-        driver_map = smp_driver_alias_load(alias_file);
+        driver_map = pre_driver_map;
+        if isempty(driver_map)
+            driver_map = smp_driver_alias_load(alias_file);
+        end
 
         % Build driver lookup: lowercase alias -> canonical name
         drv_lut    = containers.Map('KeyType','char','ValueType','char');

@@ -254,13 +254,16 @@ function groups = smp_append_stints(file_list, driver_map, alias, session_filter
     %  Read metadata for all files and resolve through aliases
     % ------------------------------------------------------------------
     n = numel(file_list);
-    meta_list = struct('path',     cell(n,1), ...
-                       'team',     cell(n,1), ...
-                       'driver',   cell(n,1), ...
-                       'car',      cell(n,1), ...
-                       'session',  cell(n,1), ...
-                       'log_date', cell(n,1), ...
-                       'key',      cell(n,1));
+    meta_list = struct('path',       cell(n,1), ...
+                       'team',       cell(n,1), ...
+                       'driver',     cell(n,1), ...
+                       'car',        cell(n,1), ...
+                       'session',    cell(n,1), ...
+                       'venue',      cell(n,1), ...
+                       'log_date',   cell(n,1), ...
+                       'time_str',   cell(n,1), ...
+                       'run_number', cell(n,1), ...
+                       'key',        cell(n,1));
 
     for i = 1:n
         fpath = file_list(i).path;
@@ -275,15 +278,24 @@ function groups = smp_append_stints(file_list, driver_map, alias, session_filter
         end
 
         raw_driver  = strtrim(char(string(safe_field(info, 'driver',  ''))));
-        raw_session = strtrim(char(string(safe_field(info, 'session', ''))))
+        raw_session = strtrim(char(string(safe_field(info, 'session', ''))));
+        raw_venue   = strtrim(char(string(safe_field(info, 'venue',   ''))));
         raw_car     = strtrim(char(string(safe_field(info, 'car_number', ''))));
         log_date    = strtrim(char(string(safe_field(info, 'log_date', '19700101'))));
+        time_str    = strtrim(char(string(safe_field(info, 'time', ''))));
+        run_number  = strtrim(char(string(safe_field(info, 'run_number', ''))));
+        if isempty(run_number)
+            run_number = strtrim(char(string(safe_field(info, 'run', ''))));
+        end
 
         % Resolve driver through alias table
         res_driver = resolve_driver(raw_driver, driver_map);
 
         % Resolve session through alias table
         res_session = resolve_session(raw_session, alias);
+
+        % Resolve venue through alias table (fallback to binary string)
+        res_venue = resolve_venue(raw_venue, alias);
 
         % Session filter — skip file before grouping if session not wanted
         if use_filter && ~any(strcmpi(res_session, filter_lower))
@@ -295,13 +307,16 @@ function groups = smp_append_stints(file_list, driver_map, alias, session_filter
         group_key = lower(sprintf('%s|%s|%s|%s', tacro, res_driver, res_session, raw_car));
         group_key = regexprep(group_key, '\s+', '_');
 
-        meta_list(i).path     = fpath;
-        meta_list(i).team     = tacro;
-        meta_list(i).driver   = res_driver;
-        meta_list(i).car      = raw_car;
-        meta_list(i).session  = res_session;
-        meta_list(i).log_date = log_date;
-        meta_list(i).key      = group_key;
+        meta_list(i).path       = fpath;
+        meta_list(i).team       = tacro;
+        meta_list(i).driver     = res_driver;
+        meta_list(i).car        = raw_car;
+        meta_list(i).session    = res_session;
+        meta_list(i).venue      = res_venue;
+        meta_list(i).log_date   = log_date;
+        meta_list(i).time_str   = time_str;
+        meta_list(i).run_number = run_number;
+        meta_list(i).key        = group_key;
     end
 
     % ------------------------------------------------------------------
@@ -314,6 +329,7 @@ function groups = smp_append_stints(file_list, driver_map, alias, session_filter
     if isempty(meta_list)
         fprintf('smp_append_stints: no files matched session filter — returning empty.\n\n');
         groups = struct('key',{},'driver',{},'car',{},'session',{},...
+                        'venue',{},'log_date',{},'time_str',{},'run_number',{},...
                         'team_acronym',{},'files',{},'n_files',{});
         return;
     end
@@ -322,6 +338,7 @@ function groups = smp_append_stints(file_list, driver_map, alias, session_filter
     unique_keys = unique(all_keys, 'stable');
 
     groups = struct('key',{},'driver',{},'car',{},'session',{},...
+                    'venue',{},'log_date',{},'time_str',{},'run_number',{},...
                     'team_acronym',{},'files',{},'n_files',{});
 
     for g = 1:numel(unique_keys)
@@ -341,6 +358,10 @@ function groups = smp_append_stints(file_list, driver_map, alias, session_filter
         groups(g).driver       = members(1).driver;
         groups(g).car          = members(1).car;
         groups(g).session      = members(1).session;
+        groups(g).venue        = members(1).venue;
+        groups(g).log_date     = members(1).log_date;
+        groups(g).time_str     = members(1).time_str;
+        groups(g).run_number   = members(1).run_number;
         groups(g).team_acronym = members(1).team;
         groups(g).files        = {members.path};
         groups(g).n_files      = numel(members);
@@ -386,6 +407,28 @@ function resolved = resolve_driver(raw_name, driver_map)
             end
             return;
         end
+    end
+end
+
+
+function resolved = resolve_venue(raw_venue, alias)
+% Resolve raw venue string to canonical name via venue alias map.
+% Falls back to raw venue string if no match found.
+
+    resolved = raw_venue;
+    if isempty(alias) || ~isstruct(alias) || isempty(raw_venue)
+        return;
+    end
+    if ~isfield(alias, 'venue') || ~isfield(alias.venue, 'lookup')
+        return;
+    end
+
+    lut = alias.venue.lookup;
+    if lut.Count == 0, return; end
+
+    key = lower(strtrim(raw_venue));
+    if isKey(lut, key)
+        resolved = lut(key);
     end
 end
 
