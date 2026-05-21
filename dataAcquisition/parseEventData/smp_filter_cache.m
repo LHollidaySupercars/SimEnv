@@ -95,7 +95,7 @@ function SMP_out = smp_filter_cache(cache, alias, varargin)
         col_mask = false(n, 1);
 
         for k = 1:numel(terms)
-            term = lower(strtrim(terms{k}));
+            term = (strtrim(terms{k}));
             if isempty(term), continue; end
             switch match_mode
                 case 'partial'
@@ -246,6 +246,10 @@ function terms = aliases_for_keywords(keywords, lut)
             continue;
         end
         target = lut(kw);
+        % Always include the canonical value itself so that manifest entries
+        % storing the canonical string are found even when no lut key is a
+        % substring of that canonical string (e.g. 'q13' not in 'Qualifying Session 1').
+        terms{end+1} = lower(target); %#ok
         for j = 1:numel(all_keys)
             if strcmp(all_values{j}, target) && ~ismember(all_keys{j}, terms)
                 terms{end+1} = all_keys{j}; %#ok

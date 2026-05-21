@@ -242,7 +242,12 @@ function groups = smp_append_stints(file_list, driver_map, alias, session_filter
     if ischar(session_filter) || isstring(session_filter)
         session_filter = {char(session_filter)};
     end
-    filter_lower = lower(session_filter);
+    % Resolve each filter keyword through the alias table (same as res_session)
+    % so that e.g. 'Practice 1' or 'Run 16' both resolve to canonical 'P01'
+    filter_lower = cell(size(session_filter));
+    for sfi = 1:numel(session_filter)
+        filter_lower{sfi} = lower(resolve_session(session_filter{sfi}, alias));
+    end
     use_filter   = ~isempty(filter_lower);
 
     fprintf('smp_append_stints: grouping %d file(s)...\n', numel(file_list));

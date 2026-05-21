@@ -122,9 +122,9 @@ function save_by_session(top_level_dir, cache, alias)
             if isKey(lut, lower(raw_sess))
                 canonical = lut(lower(raw_sess));
             else
-                fprintf('  [SKIP] "%s" — no alias mapping found. Add to eventAlias.xlsx SESSION sheet.\n', raw_sess);
+                fprintf('  [WARN] "%s" — no alias mapping found; saving under raw session name. Add to eventAlias.xlsx SESSION sheet to rename.\n', raw_sess);
+                canonical = raw_sess;
                 n_skip = n_skip + 1;
-                continue;
             end
         else
             % No alias provided — use raw string as-is (backwards compat)

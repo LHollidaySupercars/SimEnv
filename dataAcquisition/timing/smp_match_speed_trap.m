@@ -33,18 +33,31 @@ function T_match = smp_match_speed_trap(cache, opts)
 
     if nargin < 2 || isempty(opts), opts = struct(); end
 
-    event_filt = get_opt(opts, 'event',            '');
-    ses_filt   = get_opt(opts, 'session',           '');
-    rep_type   = get_opt(opts, 'report_type',       'top_speed');
-    master_csv = get_opt(opts, 'master_csv',        '');
-    base_dir   = get_opt(opts, 'timing_base_dir',   '');
-    speed_ch   = get_opt(opts, 'speed_channel',     'Ground_Speed');
-    mylaps_ch  = get_opt(opts, 'mylaps_channel',    'MyLaps_X2TRA_DeviceShortId');
+    event_filt   = get_opt(opts, 'event',            '');
+    ses_filt     = get_opt(opts, 'session',           '');
+    rep_type     = get_opt(opts, 'report_type',       'top_speed');
+    master_csv   = get_opt(opts, 'master_csv',        '');
+    base_dir     = get_opt(opts, 'timing_base_dir',   '');
+    speed_ch     = get_opt(opts, 'speed_channel',     'Ground_Speed');
+    mylaps_ch    = get_opt(opts, 'mylaps_channel',    'MyLaps_X2TRA_DeviceShortId');
+    press_chs    = get_opt(opts, 'press_channels',    {'TPM1S_FL_WS_PRESS','TPM1S_FR_WS_PRESS', ...
+                                                        'TPM1S_RL_WS_PRESS','TPM1S_RR_WS_PRESS'});
+    wheel_chs    = get_opt(opts, 'wheel_speed_channels', {'Wheel_Speed_Front_Left','Wheel_Speed_Front_Right', ...
+                                                          'Wheel_Speed_Rear_Left','Wheel_Speed_Rear_Right'});
+    accel_chs    = get_opt(opts, 'accel_channels',    {'ADR_Acceleration_X'});
+    % Pressure scale: ld stores kPa/10; MoTeC i2 displays psi. 10*0.14504 = 1.4504
+    press_scale  = get_opt(opts, 'press_scale',       10 * 0.14504);
+    skip_pit_lap = get_opt(opts, 'skip_pit_lap',      false);
+    pit_trap_col = get_opt(opts, 'pit_trap_col',      '');
+    pit_trap_n_v = get_opt(opts, 'pit_trap_n',        1);
 
     % ── Resolve CSV path & speed column ──────────────────────────────────────
     timing_dir = fileparts(mfilename('fullpath'));
     if strcmp(rep_type, 'pit_speed')
         kph_col = 's1_kph';
+        if ~isempty(pit_trap_col)
+            kph_col = pit_trap_col;
+        end
         if isempty(master_csv)
             if ~isempty(base_dir) && ~isempty(event_filt) && ~isempty(ses_filt)
                 master_csv = resolve_timing_csv(base_dir, event_filt, ses_filt, 'pit_speed');
@@ -113,8 +126,20 @@ function T_match = smp_match_speed_trap(cache, opts)
     T.trap_type = repmat(trap_type_val, height(T), 1);
     T.beacon_val = repmat(double(beacon_val_num), height(T), 1);
 
-    % ── Also load pit_speed CSV and append (unless already in pit-only mode) ──
-    if ~strcmp(rep_type, 'pit_speed')
+    % ── Assign pit_stop_n (rank per car by ascending lap) for pit_speed rows ──────
+    if strcmp(rep_type, 'pit_speed')
+        T.pit_stop_n = zeros(height(T), 1);
+        pit_cars_r = unique(T.car);
+        for pci_r = 1:numel(pit_cars_r)
+            pc_mask_r = strcmp(T.car, pit_cars_r(pci_r));
+            [~, rank_ord_r] = sort(T.lap(pc_mask_r));
+            idx_r = find(pc_mask_r);
+            for ri_r = 1:numel(rank_ord_r)
+                T.pit_stop_n(idx_r(rank_ord_r(ri_r))) = ri_r;
+            end
+        end
+    end
+    if ~strcmp(rep_type, 'pit_speed') && ~skip_pit_lap
         pit_csv = get_opt(opts, 'master_pit_csv', '');
         if isempty(pit_csv)
             if ~isempty(base_dir) && ~isempty(event_filt) && ~isempty(ses_filt)
@@ -136,14 +161,48 @@ function T_match = smp_match_speed_trap(cache, opts)
             end
             if height(T_pit) > 0
                 T_pit.car = strtrim(string(T_pit.car));
-                if ~isnumeric(T_pit.lap),    T_pit.lap    = str2double(string(T_pit.lap));    end
-                if ~isnumeric(T_pit.s1_kph), T_pit.s1_kph = str2double(string(T_pit.s1_kph)); end
-                T_pit.kph        = T_pit.s1_kph;
-                T_pit.trap_type  = repmat("pit_speed", height(T_pit), 1);
-                T_pit.beacon_val = repmat(double(get_opt(opts, 'beacon_pit', 41)), height(T_pit), 1);
-                T_pit = align_pit_table(T_pit, T);
-                T = [T; T_pit]; %#ok<AGROW>
-                fprintf('[smp_match_speed_trap] Appended %d pit_speed rows.\n', height(T_pit));
+                if ~isnumeric(T_pit.lap), T_pit.lap = str2double(string(T_pit.lap)); end
+                % Resolve kph column: try s1_kph, then kph, then any *kph* column
+                pit_vars = T_pit.Properties.VariableNames;
+                if ~isempty(pit_trap_col) && ismember(pit_trap_col, pit_vars)
+                    pit_kph_src = pit_trap_col;
+                elseif ismember('s1_kph', pit_vars)
+                    pit_kph_src = 's1_kph';
+                elseif ismember('kph', pit_vars)
+                    pit_kph_src = 'kph';
+                else
+                    kph_candidates = pit_vars(~cellfun(@isempty, regexpi(pit_vars, 'kph')));
+                    if ~isempty(kph_candidates)
+                        pit_kph_src = kph_candidates{1};
+                        fprintf('[smp_match_speed_trap] pit_speed: using ''%s'' as kph column\n', pit_kph_src);
+                    else
+                        fprintf('[smp_match_speed_trap] pit_speed CSV has no kph column — skipping\n');
+                        pit_kph_src = '';
+                    end
+                end
+                if ~isempty(pit_kph_src)
+                    if ~isnumeric(T_pit.(pit_kph_src))
+                        T_pit.(pit_kph_src) = str2double(string(T_pit.(pit_kph_src)));
+                    end
+                    T_pit.kph        = T_pit.(pit_kph_src);
+                    T_pit.trap_type  = repmat("pit_speed", height(T_pit), 1);
+                    T_pit.beacon_val = repmat(double(get_opt(opts, 'beacon_pit', 41)), height(T_pit), 1);
+                    % Add pit_stop_n: rank each row per car/session by ascending lap number
+                    T_pit.pit_stop_n = zeros(height(T_pit), 1);
+                    pit_cars = unique(T_pit.car);
+                    for pci = 1:numel(pit_cars)
+                        pc_mask = strcmp(T_pit.car, pit_cars(pci));
+                        [~, rank_ord] = sort(T_pit.lap(pc_mask));
+                        idx = find(pc_mask);
+                        for ri = 1:numel(rank_ord)
+                            T_pit.pit_stop_n(idx(rank_ord(ri))) = ri;
+                        end
+                    end
+                    T_pit = align_pit_table(T_pit, T);
+                    T     = align_pit_table(T, T_pit);
+                    T = [T; T_pit]; %#ok<AGROW>
+                    fprintf('[smp_match_speed_trap] Appended %d pit_speed rows.\n', height(T_pit));
+                end
             end
         else
             fprintf('[smp_match_speed_trap] No pit_speed CSV at: %s (skipping)\n', pit_csv);
@@ -157,13 +216,13 @@ function T_match = smp_match_speed_trap(cache, opts)
     mf_gk  = string(mf.GroupKey);
 
     % ── First pass: direct lap match ─────────────────────────────────────────
-    results = match_rows(T, mf_car, mf_ses, mf_gk, cache, speed_ch, mylaps_ch, 0);
+    results = match_rows(T, mf_car, mf_ses, mf_gk, cache, speed_ch, mylaps_ch, press_chs, wheel_chs, accel_chs, press_scale, 0);
 
     % ── Offset fallback: if match rate < 20%, retry with timing.lap - 1 ──────
     n_total   = height(results);
     n_matched = sum(results.matched);
     if n_total > 0 && (n_matched / n_total) < 0.2
-        results_off = match_rows(T, mf_car, mf_ses, mf_gk, cache, speed_ch, mylaps_ch, -1);
+        results_off = match_rows(T, mf_car, mf_ses, mf_gk, cache, speed_ch, mylaps_ch, press_chs, wheel_chs, accel_chs, press_scale, -1);
         if sum(results_off.matched) > n_matched
             results = results_off;
             fprintf(['[smp_match_speed_trap] WARNING: offset -1 applied — ' ...
@@ -172,24 +231,52 @@ function T_match = smp_match_speed_trap(cache, opts)
     end
 
     T_match = results;
+    T_match.pit_trap_n = repmat(int32(pit_trap_n_v), height(T_match), 1);
 end
 
 % ─────────────────────────────────────────────────────────────────────────────
 
-function T_out = match_rows(T, mf_car, mf_ses, mf_gk, cache, speed_ch, mylaps_ch, offset)
+function T_out = match_rows(T, mf_car, mf_ses, mf_gk, cache, speed_ch, mylaps_ch, press_chs, wheel_chs, accel_chs, press_scale, offset)
 
     n = height(T);
+
+    % Pre-compute valid field names for pressure channels
+    n_press      = numel(press_chs);
+    press_valid  = cellfun(@matlab.lang.makeValidName, press_chs, 'UniformOutput', false);
+    press_cols   = cell(1, n_press);   % will hold nan(n,1) arrays
+    for pi = 1:n_press
+        press_cols{pi} = nan(n, 1);
+    end
+
+    % Pre-compute valid field names for wheel speed channels
+    n_wheel     = numel(wheel_chs);
+    wheel_valid = cellfun(@matlab.lang.makeValidName, wheel_chs, 'UniformOutput', false);
+    wheel_cols  = cell(1, n_wheel);   % will hold nan(n,1) arrays
+    for wi = 1:n_wheel
+        wheel_cols{wi} = nan(n, 1);
+    end
+
+    % Pre-compute valid field names for acceleration channels
+    n_accel     = numel(accel_chs);
+    accel_valid = cellfun(@matlab.lang.makeValidName, accel_chs, 'UniformOutput', false);
+    accel_cols  = cell(1, n_accel);
+    for ai = 1:n_accel
+        accel_cols{ai} = nan(n, 1);
+    end
 
     car_col       = strings(n, 1);
     driver_col    = strings(n, 1);
     session_col   = strings(n, 1);
     vehicle_col   = strings(n, 1);
     trap_type_col = strings(n, 1);
-    lap_col       = zeros(n, 1);
-    timing_kph    = nan(n, 1);
-    motec_kph     = nan(n, 1);
-    delta_kph     = nan(n, 1);
-    group_key_col = strings(n, 1);
+    lap_col          = zeros(n, 1);
+    timing_kph       = nan(n, 1);
+    motec_kph        = nan(n, 1);
+    delta_kph        = nan(n, 1);
+    lap_time_col     = nan(n, 1);
+    motec_lap_num_col = nan(n, 1);
+    motec_lap_type_col = strings(n, 1);
+    group_key_col    = strings(n, 1);
     matched_col   = false(n, 1);
 
     has_driver  = ismember('driver',  T.Properties.VariableNames);
@@ -228,12 +315,15 @@ function T_out = match_rows(T, mf_car, mf_ses, mf_gk, cache, speed_ch, mylaps_ch
 
             is_pit_row = strcmp(T.trap_type(i), 'pit_speed');
             if is_pit_row
-                % pit_speed CSV: lap = in-lap timing number - 1
-                % Find the pit_lap immediately following that in-lap.
-                inlap_timing_num = lap_target + 1;
-                k = pit_lap_after_timing_inlap(tr, inlap_timing_num);
+                % Match Nth pit_speed CSV row → Nth 'pitlap' in MoTeC (chronological order)
+                % Pit lane speed beacon fires during the pitlap (lap entirely within pit lane)
+                pit_n = 1;
+                if ismember('pit_stop_n', T.Properties.VariableNames)
+                    pit_n = T.pit_stop_n(i);
+                end
+                k = nth_pitlap_idx(tr, pit_n);
             else
-                % timing-lap → trace index, skipping MoTeC pit_lap laps
+                % timing-lap → trace index, skipping MoTeC pitlap laps
                 k = timing_lap_to_trace_idx(tr, lap_target, 0);
             end
             if isempty(k), continue; end
@@ -246,16 +336,63 @@ function T_out = match_rows(T, mf_car, mf_ses, mf_gk, cache, speed_ch, mylaps_ch
                 delta_kph(i)   = t_kph - mk;
                 matched_col(i) = true;
             end
+            if isfield(tr, 'lap_times') && numel(tr.lap_times) >= k
+                lap_time_col(i) = tr.lap_times(k);
+            end
+            motec_lap_num_col(i) = tr.lap_numbers(k);
+            if isfield(tr, 'lap_types') && numel(tr.lap_types) >= k
+                motec_lap_type_col(i) = string(tr.lap_types{k});
+            end
+            % Average each pressure channel over the beacon window, then scale to psi
+            for pi = 1:n_press
+                fld = press_valid{pi};
+                pv  = extract_channel_at_trap(tr, k, fld, bkn_valid, bkn_val);
+                if ~isnan(pv)
+                    pv = pv * press_scale;
+                end
+                press_cols{pi}(i) = pv;
+            end
+            % Average each wheel speed channel over the beacon window, normalise to kph
+            for wi = 1:n_wheel
+                fld = wheel_valid{wi};
+                wv  = extract_channel_at_trap(tr, k, fld, bkn_valid, bkn_val);
+                if ~isnan(wv) && wv < 10   % assume m/s if < 10 — convert to kph
+                    wv = wv * 3.6;
+                end
+                wheel_cols{wi}(i) = wv;
+            end
+            % Average each acceleration channel over the beacon window
+            for ai = 1:n_accel
+                fld = accel_valid{ai};
+                accel_cols{ai}(i) = extract_channel_at_trap(tr, k, fld, bkn_valid, bkn_val);
+            end
             break;
         end
     end
 
     T_out = table(car_col, driver_col, session_col, lap_col, trap_type_col, ...
-                  timing_kph, motec_kph, delta_kph, ...
+                  timing_kph, motec_kph, delta_kph, lap_time_col, ...
+                  motec_lap_num_col, motec_lap_type_col, ...
                   group_key_col, matched_col, vehicle_col, ...
                   'VariableNames', {'car','driver','session','lap','trap_type', ...
-                                    'timing_kph','motec_kph','delta_kph', ...
+                                    'timing_kph','motec_kph','delta_kph','lap_time_s', ...
+                                    'motec_lap','motec_lap_type', ...
                                     'group_key','matched','vehicle'});
+    % Append pressure columns
+    for pi = 1:n_press
+        col_name = lower(press_valid{pi});
+        T_out.(col_name) = press_cols{pi};
+    end
+    % Append wheel speed columns (prefix ws_)
+    for wi = 1:n_wheel
+        col_name = ['ws_' lower(wheel_valid{wi})];
+        T_out.(col_name) = wheel_cols{wi};
+    end
+    % Append acceleration columns (prefix accel_)
+    for ai = 1:n_accel
+        col_name = ['accel_' lower(accel_valid{ai})];
+        T_out.(col_name) = accel_cols{ai};
+    end
 end
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -308,6 +445,85 @@ function k = timing_lap_to_trace_idx(tr, timing_lap, offset)
     % Convert back to original (unsorted) trace index
     original_sorted_idx = sort_idx(match);
     k = original_sorted_idx;
+end
+
+% ─────────────────────────────────────────────────────────────────────────────
+
+function k = nth_pitlap_idx(tr, n)
+% Return trace index of the Nth 'pitlap' in chronological (lap_number) order.
+    k = [];
+    lap_nums = tr.lap_numbers(:);
+    if isfield(tr, 'lap_types') && numel(tr.lap_types) == numel(lap_nums)
+        lap_types = tr.lap_types(:);
+    else
+        return;
+    end
+    [~, sort_idx] = sort(lap_nums);
+    count = 0;
+    for j = 1:numel(sort_idx)
+        idx = sort_idx(j);
+        if strcmpi(lap_types{idx}, 'pitlap')
+            count = count + 1;
+            if count == n
+                k = idx;
+                return;
+            end
+        end
+    end
+end
+
+% ─────────────────────────────────────────────────────────────────────────────
+
+function k = nth_inlap_idx(tr, n)
+% Return trace index of the Nth 'inlap' in chronological (lap_number) order.
+% Pit lane speed is captured as the car enters the pit lane (inlap).
+    k = [];
+    lap_nums = tr.lap_numbers(:);
+    if isfield(tr, 'lap_types') && numel(tr.lap_types) == numel(lap_nums)
+        lap_types = tr.lap_types(:);
+    else
+        return;
+    end
+    [~, sort_idx] = sort(lap_nums);
+    count = 0;
+    for j = 1:numel(sort_idx)
+        idx = sort_idx(j);
+        if strcmpi(lap_types{idx}, 'inlap')
+            count = count + 1;
+            if count == n
+                k = idx;
+                return;
+            end
+        end
+    end
+end
+
+% ─────────────────────────────────────────────────────────────────────────────
+
+function val = extract_channel_at_trap(tr, k, ch_valid, bkn_valid, bkn_val)
+% Average any channel within the MyLaps beacon window for lap k.
+% Returns NaN if channel absent, beacon absent, or window empty.
+
+    val = NaN;
+    if ~isfield(tr, ch_valid) || numel(tr.(ch_valid)) < k, return; end
+    ch_data = tr.(ch_valid)(k).data(:);
+    ch_dist = tr.(ch_valid)(k).dist(:);
+    if isempty(ch_data), return; end
+
+    if ~isfield(tr, bkn_valid) || numel(tr.(bkn_valid)) < k, return; end
+    bkn_data = tr.(bkn_valid)(k).data(:);
+    bkn_dist = tr.(bkn_valid)(k).dist(:);
+    if isempty(bkn_data), return; end
+
+    bkn_mask = round(bkn_data) == bkn_val;
+    if ~any(bkn_mask), return; end
+
+    d_start  = min(bkn_dist(bkn_mask));
+    d_end    = max(bkn_dist(bkn_mask));
+    win_mask = ch_dist >= d_start & ch_dist <= d_end & ~isnan(ch_data);
+    if ~any(win_mask), return; end
+
+    val = mean(ch_data(win_mask));
 end
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -414,9 +630,11 @@ end
 
 function T = make_empty_table()
     T = table(strings(0,1), strings(0,1), strings(0,1), zeros(0,1), strings(0,1), ...
-              nan(0,1), nan(0,1), nan(0,1), strings(0,1), false(0,1), strings(0,1), ...
+              nan(0,1), nan(0,1), nan(0,1), nan(0,1), nan(0,1), strings(0,1), ...
+              strings(0,1), false(0,1), strings(0,1), ...
               'VariableNames', {'car','driver','session','lap','trap_type', ...
-                                'timing_kph','motec_kph','delta_kph', ...
+                                'timing_kph','motec_kph','delta_kph','lap_time_s', ...
+                                'motec_lap','motec_lap_type', ...
                                 'group_key','matched','vehicle'});
 end
 

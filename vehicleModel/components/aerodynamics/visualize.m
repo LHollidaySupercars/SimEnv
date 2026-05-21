@@ -1,6 +1,6 @@
 FordAero = readtable("PARITY_AERO_MAPS.xlsx",'Sheet','FORD');
 ToyotaAero = readtable("PARITY_AERO_MAPS.xlsx",'Sheet','TOYOTA');
-GMAero = readtable("PARITY_AERO_MAPS.xlsx",'Sheet','GM');
+GMAero = readtable("PARITY_AERO_MAPS.xlsx",'Sheet','CHEVROLET');
 
 %% Ford
 

@@ -208,7 +208,9 @@ function figs = smp_plot_from_config(SMP, plots, cfg, driver_map, opts)
                 case 'big_scatter'
                     figs{p} = make_big_scatter(plot_run_list, pd, colour_cfg, driver_map, opts, SHAPES, ax_in);
                 case 'scatter_trace'
-                    figs{p} = make_scatter_trace(plot_run_list, pd, colour_cfg, driver_map, opts, SHAPES, ax_in)
+                    figs{p} = make_scatter_trace(plot_run_list, pd, colour_cfg, driver_map, opts, SHAPES, ax_in);
+                case 'phase_profile'
+                    figs{p} = make_phase_profile(plot_run_list, pd, colour_cfg, driver_map, opts, ax_in);
                 otherwise
                     warning('smp_plot_from_config: plot type "%s" not supported.', pd.type);
             end
@@ -3368,4 +3370,95 @@ function tla = resolve_tla(driver_name, driver_map)
             return;
         end
     end
+end
+
+
+% ======================================================================= %
+%  PHASE PROFILE
+% ======================================================================= %
+function fig = make_phase_profile(run_list, pd, colour_cfg, driver_map, opts, ax_in)
+% MAKE_PHASE_PROFILE  Scatter+line plot of a gated aero (or any) channel
+% averaged per corner phase across laps.
+%
+% Excel config:
+%   type          = phase_profile
+%   mathFunction  = mean non zero          (recommended)
+%   yAxis1        = CLa_SCz_Braking_VCH
+%   yAxis2        = CLa_SCz_Entry_VCH
+%   yAxis3        = CLa_SCz_MidCrn_VCH
+%   yAxis4        = CLa_SCz_Exit_VCH
+%   colours       = manufacturer | driver
+%
+% The four yAxis channels must already exist in entry.stats (i.e. the
+% gated product channels, e.g. brakingGateVCH .* CLa_SCz_VCH, must have
+% been computed by smp_gated_channels and included in channels_to_extract).
+%
+% Each run_list entry contributes one line: median across laps of the
+% per-lap math_fn value for each phase channel.
+
+    if nargin < 6, ax_in = []; end
+    [fig, ax] = new_fig(pd, opts, ax_in);
+    fs = get_opt(opts, 'font_size', 11);
+
+    PHASE_LABELS = {'Braking', 'Entry', 'Mid-Corner', 'Exit'};
+    n_phases     = min(numel(pd.y_channels), 4);
+
+    if n_phases == 0
+        warning('make_phase_profile: no y_channels defined for plot "%s".', pd.name);
+        return;
+    end
+
+    leg_h   = [];
+    leg_l   = {};
+    leg_seen = {};
+
+    for r = 1:numel(run_list)
+        entry = run_list(r);
+        col   = resolve_colour(entry, pd.colour_mode, colour_cfg, driver_map);
+
+        phase_vals = NaN(1, n_phases);
+        for pi = 1:n_phases
+            y_field = sanitise_fn(pd.y_channels{pi});
+            if ~isfield(entry.stats, y_field)
+                fprintf('  [WARN] phase_profile: channel "%s" not in stats for %s — skipping phase.', ...
+                    pd.y_channels{pi}, entry.driver);
+                continue;
+            end
+            per_lap = local_apply_math(entry.stats.(y_field), pd.math_fn);
+            finite_vals = per_lap(isfinite(per_lap));
+            if ~isempty(finite_vals)
+                phase_vals(pi) = median(finite_vals);
+            end
+        end
+
+        valid_phases = find(isfinite(phase_vals));
+        if isempty(valid_phases), continue; end
+
+        % Line connecting all finite phases
+        plot(ax, valid_phases, phase_vals(valid_phases), '-', ...
+            'Color', col, 'LineWidth', 1.5);
+
+        % Scatter markers on top
+        h = scatter(ax, valid_phases, phase_vals(valid_phases), 60, col, 'o', 'filled', ...
+            'MarkerEdgeColor', col * 0.7, 'MarkerFaceAlpha', 0.9);
+
+        lbl = build_label(entry, pd, 1, driver_map);
+        if ~any(strcmp(leg_seen, lbl))
+            leg_h(end+1)   = h;   %#ok
+            leg_l{end+1}   = lbl; %#ok
+            leg_seen{end+1} = lbl; %#ok
+        end
+    end
+
+    % X-axis phase labels
+    xticks(ax, 1:n_phases);
+    xticklabels(ax, PHASE_LABELS(1:n_phases));
+    ax.XLim = [0.5, n_phases + 0.5];
+
+    % Y-axis label — use units of first channel if available
+    y_lbl = strjoin(pd.y_channels, ' / ');
+    ylabel(ax, y_lbl, 'FontSize', fs, 'Interpreter', 'none');
+
+    apply_legend(ax, leg_h, leg_l, opts);
+    apply_axis_limits(ax, pd);
 end

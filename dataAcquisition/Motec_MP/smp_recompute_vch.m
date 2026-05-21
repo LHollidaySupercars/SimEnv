@@ -31,6 +31,7 @@ function cache = smp_recompute_vch(top_level_dir, season, driver_map, alias, cha
     track          = get_opt(opts, 'track',          '');
     session_filter = get_opt(opts, 'session_filter', {});
     verbose        = get_opt(opts, 'verbose',        true);
+    load_all_ch    = get_opt(opts, 'load_all_channels', false);
 
     fprintf('\n============================================\n');
     fprintf('  SMP Recompute VCH  (serial)\n');
@@ -50,9 +51,14 @@ function cache = smp_recompute_vch(top_level_dir, season, driver_map, alias, cha
         fprintf('[WARN] No track specified - using default lap time limits (10s / 600s).\n\n');
     end
 
-    lap_opts.min_lap_time = min_lt;
-    lap_opts.max_lap_time = max_lt;
-    lap_opts.verbose      = false;
+    lap_opts.min_lap_time    = min_lt;
+    lap_opts.max_lap_time    = max_lt;
+    lap_opts.verbose         = false;
+    lap_opts.detect_pitlane  = get_opt(opts, 'detect_pitlane', false);
+    lap_opts.fcy_channel     = get_opt(opts, 'fcy_channel',    'Sw_State_SC');
+    lap_opts.br2_channel     = get_opt(opts, 'br2_channel',    'BR2_Beacon_Number');
+    lap_opts.br2_protocol    = get_opt(opts, 'br2_protocol',   'standard');
+    lap_opts.beacon_check    = get_opt(opts, 'beacon_check',   false);
 
     stat_ops = {'max','min','mean','median','std','var','range','change', ...
                 'max non zero','min non zero','mean non zero', ...
@@ -70,7 +76,7 @@ function cache = smp_recompute_vch(top_level_dir, season, driver_map, alias, cha
         cache = smp_cache_load(top_level_dir, session_filter);
         fprintf('Cache loaded (%d manifest rows).\n\n', height(cache.manifest));
     end
-    save_mode = cache.save_mode;
+    save_mode = get_opt(opts, 'save_mode', cache.save_mode);
 
     if height(cache.manifest) == 0
         fprintf('Cache is empty - nothing to recompute.\n');
@@ -127,7 +133,7 @@ function cache = smp_recompute_vch(top_level_dir, season, driver_map, alias, cha
 
         try
             fprintf('  Loading .ld file(s)...\n');
-            session = load_and_concat(grp.files, channels, verbose, T_gated);
+            session = load_and_concat(grp.files, channels, verbose, T_gated, load_all_ch, driver_map);
 
             if isempty(session)
                 fprintf('  [WARN] No channel data returned - skipping.\n');
@@ -163,9 +169,11 @@ function cache = smp_recompute_vch(top_level_dir, season, driver_map, alias, cha
                 continue;
             end
             fprintf('  %d valid lap(s).\n', numel(laps));
-
+            fieldsToKeep = [T_gated.CHANNEL_NAME; custom_fields];
             % ---- Compute stats for custom channels only ----
-            vch_stats = lap_stats(laps, custom_fields, ...
+%             vch_stats = lap_stats(laps, custom_fields, ...
+%                 struct('operations', {stat_ops}));
+            vch_stats = lap_stats(laps, fieldsToKeep, ...
                 struct('operations', {stat_ops}));
             clear laps;
 
@@ -203,16 +211,31 @@ end
 % ======================================================================= %
 %  LOAD AND CONCAT  (mirrors smp_compile_event exactly)
 % ======================================================================= %
-function session = load_and_concat(files, channels_to_extract, verbose, T_gated)
+function session = load_and_concat(files, channels_to_extract, verbose, T_gated, load_all, driver_map)
+    if nargin < 5, load_all   = false; end
+    if nargin < 6, driver_map = [];    end
     EXCEL_FILTERING        = 'C:\SimEnv\dataAcquisition\Motec_MP\filterRequest\filterRequest.xlsx';
     CHANNELS_FOR_START_VAL = {'Acceleration_Z_Filt'};
 
+    if load_all
+        rd_channels = {};
+    else
+        rd_channels = channels_to_extract;
+    end
+
     if numel(files) == 1
-        session     = motec_ld_reader(files{1}, channels_to_extract);
+        session     = motec_ld_reader(files{1}, rd_channels);
+        try, fi = motec_ld_info(files{1}, false); catch, fi = struct(); end
+        mfr = ''; if isfield(fi, 'manufacturer'), mfr = fi.manufacturer; end
+        if isempty(mfr) && isfield(fi, 'driver') && ~isempty(driver_map)
+            mfr = resolve_manufacturer(fi.driver, driver_map);
+        end
         startingVal = startingValues(CHANNELS_FOR_START_VAL, EXCEL_FILTERING, session);
-        session     = smp_custom_channels(session, 'startingValues', startingVal);
+        before      = fieldnames(session);
+        session     = smp_custom_channels(session, 'startingValues', startingVal, 'manufacturer', mfr);
+        vch_names   = setdiff(fieldnames(session), before);
         [session, gated_names]  = smp_gated_channels(session, T_gated);
-%         channels_to_extract     = union(channels_to_extract, gated_names);
+        channels_to_extract     = union(channels_to_extract, [vch_names(:); gated_names(:)]);
         session     = filter_channels(session, channels_to_extract);
         return;
     end
@@ -224,17 +247,25 @@ function session = load_and_concat(files, channels_to_extract, verbose, T_gated)
             fprintf('    Loading stint %d: %s\n', f, fname);
         end
         t0 = tic;
-        s = motec_ld_reader(files{f}, channels_to_extract);
+        s = motec_ld_reader(files{f}, rd_channels);
         fprintf('  motec_ld_reader: %.2fs\n', toc(t0));
+
+        try fi = motec_ld_info(files{f}, false); catch, fi = struct(); end
+        mfr = ''; if isfield(fi, 'manufacturer'), mfr = fi.manufacturer; end
+        if isempty(mfr) && isfield(fi, 'driver') && ~isempty(driver_map)
+            mfr = resolve_manufacturer(fi.driver, driver_map);
+        end
 
         t0 = tic;
         startingVal = startingValues(CHANNELS_FOR_START_VAL, EXCEL_FILTERING, s);
-        s = smp_custom_channels(s, 'startingValues', startingVal);
+        before      = fieldnames(s);
+        s = smp_custom_channels(s, 'startingValues', startingVal, 'manufacturer', mfr);
+        vch_names   = setdiff(fieldnames(s), before);
         fprintf('  smp_custom_channels: %.2fs\n', toc(t0));
 
         t0 = tic;
         [s, gated_names]    = smp_gated_channels(s, T_gated);
-        channels_to_extract = union(channels_to_extract, gated_names);
+        channels_to_extract = union(channels_to_extract, [vch_names(:); gated_names(:)]);
         fprintf('  smp_gated_channels: %.2fs\n', toc(t0));
 
         s = filter_channels(s, channels_to_extract);
@@ -335,5 +366,45 @@ function val = get_opt(s, field, default)
         val = s.(field);
     else
         val = default;
+    end
+end
+
+
+% ======================================================================= %
+%  Resolve manufacturer from a driver name via driver_map.
+%  Mirrors the resolve_driver_meta logic in smp_compile_event.
+% ======================================================================= %
+function mfr = resolve_manufacturer(driver_name, driver_map)
+% Mirrors resolve_driver_meta lookup order: direct → strip-normalised → alias.
+    mfr = '';
+    if isempty(driver_name) || isempty(driver_map), return; end
+    key   = regexprep(lower(strtrim(driver_name)), '[^a-z0-9]', '');
+    names = fieldnames(driver_map);
+    entry = [];
+    % 1. Direct key
+    if isfield(driver_map, driver_name), entry = driver_map.(driver_name); end
+    % 2. Strip-normalised key
+    if isempty(entry)
+        for i = 1:numel(names)
+            if strcmp(key, regexprep(lower(names{i}), '[^a-z0-9]', ''))
+                entry = driver_map.(names{i}); break;
+            end
+        end
+    end
+    % 3. Alias search
+    if isempty(entry)
+        for i = 1:numel(names)
+            e = driver_map.(names{i});
+            if ~isfield(e, 'aliases'), continue; end
+            for a = 1:numel(e.aliases)
+                if strcmp(key, regexprep(lower(e.aliases{a}), '[^a-z0-9]', ''))
+                    entry = e; break;
+                end
+            end
+            if ~isempty(entry), break; end
+        end
+    end
+    if ~isempty(entry) && isfield(entry, 'manufacturer')
+        mfr = entry.manufacturer;
     end
 end

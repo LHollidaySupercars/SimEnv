@@ -1,18 +1,25 @@
 function tyreDataViewer()
-% TYREDATAVIEWER Interactive GUI for viewing Calspan tyre data with Pacejka fitting
+% TYREDATAVIEWER  Standalone launcher for the Tyre Data Viewer.
 %
 %   Launch with: tyreDataViewer()
 %
-%   Features:
-%   - Load .mat file with tyre data (auto-loads default dataset)
-%   - Select test type (FreeRoll, BrkDrv, etc.)
-%   - Select individual test from dropdown
-%   - Choose plot type: Scatter, 2D Line, Surface
-%   - Select X, Y, Z (for scatter color or surface), variables
-%   - Filter data by range pairs (e.g., "0,2,4,6" for ranges 0-2 and 4-6)
-%   - Overlay Pacejka formula with adjustable parameters
-%   - Export current plot as image or data as CSV
-%   - Interactive plot tools: Pan, Zoom, Rotate, Data Cursor
+%   All UI logic lives in tyreDataViewer_panel.m.
+%   This wrapper creates a uifigure with a single tab and embeds the panel.
+
+    fig  = uifigure('Name', 'Tyre Data Viewer', 'Position', [100 100 1400 720]);
+    tg   = uitabgroup(fig);
+    tab1 = uitab(tg, 'Title', 'Tyre Data');
+    tyreDataViewer_panel(tab1);
+end
+
+% =========================================================================
+%  ORIGINAL IMPLEMENTATION — preserved below for reference only.
+%  All active code is now in tyreDataViewer_panel.m
+% =========================================================================
+%{
+
+function tyreDataViewer_ORIGINAL()
+% (original function body kept verbatim for reference)
 
     % Create figure
     fig = figure('Name', 'Tyre Data Viewer', 'Position', [100 100 1400 700], ...
@@ -1039,3 +1046,4 @@ function tyreDataViewer()
         msgbox('Data saved successfully!', 'Success');
     end
 end
+%}

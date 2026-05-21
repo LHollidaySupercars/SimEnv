@@ -6,15 +6,19 @@ function SmpExplorer()
 %
 % Usage:  SmpExplorer()
 %
-% Requires MATLAB R2021a or later (uifigure / App Designer components).
+% Requires MATLAB R2020a or later (uifigure / App Designer components).
 
-    %% ---- Ensure required paths are on the MATLAB path ----
+%     %% ---- Ensure required paths are on the MATLAB path ----
     thisDir  = fileparts(mfilename('fullpath'));
     motecDir = fullfile(thisDir, '..', 'Motec_MP');
+    tyreDir  = fullfile(thisDir, '..', '..', 'vehicleModel', 'components', 'tyre');
     addpath(thisDir);
     addpath(fullfile(motecDir, 'plot'));
     addpath(fullfile(motecDir, 'motecFiltering'));
     addpath(fullfile(motecDir, 'alias'));
+    addpath(tyreDir);
+    addpath(fullfile(tyreDir, 'pacejkaFormula'));
+    addpath('C:\Program Files\MATLAB\R2020a\toolbox\matlab\uicomponents')
 
     %% ---- Figure ----
     fig = uifigure( ...
@@ -60,7 +64,6 @@ function SmpExplorer()
 
     lbl = uilabel(LG, 'Text', 'CACHE', 'FontWeight', 'bold', 'FontSize', 10);
     lbl.Layout.Row = 1;
-
     hPathField = uieditfield(LG, 'text');
     hPathField.Layout.Row = 2;
 
@@ -82,30 +85,28 @@ function SmpExplorer()
         'ColumnWidth', {70, 50, 65, 62}, ...
         'RowName', {});
     hManifest.Layout.Row = 6;
-
-    hStatusLbl = uilabel(LG, 'Text', 'No cache loaded', ...
-        'FontColor', [0.5 0.5 0.5], 'HorizontalAlignment', 'center', 'FontSize', 9);
+    hStatusLbl = uieditfield(LG, 'text', 'Value', 'No cache loaded', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94], 'FontColor', [0.5 0.5 0.5], 'HorizontalAlignment', 'center', 'FontSize', 9);
     hStatusLbl.Layout.Row = 7;
 
-    lbl = uilabel(LG, 'Text', 'SESSIONS (ctrl+click)', 'FontWeight', 'bold', 'FontSize', 9);
+    lbl = uieditfield(LG, 'text', 'Value', 'SESSIONS (ctrl+click)', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94], 'FontWeight', 'bold', 'FontSize', 9);
     lbl.Layout.Row = 8;
 
     hSessionsList = uilistbox(LG, 'Items', {}, 'Multiselect', 'on');
     hSessionsList.Layout.Row = 9;
 
-    lbl = uilabel(LG, 'Text', 'TEAMS (ctrl+click)', 'FontWeight', 'bold', 'FontSize', 9);
+    lbl = uieditfield(LG, 'text', 'Value', 'TEAMS (ctrl+click)', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94], 'FontWeight', 'bold', 'FontSize', 9);
     lbl.Layout.Row = 10;
 
     hTeamsList = uilistbox(LG, 'Items', {}, 'Multiselect', 'on');
     hTeamsList.Layout.Row = 11;
 
-    lbl = uilabel(LG, 'Text', 'MANUFACTURERS (ctrl+click)', 'FontWeight', 'bold', 'FontSize', 9);
+    lbl = uieditfield(LG, 'text', 'Value', 'MANUFACTURERS (ctrl+click)', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94], 'FontWeight', 'bold', 'FontSize', 9);
     lbl.Layout.Row = 12;
 
     hMfrList = uilistbox(LG, 'Items', {}, 'Multiselect', 'on');
     hMfrList.Layout.Row = 13;
 
-    lbl = uilabel(LG, 'Text', 'LAP RANGE  (min / max)', 'FontWeight', 'bold', 'FontSize', 9);
+    lbl = uieditfield(LG, 'text', 'Value', 'LAP RANGE  (min / max)', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94], 'FontWeight', 'bold', 'FontSize', 9);
     lbl.Layout.Row = 14;
 
     lapGrid = uigridlayout(LG, [1 2]);
@@ -123,7 +124,7 @@ function SmpExplorer()
     hFilterBtn.ButtonPushedFcn = @(~,~) onApplyFilters(fig, ...
         hSessionsList, hTeamsList, hMfrList, hLapMin, hLapMax);
 
-    hFilterStatus = uilabel(LG, 'Text', '', ...
+    hFilterStatus = uieditfield(LG, 'text', 'Value', '', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94], ...
         'FontColor', [0.3 0.7 0.3], 'HorizontalAlignment', 'center', ...
         'FontSize', 9);
     hFilterStatus.Layout.Row = 17;
@@ -142,24 +143,31 @@ function SmpExplorer()
     %% ---- TAB 1: Manual Builder ----
     tab1 = uitab(tabGrp, 'Title', 'Manual Builder');
 
-    t1Outer = uigridlayout(tab1, [2 2]);
-    t1Outer.ColumnWidth   = {340, '1x'};
+    t1Outer = uigridlayout(tab1, [2 1]);
+    t1Outer.ColumnWidth   = {'1x'};
     t1Outer.RowHeight     = {'1x', 32};
     t1Outer.Padding       = [6 6 6 6];
     t1Outer.ColumnSpacing = 6;
 
-    ctrlPnl = uipanel(t1Outer, 'BorderType', 'line', 'Title', 'Plot Definition');
+    % Nested row for ctrlPnl + hPlotPnl side by side (avoids col span)
+    t1TopRow = uigridlayout(t1Outer, [1 2]);
+    t1TopRow.Layout.Row    = 1;
+    t1TopRow.ColumnWidth   = {340, '1x'};
+    t1TopRow.RowHeight     = {'1x'};
+    t1TopRow.Padding       = [0 0 0 0];
+    t1TopRow.ColumnSpacing = 6;
+
+    ctrlPnl = uipanel(t1TopRow, 'BorderType', 'line', 'Title', 'Plot Definition');
     ctrlPnl.Layout.Row    = 1;
     ctrlPnl.Layout.Column = 1;
 
-    hPlotPnl = uipanel(t1Outer, 'BorderType', 'line', 'Title', 'Plot');
+    hPlotPnl = uipanel(t1TopRow, 'BorderType', 'line', 'Title', 'Plot');
     hPlotPnl.Layout.Row    = 1;
     hPlotPnl.Layout.Column = 2;
 
-    % ---- Post-Plot Tools bar (row 2, spans both columns) ----
+    % ---- Post-Plot Tools bar (row 2, single column) ----
     postPnl = uipanel(t1Outer, 'BorderType', 'none');
     postPnl.Layout.Row    = 2;
-    postPnl.Layout.Column = [1 2];
 
     PPG = uigridlayout(postPnl, [1 5]);
     PPG.ColumnWidth   = {'1x','1x','1x','1x','1x'};
@@ -191,169 +199,276 @@ function SmpExplorer()
     hClearFitsBtn.ButtonPushedFcn = @(~,~) onClearFits(fig);
 
     NCTRL_ROWS = 24;
-    CG = uigridlayout(ctrlPnl, [NCTRL_ROWS 2]);
-    CG.ColumnWidth = {130, '1x'};
+    CG = uigridlayout(ctrlPnl, [NCTRL_ROWS 1]);
+    CG.ColumnWidth = {'1x'};
     CG.RowHeight   = repmat({22}, 1, NCTRL_ROWS);
     CG.Padding     = [8 6 8 6];
     CG.RowSpacing  = 3;
 
     r = 1;
 
-    lbl = uilabel(CG, 'Text', 'Plot Name');
-    lbl.Layout.Row = r;
-    hPlotName = uieditfield(CG, 'text', 'Value', 'My Plot');
-    hPlotName.Layout.Row = r; hPlotName.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Plot Name', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hPlotName = uieditfield(cgr, 'text', 'Value', 'My Plot'); hPlotName.Layout.Row = 1; hPlotName.Layout.Column = 2;
     r = r + 1;
 
     PLOT_TYPES = {'scatter', 'line', 'timeseries', 'timeseries_align', ...
                   'boxplot', 'violin', 'histogram', 'ranked_box', ...
                   'lapwise_box', 'sessionlapwise', 'psd', 'big_scatter', 'scatter_trace'};
-    lbl = uilabel(CG, 'Text', 'Plot Type');
-    lbl.Layout.Row = r;
-    hPlotType = uidropdown(CG, 'Items', PLOT_TYPES, 'Value', 'scatter');
-    hPlotType.Layout.Row = r; hPlotType.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Plot Type', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hPlotType = uidropdown(cgr, 'Items', PLOT_TYPES, 'Value', 'scatter'); hPlotType.Layout.Row = 1; hPlotType.Layout.Column = 2;
     hPlotType.ValueChangedFcn = @(src,~) onPlotTypeChanged(fig, src);
     r = r + 1;
 
     MATH_FNS = {'mean', 'max', 'min', 'median', 'mean non zero', ...
                 'min non zero', 'max non zero', 'std', 'range', ...
                 'change', 'final', 'initial', 'lap_delta'};
-    lbl = uilabel(CG, 'Text', 'Math Function');
-    lbl.Layout.Row = r;
-    hMathFn = uidropdown(CG, 'Items', MATH_FNS, 'Value', 'mean');
-    hMathFn.Layout.Row = r; hMathFn.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Math Function', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hMathFn = uidropdown(cgr, 'Items', MATH_FNS, 'Value', 'mean'); hMathFn.Layout.Row = 1; hMathFn.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'X Axis');
-    lbl.Layout.Row = r;
-    hXAxis = uidropdown(CG, 'Items', {'(load cache first)'}, 'Value', '(load cache first)');
-    hXAxis.Layout.Row = r; hXAxis.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'X Axis', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hXAxis = uidropdown(cgr, 'Items', {'(load cache first)'}, 'Value', '(load cache first)'); hXAxis.Layout.Row = 1; hXAxis.Layout.Column = 2;
     r = r + 1;
 
     axLabels = {'Y Axis 1', 'Y Axis 2', 'Y Axis 3', 'Y Axis 4'};
     hYAxis = gobjects(1, 4);
     for yi = 1:4
-        lbl = uilabel(CG, 'Text', axLabels{yi});
-        lbl.Layout.Row = r;
-        hYAxis(yi) = uidropdown(CG, 'Items', {'(load cache first)'}, ...
-            'Value', '(load cache first)');
-        hYAxis(yi).Layout.Row = r; hYAxis(yi).Layout.Column = 2;
+        cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+        lbl = uieditfield(cgr, 'text', 'Value', axLabels{yi}, 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+        hYAxis(yi) = uidropdown(cgr, 'Items', {'(load cache first)'}, 'Value', '(load cache first)');
+        hYAxis(yi).Layout.Row = 1; hYAxis(yi).Layout.Column = 2;
         r = r + 1;
     end
 
-    lbl = uilabel(CG, 'Text', 'Custom Expression', 'FontColor', [0.85 0.65 0.1]);
-    lbl.Layout.Row = r;
-    hCustomExpr = uieditfield(CG, 'text', 'Value', '');
-    hCustomExpr.Layout.Row = r; hCustomExpr.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Custom Expression', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94], 'FontColor', [0.85 0.65 0.1]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hCustomExpr = uieditfield(cgr, 'text', 'Value', ''); hCustomExpr.Layout.Row = 1; hCustomExpr.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Colour Mode');
-    lbl.Layout.Row = r;
-    hColourMode = uidropdown(CG, 'Items', {'manufacturer', 'driver', 'team', 'car', 'number'}, ...
-        'Value', 'manufacturer');
-    hColourMode.Layout.Row = r; hColourMode.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Colour Mode', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hColourMode = uidropdown(cgr, 'Items', {'manufacturer', 'driver', 'team', 'car', 'number'}, 'Value', 'manufacturer');
+    hColourMode.Layout.Row = 1; hColourMode.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Differentiator');
-    lbl.Layout.Row = r;
-    hDiffer = uidropdown(CG, 'Items', {'manufacturer', 'driver', 'team', 'car', ''}, ...
-        'Value', 'manufacturer');
-    hDiffer.Layout.Row = r; hDiffer.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Differentiator', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hDiffer = uidropdown(cgr, 'Items', {'manufacturer', 'driver', 'team', 'car', ''}, 'Value', 'manufacturer');
+    hDiffer.Layout.Row = 1; hDiffer.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Use Secondary Y');
-    lbl.Layout.Row = r;
-    hSecondary = uicheckbox(CG, 'Text', '', 'Value', false);
-    hSecondary.Layout.Row = r; hSecondary.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Use Secondary Y', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hSecondary = uicheckbox(cgr, 'Text', '', 'Value', false); hSecondary.Layout.Row = 1; hSecondary.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'X Limits');
-    lbl.Layout.Row = r;
-    hXLim = uieditfield(CG, 'text', 'Value', '');
-    hXLim.Layout.Row = r; hXLim.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'X Limits', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hXLim = uieditfield(cgr, 'text', 'Value', ''); hXLim.Layout.Row = 1; hXLim.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Y Limits');
-    lbl.Layout.Row = r;
-    hYLim = uieditfield(CG, 'text', 'Value', '');
-    hYLim.Layout.Row = r; hYLim.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Y Limits', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hYLim = uieditfield(cgr, 'text', 'Value', ''); hYLim.Layout.Row = 1; hYLim.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Outliers');
-    lbl.Layout.Row = r;
-    hOutliers = uicheckbox(CG, 'Text', '', 'Value', false);
-    hOutliers.Layout.Row = r; hOutliers.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Outliers', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hOutliers = uicheckbox(cgr, 'Text', '', 'Value', false); hOutliers.Layout.Row = 1; hOutliers.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Outlier Method');
-    lbl.Layout.Row = r;
-    hOutlierMethod = uidropdown(CG, 'Items', {'mad', 'iqr'}, 'Value', 'mad');
-    hOutlierMethod.Layout.Row = r; hOutlierMethod.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Outlier Method', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hOutlierMethod = uidropdown(cgr, 'Items', {'mad', 'iqr'}, 'Value', 'mad'); hOutlierMethod.Layout.Row = 1; hOutlierMethod.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Outlier Threshold');
-    lbl.Layout.Row = r;
-    hOutlierThresh = uispinner(CG, 'Value', 3.0, 'Limits', [0.1 20], 'Step', 0.5);
-    hOutlierThresh.Layout.Row = r; hOutlierThresh.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Outlier Threshold', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hOutlierThresh = uispinner(cgr, 'Value', 3.0, 'Limits', [0.1 20], 'Step', 0.5); hOutlierThresh.Layout.Row = 1; hOutlierThresh.Layout.Column = 2;
     r = r + 1;
 
-    hAlignLbl = uilabel(CG, 'Text', '-- Align Options (timeseries_align only) --', ...
+    hAlignLbl = uieditfield(CG, 'text', 'Value', '-- Align Options (timeseries_align only) --', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94], ...
         'HorizontalAlignment', 'center', 'FontColor', [0.4 0.55 0.8], 'FontSize', 9);
-    hAlignLbl.Layout.Row    = r;
-    hAlignLbl.Layout.Column = [1 2];
+    hAlignLbl.Layout.Row = r;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Align Channel');
-    lbl.Layout.Row = r;
-    hAlignCh = uidropdown(CG, 'Items', {'(none)'}, 'Value', '(none)', 'Enable', 'off');
-    hAlignCh.Layout.Row = r; hAlignCh.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Align Channel', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hAlignCh = uidropdown(cgr, 'Items', {'(none)'}, 'Value', '(none)', 'Enable', 'off'); hAlignCh.Layout.Row = 1; hAlignCh.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Align Window');
-    lbl.Layout.Row = r;
-    hAlignWin = uieditfield(CG, 'text', 'Value', '', 'Enable', 'off');
-    hAlignWin.Layout.Row = r; hAlignWin.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Align Window', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hAlignWin = uieditfield(cgr, 'text', 'Value', '', 'Enable', 'off'); hAlignWin.Layout.Row = 1; hAlignWin.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Align Method');
-    lbl.Layout.Row = r;
-    hAlignMethod = uidropdown(CG, 'Items', {'peaks', 'xcorr'}, 'Value', 'peaks', 'Enable', 'off');
-    hAlignMethod.Layout.Row = r; hAlignMethod.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Align Method', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hAlignMethod = uidropdown(cgr, 'Items', {'peaks', 'xcorr'}, 'Value', 'peaks', 'Enable', 'off'); hAlignMethod.Layout.Row = 1; hAlignMethod.Layout.Column = 2;
     r = r + 1;
 
-    lbl = uilabel(CG, 'Text', 'Align Max Offset (s)');
-    lbl.Layout.Row = r;
-    hAlignMax = uispinner(CG, 'Value', 60, 'Limits', [1 600], 'Step', 5, 'Enable', 'off');
-    hAlignMax.Layout.Row = r; hAlignMax.Layout.Column = 2;
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = uieditfield(cgr, 'text', 'Value', 'Align Max Offset (s)', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hAlignMax = uispinner(cgr, 'Value', 60, 'Limits', [1 600], 'Step', 5, 'Enable', 'off'); hAlignMax.Layout.Row = 1; hAlignMax.Layout.Column = 2;
     r = r + 1;
 
     hPlotBtn = uibutton(CG, 'Text', 'Plot', ...
         'BackgroundColor', [0.17 0.56 0.30], 'FontColor', [1 1 1], 'FontWeight', 'bold');
-    hPlotBtn.Layout.Row    = r;
-    hPlotBtn.Layout.Column = [1 2];
+    hPlotBtn.Layout.Row = r;
     hPlotBtn.ButtonPushedFcn = @(~,~) onPlotDirect(fig);
 
     %% ---- TAB 2: Excel Presets ----
     tab2 = uitab(tabGrp, 'Title', 'Excel Presets');
 
-    T2G = uigridlayout(tab2, [4 2]);
-    T2G.ColumnWidth = {120, '1x'};
+    %% ---- TAB 3: Tyre Data ----
+    tab3 = uitab(tabGrp, 'Title', 'Tyre Data');
+    tyreDataViewer_panel(tab3);   % builds UI inside tab3; state is self-contained
+
+    %% ---- TAB 4: Speed Trap ----
+    tab4 = uitab(tabGrp, 'Title', 'Speed Trap'); %#ok<NASGU>
+
+    T4G = uigridlayout(tab4, [8 1]);
+    T4G.ColumnWidth = {'1x'};
+    T4G.RowHeight   = {22, 22, 22, 22, 22, 28, 28, '1x'};
+    T4G.Padding     = [8 8 8 8];
+    T4G.RowSpacing  = 4;
+
+    t4r1 = uigridlayout(T4G, [1 2]); t4r1.Layout.Row = 1; t4r1.ColumnWidth = {120,'1x'}; t4r1.Padding = [0 0 0 0]; t4r1.RowSpacing = 0;
+    lbl = uieditfield(t4r1, 'text', 'Value', 'Timing Dir', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hStDirBrowse = uibutton(t4r1, 'Text', 'Browse...'); hStDirBrowse.Layout.Row = 1; hStDirBrowse.Layout.Column = 2;
+
+    hTimingBaseDir = uieditfield(T4G, 'text', 'Value', '');
+    hTimingBaseDir.Layout.Row = 2;
+    hStDirBrowse.ButtonPushedFcn = @(~,~) onBrowseTimingDir(fig, hTimingBaseDir);
+
+    t4r3 = uigridlayout(T4G, [1 2]); t4r3.Layout.Row = 3; t4r3.ColumnWidth = {120,'1x'}; t4r3.Padding = [0 0 0 0]; t4r3.RowSpacing = 0;
+    lbl = uieditfield(t4r3, 'text', 'Value', 'Event', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hStEvent = uieditfield(t4r3, 'text', 'Value', ''); hStEvent.Layout.Row = 1; hStEvent.Layout.Column = 2;
+
+    t4r4 = uigridlayout(T4G, [1 2]); t4r4.Layout.Row = 4; t4r4.ColumnWidth = {120,'1x'}; t4r4.Padding = [0 0 0 0]; t4r4.RowSpacing = 0;
+    lbl = uieditfield(t4r4, 'text', 'Value', 'Session', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hStSession = uieditfield(t4r4, 'text', 'Value', ''); hStSession.Layout.Row = 1; hStSession.Layout.Column = 2;
+
+    t4r5 = uigridlayout(T4G, [1 2]); t4r5.Layout.Row = 5; t4r5.ColumnWidth = {120,'1x'}; t4r5.Padding = [0 0 0 0]; t4r5.RowSpacing = 0;
+    lbl = uieditfield(t4r5, 'text', 'Value', 'Report Type', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hStReport = uidropdown(t4r5, 'Items', {'top_speed', 'pit_speed'}, 'Value', 'top_speed'); hStReport.Layout.Row = 1; hStReport.Layout.Column = 2;
+
+    hStMatchBtn = uibutton(T4G, 'Text', 'Match Laps', ...
+        'BackgroundColor', [0.18 0.44 0.73], 'FontColor', [1 1 1], 'FontWeight', 'bold');
+    hStMatchBtn.Layout.Row = 6;
+    hStMatchBtn.ButtonPushedFcn = @(~,~) onMatchSpeedTrap(fig);
+
+    hStPlotBtn = uibutton(T4G, 'Text', 'Plot Comparison', ...
+        'BackgroundColor', [0.17 0.56 0.30], 'FontColor', [1 1 1], 'FontWeight', 'bold');
+    hStPlotBtn.Layout.Row = 7;
+    hStPlotBtn.ButtonPushedFcn = @(~,~) onPlotSpeedTrap(fig);
+
+    hStResultsTable = uitable(T4G, ...
+        'ColumnName',     {'Car','Driver','Session','Lap','Timing kph','MoTeC kph','Delta','Matched'}, ...
+        'ColumnWidth',    {35, 100, 65, 35, 75, 75, 55, 60}, ...
+        'ColumnEditable', false(1, 8), ...
+        'RowName', {});
+    hStResultsTable.Layout.Row = 8;
+
+    %% ---- TAB 5: Tyre Radius ----
+    tab5 = uitab(tabGrp, 'Title', 'Tyre Radius'); %#ok<NASGU>
+
+    T5G = uigridlayout(tab5, [10 1]);
+    T5G.ColumnWidth = {'1x'};
+    T5G.RowHeight   = [repmat({22}, 1, 6), {4}, {28}, {28}, {'1x'}];
+    T5G.Padding     = [8 8 8 8];
+    T5G.RowSpacing  = 3;
+
+    % Row 1: r0 | P_coef
+    t5r1 = uigridlayout(T5G, [1 4]); t5r1.Layout.Row = 1; t5r1.ColumnWidth = {110,'1x',110,'1x'}; t5r1.Padding = [0 0 0 0]; t5r1.RowSpacing = 0;
+    uieditfield(t5r1, 'text', 'Value', 'r0 (mm)', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column     = 1;
+    hTrR0    = uieditfield(t5r1, 'numeric', 'Value', 28.2200);  hTrR0.Layout.Column    = 2;
+    uieditfield(t5r1, 'text', 'Value', 'P coef', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column      = 3;
+    hTrPCoef = uieditfield(t5r1, 'numeric', 'Value', 0.0505);   hTrPCoef.Layout.Column = 4;
+
+    % Row 2: Fz_coef | N_coef
+    t5r2 = uigridlayout(T5G, [1 4]); t5r2.Layout.Row = 2; t5r2.ColumnWidth = {110,'1x',110,'1x'}; t5r2.Padding = [0 0 0 0]; t5r2.RowSpacing = 0;
+    uieditfield(t5r2, 'text', 'Value', 'Fz coef', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column        = 1;
+    hTrFzCoef = uieditfield(t5r2, 'numeric', 'Value', -0.000340); hTrFzCoef.Layout.Column = 2;
+    uieditfield(t5r2, 'text', 'Value', 'N coef (RPM)', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column   = 3;
+    hTrNCoef  = uieditfield(t5r2, 'numeric', 'Value', 0.0004);    hTrNCoef.Layout.Column  = 4;
+
+    % Row 3: totalMass | gRef
+    t5r3 = uigridlayout(T5G, [1 4]); t5r3.Layout.Row = 3; t5r3.ColumnWidth = {110,'1x',110,'1x'}; t5r3.Padding = [0 0 0 0]; t5r3.RowSpacing = 0;
+    uieditfield(t5r3, 'text', 'Value', 'Total Mass (kg)', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column  = 1;
+    hTrMass  = uieditfield(t5r3, 'numeric', 'Value', 1300); hTrMass.Layout.Column  = 2;
+    uieditfield(t5r3, 'text', 'Value', 'g Ref (vertical)', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column = 3;
+    hTrGRef  = uieditfield(t5r3, 'numeric', 'Value', 0);    hTrGRef.Layout.Column  = 4;
+
+    % Row 4: frontCL slope | frontCL intercept
+    t5r4 = uigridlayout(T5G, [1 4]); t5r4.Layout.Row = 4; t5r4.ColumnWidth = {110,'1x',110,'1x'}; t5r4.Padding = [0 0 0 0]; t5r4.RowSpacing = 0;
+    uieditfield(t5r4, 'text', 'Value', 'Front CL slope', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column  = 1;
+    hTrFCLs = uieditfield(t5r4, 'numeric', 'Value', -0.002087248); hTrFCLs.Layout.Column = 2;
+    uieditfield(t5r4, 'text', 'Value', 'Front CL intcpt', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column = 3;
+    hTrFCLi = uieditfield(t5r4, 'numeric', 'Value', -0.196832152); hTrFCLi.Layout.Column = 4;
+
+    % Row 5: rearCL slope | rearCL intercept
+    t5r5 = uigridlayout(T5G, [1 4]); t5r5.Layout.Row = 5; t5r5.ColumnWidth = {110,'1x',110,'1x'}; t5r5.Padding = [0 0 0 0]; t5r5.RowSpacing = 0;
+    uieditfield(t5r5, 'text', 'Value', 'Rear CL slope', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column  = 1;
+    hTrRCLs = uieditfield(t5r5, 'numeric', 'Value', -0.000202926); hTrRCLs.Layout.Column = 2;
+    uieditfield(t5r5, 'text', 'Value', 'Rear CL intcpt', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column = 3;
+    hTrRCLi = uieditfield(t5r5, 'numeric', 'Value', -0.745339228); hTrRCLi.Layout.Column = 4;
+
+    % Row 6: Event | Session
+    t5r6 = uigridlayout(T5G, [1 4]); t5r6.Layout.Row = 6; t5r6.ColumnWidth = {110,'1x',110,'1x'}; t5r6.Padding = [0 0 0 0]; t5r6.RowSpacing = 0;
+    uieditfield(t5r6, 'text', 'Value', 'Event', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column   = 1;
+    hTrEvent   = uieditfield(t5r6, 'text', 'Value', '');  hTrEvent.Layout.Column   = 2;
+    uieditfield(t5r6, 'text', 'Value', 'Session', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Column = 3;
+    hTrSession = uieditfield(t5r6, 'text', 'Value', '');  hTrSession.Layout.Column = 4;
+
+    % Row 7: spacer
+    uieditfield(T5G, 'text', 'Value', '', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]).Layout.Row = 7;
+
+    % Row 8: Compute button
+    hTrComputeBtn = uibutton(T5G, 'Text', 'Compute Trap Velocity', ...
+        'BackgroundColor', [0.18 0.44 0.73], 'FontColor', [1 1 1], 'FontWeight', 'bold');
+    hTrComputeBtn.Layout.Row = 8;
+    hTrComputeBtn.ButtonPushedFcn = @(~,~) onComputeTrapVelocity(fig);
+
+    % Row 9: Plot button
+    hTrPlotBtn = uibutton(T5G, 'Text', 'Plot Velocity vs Timing', ...
+        'BackgroundColor', [0.17 0.56 0.30], 'FontColor', [1 1 1], 'FontWeight', 'bold');
+    hTrPlotBtn.Layout.Row = 9;
+    hTrPlotBtn.ButtonPushedFcn = @(~,~) onPlotTrapVelocity(fig);
+
+    % Row 10: Results table
+    hTrResultsTable = uitable(T5G, ...
+        'ColumnName',  {'Car','Driver','Sess','Lap','Trap', ...
+                        'Timing','vFL','vFR','vRL','vRR', ...
+                        'dFL','dFR','dRL','dRR', ...
+                        'rFL','rFR','rRL','rRR'}, ...
+        'ColumnWidth', {30,80,45,30,35, ...
+                        55,50,50,50,50, ...
+                        45,45,45,45, ...
+                        45,45,45,45}, ...
+        'ColumnEditable', false(1,19), ...
+        'RowName', {});
+    hTrResultsTable.Layout.Row = 10;
+
+    T2G = uigridlayout(tab2, [4 1]);
+    T2G.ColumnWidth = {'1x'};
     T2G.RowHeight   = {22, 22, '1x', 30};
     T2G.Padding     = [8 8 8 8];
     T2G.RowSpacing  = 4;
 
-    lbl = uilabel(T2G, 'Text', 'Excel File');
-    lbl.Layout.Row = 1; lbl.Layout.Column = 1;
-    hExcelPath = uieditfield(T2G, 'text', 'Value', '');
-    hExcelPath.Layout.Row = 1; hExcelPath.Layout.Column = 2;
+    t2r1 = uigridlayout(T2G, [1 2]); t2r1.Layout.Row = 1; t2r1.ColumnWidth = {120,'1x'}; t2r1.Padding = [0 0 0 0]; t2r1.RowSpacing = 0;
+    lbl = uieditfield(t2r1, 'text', 'Value', 'Excel File', 'Editable', 'off', 'BackgroundColor', [0.94 0.94 0.94]); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hExcelPath = uieditfield(t2r1, 'text', 'Value', ''); hExcelPath.Layout.Row = 1; hExcelPath.Layout.Column = 2;
 
-    hExcelBrowse = uibutton(T2G, 'Text', 'Browse...');
-    hExcelBrowse.Layout.Row = 2; hExcelBrowse.Layout.Column = 1;
+    t2r2 = uigridlayout(T2G, [1 2]); t2r2.Layout.Row = 2; t2r2.ColumnWidth = {120,'1x'}; t2r2.Padding = [0 0 0 0]; t2r2.RowSpacing = 0;
+    hExcelBrowse = uibutton(t2r2, 'Text', 'Browse...'); hExcelBrowse.Layout.Row = 1; hExcelBrowse.Layout.Column = 1;
     hExcelBrowse.ButtonPushedFcn = @(~,~) onBrowseExcel(fig, hExcelPath);
-
-    hExcelLoad = uibutton(T2G, 'Text', 'Load Excel Config', ...
-        'BackgroundColor', [0.18 0.44 0.73], 'FontColor', [1 1 1]);
-    hExcelLoad.Layout.Row = 2; hExcelLoad.Layout.Column = 2;
+    hExcelLoad = uibutton(t2r2, 'Text', 'Load Excel Config', ...
+        'BackgroundColor', [0.18 0.44 0.73], 'FontColor', [1 1 1]); hExcelLoad.Layout.Row = 1; hExcelLoad.Layout.Column = 2;
     hExcelLoad.ButtonPushedFcn = @(~,~) onLoadExcel(fig, hExcelPath);
 
     hExcelTable = uitable(T2G, ...
@@ -361,10 +476,10 @@ function SmpExplorer()
         'ColumnWidth',    {35, 140, 90, 90, 90, 70}, ...
         'ColumnEditable', [true false false false false false], ...
         'RowName', {});
-    hExcelTable.Layout.Row = 3; hExcelTable.Layout.Column = [1 2];
+    hExcelTable.Layout.Row = 3;
 
     e2BtnGrid = uigridlayout(T2G, [1 2]);
-    e2BtnGrid.Layout.Row = 4; e2BtnGrid.Layout.Column = [1 2];
+    e2BtnGrid.Layout.Row = 4;
     e2BtnGrid.ColumnWidth = {'1x', '1x'};
     e2BtnGrid.Padding = [0 0 0 0];
 
@@ -439,9 +554,348 @@ function SmpExplorer()
     app.handles.linearFitBtn  = hLinearFitBtn;
     app.handles.cubicFitBtn   = hCubicFitBtn;
     app.handles.clearFitsBtn  = hClearFitsBtn;
+    app.handles.timingBaseDir  = hTimingBaseDir;
+    app.handles.stEvent        = hStEvent;
+    app.handles.stSession      = hStSession;
+    app.handles.stReport       = hStReport;
+    app.handles.stChannel      = [];  % removed — channel fixed to Ground_Speed
+    app.handles.stResultsTable = hStResultsTable;
+    app.speedTrapMatch         = [];
+    app.handles.trR0           = hTrR0;
+    app.handles.trPCoef        = hTrPCoef;
+    app.handles.trFzCoef       = hTrFzCoef;
+    app.handles.trNCoef        = hTrNCoef;
+    app.handles.trMass         = hTrMass;
+    app.handles.trGRef         = hTrGRef;
+    app.handles.trFCLs         = hTrFCLs;
+    app.handles.trFCLi         = hTrFCLi;
+    app.handles.trRCLs         = hTrRCLs;
+    app.handles.trRCLi         = hTrRCLi;
+    app.handles.trEvent        = hTrEvent;
+    app.handles.trSession      = hTrSession;
+    app.handles.trResultsTable = hTrResultsTable;
+    app.tyreRadiusResult       = [];
     guidata(fig, app);
 
 end % SmpExplorer
+
+
+%% =========================================================================
+%  CALLBACK: Tyre Radius — Browse timing CSV
+%% =========================================================================
+function onBrowseTyreCSV(fig, hTrCsvPath) %#ok<INUSL>
+    [f, d] = uigetfile({'*.csv', 'CSV Files (*.csv)'}, 'Select timing CSV');
+    if isequal(f, 0), return; end
+    hTrCsvPath.Value = fullfile(d, f);
+end
+
+%% =========================================================================
+%  CALLBACK: Tyre Radius — Compute trap velocity
+%% =========================================================================
+function onComputeTrapVelocity(fig)
+    app = guidata(fig);
+    h   = app.handles;
+
+    if ~isfield(app, 'cache') || isempty(app.cache)
+        appendLog(h.log, 'ERROR: No cache loaded. Load a cache first.');
+        return;
+    end
+
+    params.r0           = h.trR0.Value;
+    params.P_coef       = h.trPCoef.Value;
+    params.Fz_coef      = h.trFzCoef.Value;
+    params.N_coef       = h.trNCoef.Value;
+    params.totalMass    = h.trMass.Value;
+    params.gRef         = h.trGRef.Value;
+    params.frontCL_coef = [h.trFCLs.Value, h.trFCLi.Value];
+    params.rearCL_coef  = [h.trRCLs.Value, h.trRCLi.Value];
+
+    opts.event   = strtrim(h.trEvent.Value);
+    opts.session = strtrim(h.trSession.Value);
+    base_dir = strtrim(h.timingBaseDir.Value);
+    if ~isempty(base_dir)
+        opts.timing_base_dir = base_dir;
+    end
+
+    appendLog(h.log, sprintf('Tyre radius compute | r0=%.4f P=%.4f Fz=%.6f N=%.4f', ...
+        params.r0, params.P_coef, params.Fz_coef, params.N_coef));
+
+    try
+        T = smp_compute_trap_velocity(app.cache, params, opts);
+    catch ME
+        appendLog(h.log, sprintf('ERROR: %s', ME.message));
+        return;
+    end
+
+    n_traps   = height(T);
+    n_matched = sum(T.matched);
+    appendLog(h.log, sprintf('  %d trap observations, %d with timing match', ...
+        n_traps, n_matched));
+
+    if n_traps == 0
+        h.trResultsTable.Data = {};
+    else
+        matched_str = repmat({'No'}, n_traps, 1);
+        matched_str(T.matched) = {'Yes'};
+        num_cols = {'timing_kph','vFL_kph','vFR_kph','vRL_kph','vRR_kph', ...
+                    'delta_FL','delta_FR','delta_RL','delta_RR', ...
+                    'mean_rFL_mm','mean_rFR_mm','mean_rRL_mm','mean_rRR_mm'};
+        num_data = cellfun(@(c) num2cell(round(T.(c), 1)), num_cols, ...
+                           'UniformOutput', false);
+        h.trResultsTable.Data = [ ...
+            cellstr(T.car), cellstr(T.driver), cellstr(T.session), ...
+            num2cell(T.lap), num2cell(T.trap_num), ...
+            num_data{:}, ...
+            matched_str];
+    end
+
+    app.tyreRadiusResult = T;
+    guidata(fig, app);
+end
+
+%% =========================================================================
+%  CALLBACK: Tyre Radius — Plot velocity vs timing
+%% =========================================================================
+function onPlotTrapVelocity(fig)
+    app = guidata(fig);
+    h   = app.handles;
+
+    if ~isfield(app, 'tyreRadiusResult') || isempty(app.tyreRadiusResult)
+        appendLog(h.log, 'ERROR: No results. Run ''Compute Trap Velocity'' first.');
+        return;
+    end
+
+    T = app.tyreRadiusResult;
+    % keep rows that have at least one wheel velocity
+    has_v = ~isnan(T.vFL_kph) | ~isnan(T.vFR_kph) | ...
+            ~isnan(T.vRL_kph) | ~isnan(T.vRR_kph);
+    T = T(has_v, :);
+    if height(T) == 0
+        appendLog(h.log, 'No rows with computed velocity to plot.');
+        return;
+    end
+
+    laps     = T.lap;
+    t_kph    = T.timing_kph;
+    vFL      = T.vFL_kph;
+    vFR      = T.vFR_kph;
+    vRL      = T.vRL_kph;
+    vRR      = T.vRR_kph;
+    r0_val   = h.trR0.Value;
+    P_val    = h.trPCoef.Value;
+
+    pfig = figure('Name', 'Tyre Radius — Trap Velocity vs Timing', ...
+                  'Color', [1 1 1], 'Units', 'normalized', ...
+                  'Position', [0.04 0.08 0.90 0.78]);
+
+    corner_lbl  = {'FL','FR','RL','RR'};
+    corner_data = {vFL, vFR, vRL, vRR};
+    corner_col  = {[0.18 0.44 0.73], [0.85 0.33 0.10], ...
+                   [0.47 0.67 0.19], [0.64 0.08 0.18]};
+
+    for ci = 1:4
+        ax = subplot(2, 2, ci);
+        hold(ax, 'on'); grid(ax, 'on'); box(ax, 'off');
+        title(ax, corner_lbl{ci});
+        xlabel(ax, 'Lap');
+        ylabel(ax, 'Speed (kph)');
+
+        % timing reference
+        scatter(ax, laps, t_kph, 30, [0.3 0.3 0.3], 's', 'filled', ...
+                'MarkerFaceAlpha', 0.5, 'DisplayName', 'Timing');
+
+        % wheel velocity
+        scatter(ax, laps, corner_data{ci}, 30, corner_col{ci}, 'o', 'filled', ...
+                'MarkerFaceAlpha', 0.8, 'DisplayName', sprintf('v_%s', corner_lbl{ci}));
+
+        legend(ax, 'Location', 'best', 'FontSize', 7);
+    end
+
+    sgtitle(pfig, sprintf('Trap Velocity vs Timing  |  r0=%.4f  P=%.4f', r0_val, P_val), ...
+            'FontSize', 10);
+
+    appendLog(h.log, sprintf('Tyre radius plot: %d observations across %d laps.', ...
+        height(T), numel(unique(laps))));
+end
+
+%% =========================================================================
+%  CALLBACK: Shared — Browse timing base directory
+%% =========================================================================
+function onBrowseTimingDir(fig, hTimingBaseDir) %#ok<INUSL>
+    folder = uigetdir('', 'Select season timing folder (e.g. E:\2026\99_seasonTiming)');
+    if isequal(folder, 0), return; end
+    hTimingBaseDir.Value = folder;
+end
+
+%% =========================================================================
+%  CALLBACK: Speed Trap — Match Laps
+%% =========================================================================
+function onMatchSpeedTrap(fig)
+    app = guidata(fig);
+    h   = app.handles;
+
+    if ~isfield(app, 'cache') || isempty(app.cache)
+        appendLog(h.log, 'ERROR: No cache loaded. Load a cache first.');
+        return;
+    end
+
+    opts             = struct();
+    opts.event       = strtrim(h.stEvent.Value);
+    opts.session     = strtrim(h.stSession.Value);
+    opts.report_type = h.stReport.Value;
+    base_dir = strtrim(h.timingBaseDir.Value);
+    if ~isempty(base_dir)
+        opts.timing_base_dir = base_dir;
+    end
+
+    if strcmp(opts.report_type, 'pit_speed')
+        appendLog(h.log, 'NOTE: traces store flying laps only — most pit speed entries will be unmatched.');
+    end
+
+    appendLog(h.log, sprintf('Speed trap match: %s | event=''%s'' session=''%s''', ...
+        opts.report_type, opts.event, opts.session));
+
+    try
+        T = smp_match_speed_trap(app.cache, opts);
+    catch ME
+        appendLog(h.log, sprintf('ERROR: %s', ME.message));
+        return;
+    end
+
+    n_matched   = sum(T.matched);
+    n_unmatched = height(T) - n_matched;
+    appendLog(h.log, sprintf('  %d rows: %d matched, %d unmatched', ...
+        height(T), n_matched, n_unmatched));
+
+    if height(T) == 0
+        h.stResultsTable.Data = {};
+    else
+        matched_str = repmat({'No'}, height(T), 1);
+        matched_str(T.matched) = {'Yes'};
+        h.stResultsTable.Data = [ ...
+            cellstr(T.car), cellstr(T.driver), cellstr(T.session), ...
+            num2cell(T.lap), ...
+            num2cell(round(T.timing_kph, 1)), ...
+            num2cell(round(T.motec_kph, 1)), ...
+            num2cell(round(T.delta_kph, 1)), ...
+            matched_str];
+    end
+
+    app.speedTrapMatch = T;
+    guidata(fig, app);
+end
+
+%% =========================================================================
+%  CALLBACK: Speed Trap — Plot Comparison
+%% =========================================================================
+function onPlotSpeedTrap(fig)
+    app = guidata(fig);
+    h   = app.handles;
+
+    if ~isfield(app, 'speedTrapMatch') || isempty(app.speedTrapMatch)
+        appendLog(h.log, 'ERROR: No match results. Run ''Match Laps'' first.');
+        return;
+    end
+
+    T = app.speedTrapMatch;
+    T = T(~isnan(T.timing_kph) & ~isnan(T.motec_kph), :);
+    if height(T) == 0
+        appendLog(h.log, 'No matched rows with both timing and MoTeC kph to plot.');
+        return;
+    end
+
+    % ── Manufacturer colour map ───────────────────────────────────────────────
+    mfr_colours = struct( ...
+        'Ford',      [  0,  87, 184] / 255, ...
+        'Chevrolet', [245, 196,   0] / 255, ...
+        'Toyota',    [235,  10,  30] / 255, ...
+        'Unknown',   [ 90, 102, 120] / 255  ...
+    );
+
+    % ── Infer manufacturer ────────────────────────────────────────────────────
+    mfr = repmat("Unknown", height(T), 1);
+
+    has_vehicle = ismember('vehicle', T.Properties.VariableNames) && ...
+                  any(strlength(strtrim(string(T.vehicle))) > 0);
+    if has_vehicle
+        veh = string(T.vehicle);
+        mfr(contains(veh, 'Ford',      'IgnoreCase', true)) = "Ford";
+        mfr(contains(veh, 'Chev',      'IgnoreCase', true)) = "Chevrolet";
+        mfr(contains(veh, 'Chevrolet', 'IgnoreCase', true)) = "Chevrolet";
+        mfr(contains(veh, 'Toyota',    'IgnoreCase', true)) = "Toyota";
+    elseif isfield(app, 'driver_map') && ~isempty(app.driver_map)
+        dm      = app.driver_map;
+        car_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
+        fields  = fieldnames(dm);
+        for fi = 1:numel(fields)
+            d = dm.(fields{fi});
+            if isfield(d, 'num') && isfield(d, 'manufacturer') && ~isempty(d.num)
+                car_map(char(d.num)) = char(d.manufacturer);
+            end
+        end
+        for ri = 1:height(T)
+            key = strtrim(char(T.car(ri)));
+            if isKey(car_map, key)
+                mfr(ri) = string(car_map(key));
+            end
+        end
+    end
+
+    T.mfr = mfr;
+    manufacturers = unique(mfr);
+
+    % ── Build figure ──────────────────────────────────────────────────────────
+    pfig = figure('Name', 'Speed Trap Comparison', 'Color', [1 1 1], ...
+                  'Units', 'normalized', 'Position', [0.05 0.1 0.88 0.75]);
+
+    ax1 = subplot(2, 1, 1);
+    hold(ax1, 'on'); grid(ax1, 'on'); box(ax1, 'off');
+    xlabel(ax1, 'Lap Number');
+    ylabel(ax1, 'Speed (kph)');
+    title(ax1, 'Timing vs MoTeC Speed — by Lap');
+
+    ax2 = subplot(2, 1, 2);
+    hold(ax2, 'on'); grid(ax2, 'on'); box(ax2, 'off');
+    xlabel(ax2, 'Lap Number');
+    ylabel(ax2, 'Delta: Timing \minus MoTeC (kph)');
+    title(ax2, 'Speed Delta');
+
+    h_leg = gobjects(0);
+    l_leg = {};
+
+    for mi = 1:numel(manufacturers)
+        mf   = char(manufacturers(mi));
+        mask = T.mfr == manufacturers(mi);
+        Tm   = T(mask, :);
+
+        if isfield(mfr_colours, mf)
+            col = mfr_colours.(mf);
+        else
+            col = mfr_colours.Unknown;
+        end
+
+        % Timing series — filled circles
+        ht = scatter(ax1, Tm.lap, Tm.timing_kph, 28, col, 'o', 'filled', ...
+                     'MarkerFaceAlpha', 0.8);
+        h_leg(end+1) = ht; %#ok<AGROW>
+        l_leg{end+1} = sprintf('%s (Timing)', mf); %#ok<AGROW>
+
+        % MoTeC series — crosses
+        hm = scatter(ax1, Tm.lap, Tm.motec_kph, 36, col, 'x', 'LineWidth', 1.5);
+        h_leg(end+1) = hm; %#ok<AGROW>
+        l_leg{end+1} = sprintf('%s (MoTeC)', mf); %#ok<AGROW>
+
+        % Delta panel
+        stem(ax2, Tm.lap, Tm.delta_kph, 'Color', col, ...
+             'MarkerFaceColor', col, 'MarkerSize', 4);
+    end
+
+    legend(ax1, h_leg, l_leg, 'Location', 'best', 'FontSize', 8);
+    yline(ax2, 0, 'k--', 'LineWidth', 0.8);
+
+    appendLog(h.log, sprintf('Speed trap plot: %d points, %d manufacturers.', ...
+        height(T), numel(manufacturers)));
+end
 
 %% =========================================================================
 %  CALLBACK: Browse folder
@@ -471,13 +925,13 @@ function onLoadCache(fig, pathField)
     pathVal = strtrim(pathField.Value);
     if isempty(pathVal)
         appendLog(h.log, 'ERROR: No path specified.');
-        h.statusLbl.Text      = 'No path specified';
+        h.statusLbl.Value     = 'No path specified';
         h.statusLbl.FontColor = [0.8 0.2 0.2];
         return;
     end
 
     appendLog(h.log, sprintf('Loading cache: %s', pathVal));
-    h.statusLbl.Text      = 'Loading...';
+    h.statusLbl.Value     = 'Loading...';
     h.statusLbl.FontColor = [0.8 0.7 0.1];
     drawnow;
 
@@ -491,13 +945,13 @@ function onLoadCache(fig, pathField)
             cache = smp_cache_load(pathVal);
         else
             appendLog(h.log, 'ERROR: Path is not a valid folder or .mat file.');
-            h.statusLbl.Text      = 'Invalid path';
+            h.statusLbl.Value     = 'Invalid path';
             h.statusLbl.FontColor = [0.8 0.2 0.2];
             return;
         end
     catch ME
         appendLog(h.log, sprintf('ERROR (smp_cache_load): %s', ME.message));
-        h.statusLbl.Text      = 'Load failed';
+        h.statusLbl.Value     = 'Load failed';
         h.statusLbl.FontColor = [0.8 0.2 0.2];
         return;
     end
@@ -625,7 +1079,7 @@ function onLoadCache(fig, pathField)
     end
 
     n_entries = height(T);
-    h.statusLbl.Text      = sprintf('%d entries loaded', n_entries);
+    h.statusLbl.Value     = sprintf('%d entries loaded', n_entries);
     h.statusLbl.FontColor = [0.2 0.7 0.3];
     appendLog(h.log, sprintf('  OK: %d manifest entries, %d channels found.', ...
         n_entries, numel(chans)));
@@ -686,12 +1140,12 @@ function onApplyFilters(fig, sessionsList, teamsList, mfrList, lapMin, lapMax) %
         end
 
         msg = sprintf('%d laps, %d session(s)', n_laps, numel(sess_set));
-        h.filterStatus.Text = msg;
+        h.filterStatus.Value = msg;
         appendLog(h.log, sprintf('  Filtered: %s.', msg));
 
     catch ME
         appendLog(h.log, sprintf('  Filter error: %s', ME.message));
-        h.filterStatus.Text = 'Filter error -- see log';
+        h.filterStatus.Value = 'Filter error -- see log';
     end
 end
 
@@ -801,12 +1255,31 @@ function onPlotDirect(fig)
             h.filterModeBtn.BackgroundColor = [0.4 0.4 0.4];
 
             % Copy all axes into the embedded panel
+            % (R2020a: copyobj between figure/uifigure is unsupported;
+            %  create uiaxes per source axes and copy children instead)
             allAx = findobj(srcFig, 'Type', 'axes');
+            allAx = flipud(allAx);  % restore natural creation order
             if ~isempty(allAx)
-                newAxes = copyobj(allAx, h.plotPnl);
-                % Reposition to fill panel
-                for ai = 1:numel(newAxes)
-                    set(newAxes(ai), 'Units', 'normalized', 'Position', [0.09 0.08 0.87 0.87]);
+                n = numel(allAx);
+                for ai = 1:n
+                    srcAx = allAx(ai);
+                    if n == 1
+                        pos = [0.09 0.08 0.87 0.87];
+                    else
+                        cw  = 0.85 / n;
+                        pos = [0.07 + (ai-1)*(cw + 0.01), 0.08, cw, 0.87];
+                    end
+                    newAx = uiaxes(h.plotPnl);
+                    newAx.InnerPosition = pos;
+                    copyobj(srcAx.Children, newAx);
+                    newAx.XLim          = srcAx.XLim;
+                    newAx.YLim          = srcAx.YLim;
+                    newAx.XGrid         = srcAx.XGrid;
+                    newAx.YGrid         = srcAx.YGrid;
+                    newAx.Box           = srcAx.Box;
+                    newAx.XLabel.String = srcAx.XLabel.String;
+                    newAx.YLabel.String = srcAx.YLabel.String;
+                    newAx.Title.String  = srcAx.Title.String;
                 end
             end
 

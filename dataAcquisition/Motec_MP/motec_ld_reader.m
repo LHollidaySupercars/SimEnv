@@ -1,4 +1,4 @@
-function data = motec_ld_reader(filepath, channels_to_extract)
+function data = motec_ld_reader(filepath, channels_to_extract, ecu_format)
 % MOTEC_LD_READER  Parse a MoTeC .ld binary file without the i2 API licence.
 %
 % Usage:
@@ -11,11 +11,22 @@ function data = motec_ld_reader(filepath, channels_to_extract)
 %       the linked list), but the fseek+fread of sample data is skipped for
 %       channels not in the list. Pass {} to read all channels.
 %
-% Datatype encoding (confirmed against MoTeC i2):
+%   data = motec_ld_reader('C:\path\to\yourfile.ld', channels_to_extract, true)
+%       ECU format mode — for MoTeC M1 ECU logger files which differ from
+%       dash logger files in two ways:
+%         - Units string is at metadata block offset +0x40 (not +0x48)
+%         - Datatype 4 = native float32 (not int16 + 2-byte padding)
+%       Pass false or omit for standard dash logger files.
+%
+% Datatype encoding (Dash format):
 %   1 = float16  — raw uint16 decoded as IEEE half-precision, already physical
 %   2 = int16    — scaled: (raw * mul/scale) / 10^dec + offset
 %   3 = int32    — scaled: (raw * mul/scale) / 10^dec + offset
 %   4 = int16 + 2 byte padding per sample (4 bytes/sample) — dec/offset only
+%
+% Datatype encoding (ECU format, ecu_format=true):
+%   1,2,3 same as above
+%   4 = float32  — native IEEE 754 single precision, already physical
 %
 % Post-load normalisation:
 %   Distance channels (Trip Distance, Odometer, Distance) are normalised
@@ -23,6 +34,18 @@ function data = motec_ld_reader(filepath, channels_to_extract)
 
     % Channel names that should be normalised to start at 0
     DISTANCE_CHANNELS = {'Trip Distance', 'Odometer', 'Distance', 'Trip_Distance'};
+
+    % --- ECU format flag ---
+    if nargin < 3 || isempty(ecu_format)
+        ecu_format = false;
+    end
+    if ecu_format
+        units_rel_offset = 0x40;   % units immediately after name
+        fprintf('Format: ECU logger (units at +0x40, type-4 = float32)\n');
+    else
+        units_rel_offset = 0x48;   % 8-byte short name before units
+        fprintf('Format: Dash logger (units at +0x48, type-4 = int16+pad)\n');
+    end
 
     % --- Enhanced mode: build lowercase filter set for fast lookup ---
     if nargin < 2 || isempty(channels_to_extract)
@@ -86,9 +109,8 @@ function data = motec_ld_reader(filepath, channels_to_extract)
         dec_places  = fread(fid, 1, 'int16=>double',  0, 'l');
         % Now at +0x20 — channel name
         name_raw  = fread(fid, 32, 'uint8=>double')';
-        % skip short name (+0x40, 8 bytes)
-        fread(fid, 8, 'uint8=>double');
-        % units at +0x50
+        % Units: ECU format at +0x40 (no short-name gap), Dash format at +0x48
+        fseek(fid, current_ptr + units_rel_offset, 'bof');
         units_raw = fread(fid, 12, 'uint8=>double')';
 
         % Parse null-terminated strings
@@ -144,11 +166,14 @@ function data = motec_ld_reader(filepath, channels_to_extract)
                     end
 
                 case 4
-                    % int16 with 2 bytes padding per sample (4 bytes total per sample)
-                    % data_len = number of samples, each 4 bytes wide
-                    % fread skip=2 reads int16 then skips 2 bytes before next read
-                    raw_data = fread(fid, data_len, 'int16=>double', 2, 'l');
-                    phys     = raw_data ./ (10^dec_places) + ch_offset;
+                    if ecu_format
+                        % ECU format: type-4 = native float32 (4 bytes/sample)
+                        phys = fread(fid, data_len, 'float32=>double', 0, 'l');
+                    else
+                        % Dash format: type-4 = int16 + 2-byte padding per sample
+                        raw_data = fread(fid, data_len, 'int16=>double', 2, 'l');
+                        phys     = raw_data ./ (10^dec_places) + ch_offset;
+                    end
 
                 otherwise
                     fprintf('  [??] %-32s  unknown datatype %d\n', name_str, datatype);

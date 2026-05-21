@@ -763,7 +763,8 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
 
     mode          = get_opt(opts, 'mode',           'stream');
     track         = get_opt(opts, 'track',          '');
-    max_traces    = get_opt(opts, 'max_traces',      5);
+    max_traces    = get_opt(opts, 'max_traces',      inf);
+    all_laps      = get_opt(opts, 'all_laps',         false);
     dist_npts     = get_opt(opts, 'dist_n_points',   1000);
     dist_ch       = get_opt(opts, 'dist_channel',    'Odometer');
     verbose       = get_opt(opts, 'verbose',         true);
@@ -778,9 +779,10 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
     br2_channel    = get_opt(opts, 'br2_channel',      'BR2_Beacon_Number');
     br2_protocol   = get_opt(opts, 'br2_protocol',     'standard');
     beacon_check   = get_opt(opts, 'beacon_check',     false);
-    unique_fp      = get_opt(opts, 'uniqueFingerprint', false);
-    show_report    = get_opt(opts, 'showConcatReport',  false);
-    concat_csv_dir = get_opt(opts, 'concat_csv_dir',    '');
+    unique_fp      = get_opt(opts, 'uniqueFingerprint',  false);
+    show_report    = get_opt(opts, 'showConcatReport',   false);
+    concat_csv_dir = get_opt(opts, 'concat_csv_dir',     '');
+    load_all_ch    = get_opt(opts, 'load_all_channels',  false);
 
     % ------------------------------------------------------------------
     %  Lap time limits from season overview
@@ -881,6 +883,12 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
 
     if isempty(to_load)
         fprintf('All files up to date — nothing new to compile.\n\n');
+        % Migrate cache format if needed (e.g. existing legacy → requested session mode)
+        if saveCache && strcmp(save_mode, 'session') && ...
+                (~isfield(cache, 'save_mode') || ~strcmp(cache.save_mode, 'session'))
+            fprintf('Migrating cache from legacy to session mode...\n');
+            smp_cache_save(top_level_dir, cache, save_mode, alias);
+        end
         return;
     end
 
@@ -904,7 +912,7 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
                                dist_ch, driver_map, verbose, channel_rules, ...
                                detect_pitlane, fcy_channel, ...
                                br2_channel, br2_protocol, ...
-                               unique_fp, show_report, concat_csv_dir);
+                               unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch);
     else
         cache = process_bulk(cache, groups, channels_to_extract, verbose);
     end
@@ -919,6 +927,7 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
         t_save = toc;
         fprintf('Cache saved in %.1fs.\n\n', t_save);
     end
+    cache.save_mode = save_mode;   % ensure returned cache reflects intended mode
 end
 
 
@@ -933,7 +942,7 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
                                  dist_ch, driver_map, verbose, channel_rules, ...
                                  detect_pitlane, fcy_channel, ...
                                  br2_channel, br2_protocol, ...
-                                 unique_fp, show_report, concat_csv_dir)
+                                 unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch)
     if nargin < 11, channel_rules  = [];                  end
     if nargin < 12, detect_pitlane = false;               end
     if nargin < 13, fcy_channel    = 'FCY_Flag';          end
@@ -942,6 +951,8 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
     if nargin < 16, unique_fp      = false;               end
     if nargin < 17, show_report    = false;               end
     if nargin < 18, concat_csv_dir = '';                  end
+    if nargin < 19, all_laps       = false;               end
+    if nargin < 20, load_all_ch    = false;               end
     MYLAPS_CH_DEFAULT        = 'MyLaps X2TRA DeviceShortId';
     lap_opts.min_lap_time    = min_lt;
     lap_opts.max_lap_time    = max_lt;
@@ -979,7 +990,8 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
         end
         ch_extract_full = unique([channels_to_extract(:); required_ch(:)]);
         try
-            session = load_and_concat(grp.files, ch_extract_full, verbose);
+            session = load_and_concat(grp.files, ch_extract_full, verbose, ...
+                                      unique_fp, show_report, grp.key, concat_csv_dir, load_all_ch, driver_map);
         catch ME
             fprintf('  [ERROR] Load failed: %s\n', ME.message);
             cache = add_failed_entries(cache, grp, ME.message);
@@ -993,11 +1005,6 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
 
         % ---- Lap slice ----
         try
-            opts.beacon_check       = true;
-%             opts                    = struct();
-opts.beacon_check       = true;
-opts.beacon_check_label = 'debug session';
-opts.verbose            = true;
             laps = lap_slicer(session, lap_opts);
         catch ME
             fprintf('  [ERROR] lap_slicer: %s\n', ME.message);
@@ -1013,7 +1020,6 @@ opts.verbose            = true;
             continue;
         end
 
-%         fprintf('  %d valid laps\n', numel(laps));
         fprintf('  %d valid laps\n', numel(laps));
 
         % ---- Data quality filter (NaN bad samples before stats) ----
@@ -1036,11 +1042,15 @@ opts.verbose            = true;
             continue;
         end
 
-        % ---- Select top-N laps by lap time (flying laps only) ----
-        flying_mask = strcmp({laps.lap_type}, 'flying');
-        flying_laps = laps(flying_mask);
+        % ---- Select top-N laps by lap time (flying only, or all if all_laps=true) ----
+        if all_laps
+            flying_laps = laps;
+        else
+            flying_mask = strcmp({laps.lap_type}, 'flying');
+            flying_laps = laps(flying_mask);
+        end
         if isempty(flying_laps)
-            fprintf('  [WARN] No flying laps found — skipping traces.\n');
+            fprintf('  [WARN] No laps found — skipping traces.\n');
             traces = struct('lap_times', [], 'lap_numbers', [], 'n_traces', 0);
         else
             lap_times = [flying_laps.lap_time];
@@ -1147,44 +1157,74 @@ end
 %     session = concat_sessions(all_sessions);
 % end
 
-function session = load_and_concat(files, channels_to_extract, verbose, unique_fp, show_report, label, csv_out_dir)
+function session = load_and_concat(files, channels_to_extract, verbose, unique_fp, show_report, label, csv_out_dir, load_all, driver_map)
     if nargin < 4, unique_fp    = false; end
     if nargin < 5, show_report  = false; end
     if nargin < 6, label        = '';    end
     if nargin < 7, csv_out_dir  = '';    end
+    if nargin < 8, load_all     = false; end
+    if nargin < 9, driver_map   = [];    end
+
+    % When load_all=true, pass {} to motec_ld_reader (reads every channel)
+    % and skip filter_channels so the full file is available downstream.
+    if load_all
+        rd_channels = {};
+    else
+        rd_channels = channels_to_extract;
+    end
 
     if numel(files) == 1
-        session = motec_ld_reader(files{1}, channels_to_extract);
-        session = smp_custom_channels(session);
-        session = filter_channels(session, channels_to_extract);
+        session = motec_ld_reader(files{1}, rd_channels);
+        fi = read_file_info(files{1}, driver_map);
+        session = smp_custom_channels(session, 'manufacturer', fi.manufacturer, 'driver', fi.driver);
+        if ~load_all
+            session = filter_channels(session, channels_to_extract);
+        end
         return;
     end
 
-    % Multi-stint
-    all_sessions = cell(numel(files), 1);
+    % Multi-stint — incremental concat to limit peak memory usage.
+    % Each file is loaded, processed, filtered, then immediately merged
+    % into the accumulated session before being cleared from memory.
+    concat_opts.uniqueFingerprint = unique_fp;
+    session   = [];
+    fp_report = struct('session_idx', {}, 'status', {}, 'reason', {}, ...
+                       'matched_idx', {}, 'tag',    {}, ...
+                       'fp_start',    {}, 'fp_end', {});
+
     for f = 1:numel(files)
         if verbose
             [~, fname] = fileparts(files{f});
-            fprintf('    Loading stint %d: %s\n', f, fname);
+            fprintf('    Loading stint %d/%d: %s\n', f, numel(files), fname);
         end
         totalTic = tic;
         t0 = tic;
-        s = motec_ld_reader(files{f}, channels_to_extract);
+        s = motec_ld_reader(files{f}, rd_channels);
+        fi = read_file_info(files{f}, driver_map);
         fprintf('  motec_ID_reader: %.2fs\n', toc(t0));
         t0 = tic;
-        s = smp_custom_channels(s);
+        s = smp_custom_channels(s, 'manufacturer', fi.manufacturer, 'driver', fi.driver);
         fprintf('  smp_custom_channels: %.2fs\n', toc(t0));
-        t0 = tic;
-        s = filter_channels(s, channels_to_extract);
-        fprintf('  filter_channels: %.2fs\n', toc(t0));
-        all_sessions{f} = s;
+        if ~load_all
+            t0 = tic;
+            s = filter_channels(s, channels_to_extract);
+            fprintf('  filter_channels: %.2fs\n', toc(t0));
+        end
+
+        if isempty(session)
+            session = s;
+        else
+            [session, rep] = concat_sessions({session, s}, concat_opts);
+            if ~isempty(rep)
+                fp_report = [fp_report, rep(:)'];  %#ok<AGROW>
+            end
+        end
+        clear s;
         fprintf('  Total Time: %.2fs\n', toc(totalTic));
     end
 
-    concat_opts.uniqueFingerprint = unique_fp;
-    [session, fp_report] = concat_sessions(all_sessions, concat_opts);
     if show_report && ~isempty(fp_report)
-        smp_show_concat_report(fp_report, label, files, all_sessions, session);
+        smp_show_concat_report(fp_report, label, files, {}, session);
     end
     n_dropped = sum(strcmp({fp_report.status}, 'dropped'));
     if n_dropped > 0 && ~isempty(csv_out_dir)
@@ -1202,6 +1242,29 @@ function session = load_and_concat(files, channels_to_extract, verbose, unique_f
                   'VariableNames', {'session_idx','file','status','reason','matched_idx','tag'});
         writetable(T, csv_path);
         fprintf('  [concat] CSV saved: %s\n', csv_path);
+    end
+end
+
+
+% ======================================================================= %
+function info = read_file_info(filepath, driver_map)
+% Read file header metadata via motec_ld_info (quiet — no console output).
+% If manufacturer is empty after header read, fall back to driver alias lookup.
+% Returns an empty struct on failure so callers don't crash.
+    if nargin < 2, driver_map = []; end
+    try
+        info = motec_ld_info(filepath, false);
+    catch
+        info = struct();
+    end
+    % Fallback: resolve manufacturer from driver alias when vehicle string
+    % doesn't match any known pattern (returns '' from infer_manufacturer).
+    if (~isfield(info, 'manufacturer') || isempty(info.manufacturer)) && ...
+       isfield(info, 'driver') && ~isempty(info.driver)
+        mfr = resolve_driver_meta(info.driver, driver_map);
+        if ~isempty(mfr)
+            info.manufacturer = mfr;
+        end
     end
 end
 
@@ -1281,8 +1344,12 @@ function traces = package_traces(top_laps, channels_to_extract)
     for c = 1:numel(ch_fields)
         fn = ch_fields{c};
 
-        % Only store requested channels
-        is_requested = isempty(channels_to_extract) || ...
+        % Always keep MyLaps beacon channel (needed for speed trap windowing)
+        is_mylaps = ~isempty(regexpi(fn, 'mylaps', 'once'));
+
+        % Only store requested channels (or always-keep channels)
+        is_requested = is_mylaps || ...
+                       isempty(channels_to_extract) || ...
                        any(strcmpi(fn, channels_to_extract)) || ...
                        any(cellfun(@(ch) strcmpi(regexprep(ch,'[^a-zA-Z0-9_]','_'), fn), ...
                                    channels_to_extract));

@@ -7,7 +7,7 @@ fprintf('Loading Kinematic properties...\n');
 
 GEN3_KinematicParameters
 POS = containers.Map();
-axle = 'front'
+axle = 'front';
 
 %% Shim Enquiry
 %% ============================== FRONT ==================================
@@ -47,8 +47,7 @@ vehicle = clevisOffset(vehicle, Clevis, clevisShims, axle)
 POS('REAR_UBJ_UPRIGHT_POS') = 3;
 
 
-axle = 'rear'
-original = vehicle.ford.kinematics.rear.upperAArm.fore;
+axle = 'rear';
 POS('RLF_POS') = 3;
 Clevis = 'ford.kinematics.rear.lowerAArm.fore';
 clevisShims = ...
@@ -79,6 +78,7 @@ clevisShims = ...
 vehicle = clevisOffset(vehicle, Clevis, clevisShims, axle);
 %%
 
+vehicle = clevisPOSOffset(vehicle, manufacturer, POS, 'front');
 vehicle = clevisPOSOffset(vehicle, manufacturer, POS, axle);
 
 assumedLinearRackDisplacement = [-pi, pi] * vehicle.ford.steering.ratio;
@@ -98,11 +98,13 @@ fprintf('Initializing Rear Camber sweep...\n');
 fprintf('Initializing Uses Baseline Theta For Search...\n');
 fprintf('Completed Lower A-Arm Sweep...\n\t Kinematics will not be accurate post this step\t Damper And Lower A-Arm Angle Are Well Defined...');
 
-vehicle.(manufacturer).kinematics.(axle).camberSweep = solveWheelCamber(vehicle, 'manufacturer', 'ford', 'axle', axle);
+% vehicle.(manufacturer).kinematics.(axle).camberSweep = solveWheelCamber(vehicle, 'manufacturer', 'ford', 'axle', axle);
+vehicle = solveWheelCamber(vehicle, 'manufacturer', 'ford', 'axle', axle);
 fprintf('Completed Initial Rear Camber Sweep...\n');
 fprintf('Completed To Achieve KPIs...\n');
 fprintf('Initializing toe sweep...\n');
-vehicle.(manufacturer).kinematics.(axle).toeSweep = solveWheelToe(vehicle, 'manufacturer', 'ford', 'axle', axle);
+% vehicle.(manufacturer).kinematics.(axle).toeSweep = solveWheelToe(vehicle, 'manufacturer', 'ford', 'axle', axle);
+vehicle = solveWheelToe(vehicle, 'manufacturer', 'ford', 'axle', axle);
 fprintf('Completed toe sweep...\n');
 % Find Reasonable range of damper displacement
 fprintf('Initializing Damper Travel...\n');
@@ -115,32 +117,32 @@ fprintf('Initializing A-Arm Compensation...\n');
 
 radiiOffset = rearAArmCompensation(vehicle, manufacturer, axle, shims, 'CAD_ERROR', true); % in plane radius increase
 
-[vehicle.(manufacturer).kinematics.(axle).upperAArm.ballJoint, ~] = threeSphereUpperAArm(vehicle, 'ford', 'newRadii', radiiOffset, 'plotResults', true);
+% [vehicle.(ma nufacturer).kinematics.(axle).upperAArm.ballJoint, ~]= threeSphereUpperAArm(vehicle, 'ford', 'newRadii', radiiOffset, 'plotResults', true);
+vehicle = threeSphereUpperAArm(vehicle, 'ford', 'newRadii', radiiOffset, 'plotResults', true);
 fprintf('Completed A-Arm Compensation...\n');
 %% UBJ Compensation 
 fprintf('Initializing UBJ to LBJ Length Compensation...\n');
 radiiOffset = getOffset(vehicle, manufacturer, POS, axle)
-[vehicle.(manufacturer).kinematics.(axle).upperAArm.ballJoint, ~] = threeSphereUpperAArm(vehicle, 'ford', 'newRadii', radiiOffset, 'plotResults', true, 'geometrySystem', 'extendUBJ');
+vehicle = threeSphereUpperAArm(vehicle, 'ford', 'newRadii', radiiOffset, 'plotResults', true, 'geometrySystem', 'extendUBJ');
 fprintf('Completed UBJ to LBJ Length Correction...\n');
 
-%% UBJ Compensation 
-
-vehicle.ford.kinematics.rear.camberSweep.camberCorrected = vehicle.ford.kinematics.rear.camberSweep.camber; 
 %% Static Camber Compensation
+camberPreCorrection = vehicle.(manufacturer).kinematics.(axle).camberSweep.camber;
 fprintf('Initializing Rear Camber sweep...\n');
-vehicle.(manufacturer).kinematics.(axle).camberSweep = solveWheelCamber(vehicle, 'manufacturer', 'ford', 'axle', axle,'thetaL_range', vehicle.(manufacturer).kinematics.(axle).camberSweep.thetaL);
+vehicle = solveWheelCamber(vehicle, 'manufacturer', 'ford', 'axle', axle,'thetaL_range', vehicle.(manufacturer).kinematics.(axle).camberSweep.thetaL);
+vehicle.(manufacturer).kinematics.(axle).camberSweep.camberCorrected = camberPreCorrection;
 fprintf('Completed rear camber sweep...\n');
 %% Toe Sweep
 
 fprintf('Initializing toe sweep...\n');
-vehicle.(manufacturer).kinematics.(axle).toeSweep = solveWheelToe(vehicle, 'manufacturer', 'ford', 'axle', axle);
+vehicle = solveWheelToe(vehicle, 'manufacturer', 'ford', 'axle', axle);
 fprintf('Completed toe sweep...\n');
 
 %% Tyre 
 
 fprintf('Initializing Contact Patch Correction...\n');
 fprintf('Takes in\n\t- Kinematic Points\n\t- Rotation Axis Offset\n\t\t- Static offset, upright reference frame\n\t- Wheel Geometry\n\t\t- Assuming rigid Tyre\n\t\t- Rear Axle Camber & KPI are identical\n')
-vehicle = offsetInPerpendicularPlane(vehicle, 'ford', 'rear', 'contactChoice', 'tyreCentre')
+vehicle = offsetInPerpendicularPlane(vehicle, 'ford', 'rear', 'contactChoice', 'tyreCentre');
 fprintf('Completed Contact Patch Correction...\n');
 
 %% Roll Centre Calculation
@@ -148,33 +150,32 @@ fprintf('Completed Contact Patch Correction...\n');
 
 fprintf('Initializing Roll Centre Sweep...\n');
 vehicle = offsetInPerpendicularPlane(vehicle, 'ford', 'rear', 'contactChoice', 'tyreCentre')
-[vehicle.(manufacturer).kinematics.(axle).RC_height_array, vehicle.ford.kinematics.dRC_dz_nominal] = ...
-    calculateRollCenter(vehicle, 'manufacturer', 'ford', 'Plotting', true)
+vehicle = calculateRollCenter(vehicle, 'manufacturer', 'ford', 'Plotting', true)
 
 %% Projected Under LBJ
 
-[vehicle.(manufacturer).kinematics.(axle).RC_height_array, vehicle.ford.kinematics.dRC_dz_nominal] = ...
-    calculateRollCenter(vehicle, 'manufacturer', 'ford','wheelCentre', 'compensated', 'Plotting', true)
-
+% vehicle = calculateRollCenter(vehicle, 'manufacturer', 'ford','simplified', 'compensated', 'Plotting', true)
+% This step is cooked
 %% Inside Edge Tyre
+% vehicle = offsetInPerpendicularPlane(vehicle, 'ford', 'rear', 'contactChoice', 'inside');
+% vehicle = calculateRollCenter(vehicle, 'manufacturer', 'ford','wheelCentre', 'compensated', 'Plotting', true)
+% fprintf('Completed Roll Centre Sweep...\n');
 
-vehicle = offsetInPerpendicularPlane(vehicle, 'ford', 'rear', 'contactChoice', 'inside');
-[vehicle.(manufacturer).kinematics.(axle).RC_height_array, vehicle.ford.kinematics.dRC_dz_nominal] = ...
-    calculateRollCenter(vehicle, 'manufacturer', 'ford','wheelCentre', 'compensated', 'Plotting', true)
-fprintf('Completed Roll Centre Sweep...\n');
 %% Reproduce MR Plots with corrected Geometry
 
 vehicle = solveDamperTravel(vehicle, 'debug', 1, 'Plotting',true, 'wheelCentre', 'compensated');
-
+vehicle = solveLinearPotTravel(vehicle, 'debug', 1, 'Plotting',true, 'wheelCentre', 'compensated');
+vehicle = buildPotToDamperLUT(vehicle, 'manufacturer', manufacturer, 'axle', axle, 'Plotting', true);
 %% Anti Geometry Calculation
 fprintf('Initializing Anti Geometry Sweep...\n');
-vehicle.(manufacturer).kinematics.(axle).antiDive = calculateAntiGeometry(vehicle);
+vehicle = calculateAntiGeometry(vehicle);
 fprintf('Initializing Anti Geometry Sweep...\n');
 %% Scrub Radius Calculation
 fprintf('Initializing... \n\t- Scrub Radius\n\t- Caster Angle\n Calculation...\n');
-[vehicle.(manufacturer).kinematics.(axle).RC_height_array, vehicle.ford.kinematics.dRC_dz_nominal] =  calculateKinematicAttributes(vehicle, 'manufacturer', 'ford', 'Plotting', true)
+% vehicle =  calculateKinematicAttributes(vehicle, 'manufacturer', 'ford', 'Plotting', true)
 
-
+%% LUT Rear Axle
+vehicle = buildPotToDamperLUT(vehicle, 'axle', 'rear')
 %% Finalize Rear
 
 fprintf('Rezero All Geometry About Designed Position...\n');
@@ -192,7 +193,7 @@ assumedLinearRackDisplacement = [-pi, pi] * vehicle.ford.steering.ratio;
 
 fprintf('Initializing front Kinematic sweep...\n');
 fprintf('Initializing front camber sweep...\n');
-vehicle.(manufacturer).kinematics.(axle).camberSweep = solveWheelCamber(vehicle, 'manufacturer', 'ford', 'axle', axle);
+vehicle = solveWheelCamber(vehicle, 'manufacturer', 'ford', 'axle', axle);
 fprintf('Completed front Camber sweep...\n');
 %%
 
@@ -211,14 +212,14 @@ fprintf('Completed Camber sweep...\n');
 fprintf('Initializing Front Toe sweep...\n');
 fprintf('Rows - Wheel Travel\nColumns - Steering Travel...\n')
 
-vehicle.(manufacturer).kinematics.(axle).toeSweep = solveWheelToe(vehicle, 'manufacturer', 'ford', 'axle', axle, 'isSteeringAngle', true, 'fidelity', length(vehicle.ford.kinematics.rear.camberSweep.thetaL));
+vehicle = solveWheelToe(vehicle, 'manufacturer', 'ford', 'axle', axle, 'isSteeringAngle', true, 'fidelity', length(vehicle.ford.kinematics.rear.camberSweep.thetaL));
 fprintf('Completed toe sweep...\n');
 
 %%
 fprintf('Initializing roll centre sweep...\n');
-[vehicle.(manufacturer).kinematics.(axle).RC_height_array, vehicle.ford.kinematics.dRC_dz_nominal] =  calculateRollCenter(vehicle, 'manufacturer', 'ford')
+vehicle =  calculateRollCenter(vehicle, 'manufacturer', 'ford')
 fprintf('Initializing roll centre sweep...\n');
-vehicle.(manufacturer).kinematics.(axle).antiDive = calculateAntiGeometry(vehicle);
+vehicle = calculateAntiGeometry(vehicle);
 % fprintf('Initializing Roll Centre Sweep...\n');
 
 
@@ -227,6 +228,7 @@ vehicle.(manufacturer).kinematics.(axle).antiDive = calculateAntiGeometry(vehicl
 vehicle = offsetInPerpendicularPlane(vehicle, 'ford', 'front', 'contactChoice', 'tyreCentre');
 
 vehicle = offsetInPerpendicularPlane(vehicle, 'ford', 'rear', 'contactChoice', 'tyreCentre');
+frontToeSize = size(vehicle.(manufacturer).kinematics.(axle).toeSweep.toe);
 %% Inside
 for i = 1 : frontToeSize(2)
     vehicle = offsetInPerpendicularPlane(vehicle, 'ford', 'front', 'contactChoice', 'inside','toeIndex', i);
@@ -234,28 +236,23 @@ end
 
 vehicle = offsetInPerpendicularPlane(vehicle, 'ford', 'rear', 'contactChoice', 'inside');
 %%
-frontToeSize = size(vehicle.(manufacturer).kinematics.(axle).toeSweep.toe)
-
 for i = 1 : frontToeSize(2)
     vehicle = offsetInPerpendicularPlane(vehicle, 'ford', 'front', 'contactChoice', 'tyreCentre','toeIndex', i);
 end 
 %%
 
-[vehicle.(manufacturer).kinematics.(axle).RC_height_array, vehicle.ford.kinematics.dRC_dz_nominal] = ...
-    calculateRollCenter(vehicle, 'manufacturer', 'ford', 'Plotting', true, 'axle', 'front')
+vehicle = calculateRollCenter(vehicle, 'manufacturer', 'ford', 'Plotting', true, 'axle', 'front')
 
 %% Projected Under LBJ
 
-[vehicle.(manufacturer).kinematics.(axle).RC_height_array, vehicle.ford.kinematics.dRC_dz_nominal] = ...
-    calculateRollCenter(vehicle, 'manufacturer', 'ford','wheelCentre', 'compensated', 'Plotting', true, 'axle', axle)
+vehicle = calculateRollCenter(vehicle, 'manufacturer', 'ford','wheelCentre', 'compensated', 'Plotting', true, 'axle', axle)
 
 %% Inside Edge Tyre
 % front wont work right now
 % The front toe is a surface plot so need to pick the 0 pickup point
 % smart implementation not dumb
 vehicle = offsetInPerpendicularPlane(vehicle, 'ford', axle, 'contactChoice', 'inside');
-[vehicle.(manufacturer).kinematics.(axle).RC_height_array, vehicle.ford.kinematics.dRC_dz_nominal] = ...
-    calculateRollCenter(vehicle, 'manufacturer', 'ford','wheelCentre', 'compensated', 'Plotting', true, 'axle', axle)
+vehicle = calculateRollCenter(vehicle, 'manufacturer', 'ford','wheelCentre', 'compensated', 'Plotting', true, 'axle', axle)
 fprintf('Completed Roll Centre Sweep...\n');
 %%
 %% Plotting Script for Suspension Kinematics
@@ -335,7 +332,7 @@ grid on;
 % Subplot 5: Anti-Dive/Squat vs Wheel Travel
 subplot(2, 3, 5);
 hold on;
-plot(frontWheelTravel(:,3), 50 * ones(size(frontWheelTravel)), '--', 'LineWidth', 2, 'Color', frontColor, 'DisplayName', 'Front Anti-Dive');
+plot(frontWheelTravel(:,3), 50 * ones(size(frontWheelTravel(:,3))), '--', 'LineWidth', 2, 'Color', frontColor, 'DisplayName', 'Front Anti-Dive');
 plot(rearWheelTravel(:,3), vehicle.(manufacturer).kinematics.rear.antiDive, '--', 'LineWidth', 2, 'Color', rearColor, 'DisplayName', 'Rear Anti-Squat');
 xlabel('Wheel Travel [mm]');
 ylabel('Anti-Geometry [%]');
@@ -379,8 +376,8 @@ figure('Position', [100, 100, 1000, 500]);
 % Subplot 1: Toe Gain vs Wheel Travel
 subplot(1, 2, 1);
 hold on;
-plot(frontWheelTravel, frontToeGain, 'LineWidth', 2, 'Color', frontColor, 'DisplayName', 'Front');
-plot(rearWheelTravel, rearToeGain, 'LineWidth', 2, 'Color', rearColor, 'DisplayName', 'Rear');
+plot(frontWheelTravel(:,3), frontToeGain, 'LineWidth', 2, 'Color', frontColor, 'DisplayName', 'Front');
+plot(rearWheelTravel(:,3), rearToeGain, 'LineWidth', 2, 'Color', rearColor, 'DisplayName', 'Rear');
 xlabel('Wheel Travel [mm]');
 ylabel('Toe Gain [deg/mm]');
 title('Toe Gain vs Wheel Travel');
@@ -391,8 +388,8 @@ hold off;
 % Subplot 2: Camber Gain vs Wheel Travel
 subplot(1, 2, 2);
 hold on;
-plot(frontWheelTravel, frontCamberGain, 'LineWidth', 2, 'Color', frontColor, 'DisplayName', 'Front');
-plot(rearWheelTravel, rearCamberGain, 'LineWidth', 2, 'Color', rearColor, 'DisplayName', 'Rear');
+plot(frontWheelTravel(:,3), frontCamberGain, 'LineWidth', 2, 'Color', frontColor, 'DisplayName', 'Front');
+plot(rearWheelTravel(:,3), rearCamberGain, 'LineWidth', 2, 'Color', rearColor, 'DisplayName', 'Rear');
 xlabel('Wheel Travel [mm]');
 ylabel('Camber Gain [deg/mm]');
 title('Camber Gain vs Wheel Travel');

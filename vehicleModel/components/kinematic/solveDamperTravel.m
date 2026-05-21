@@ -205,6 +205,8 @@ function vehicle = solveDamperTravel(vehicle, varargin)
     [~, indexOfMin] = min(abs(vehicle.(manufacturer).kinematics.(axle).camberSweep.thetaL));
     vehicle.(manufacturer).kinematics.(axle).camberSweep.thetaL_0Index = ...
         indexOfMin;
+    vehicle.(manufacturer).kinematics.(axle).damper.thetaL = ...
+        vehicle.(manufacturer).kinematics.(axle).camberSweep.thetaL;
     % Optional plotting
     if doPlotting
         plotDamperTravel(thetaSweep, damperLength, rotationError, ...
@@ -411,15 +413,21 @@ function plotDamperTravel(thetaSweep, damperLength, rotationError, ...
         MR = zeros(numPoints, 1);
         deltaDisplacement = zeros(numPoints, 1);
         deltaWheelTravel = zeros(numPoints, 1);
-        verticalWheelTravel = zeros(numPoints, 1);
-        
+
+        % wheelTravel is on the camber sweep thetaL grid.
+        % Damper displacement is on the damper thetaL grid (1001 pts trimmed).
+        % Interpolate wheelTravel(:,3) onto the damper's thetaL so arrays align.
+        damperThetaL = vehicle.(manufacturer).kinematics.(axle).damper.thetaL;
+        camberThetaL = vehicle.(manufacturer).kinematics.(axle).camberSweep.thetaL;
+        wt_z_raw     = wheelTravel(:, 3);
+        verticalWheelTravel = interp1(camberThetaL, wt_z_raw, damperThetaL, 'linear', 'extrap');
+
         for i = 1:numPoints
-            % Extract vertical (z-component) wheel travel
-            verticalWheelTravel(i) = wheelTravel(i, 3);
+            % (verticalWheelTravel already fully populated above)
             
             if i > 1
                 % Instantaneous changes (vertical only)
-                deltaWheelTravel(i) = wheelTravel(i, 3) - wheelTravel(i-1, 3);
+                deltaWheelTravel(i) = verticalWheelTravel(i) - verticalWheelTravel(i-1);
                 deltaDisplacement(i) = displacement(i) - displacement(i-1);
                 
                 % Motion ratio: vertical wheel travel per unit damper displacement

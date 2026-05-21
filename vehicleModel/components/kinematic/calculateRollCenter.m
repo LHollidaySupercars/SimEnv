@@ -130,15 +130,15 @@ function vehicle = calculateRollCenter(vehicle, varargin)
     if nominal_idx == 1
         % Forward difference
         dRC_dz_nominal = (RC_height_array(2) - RC_height_array(1)) / ...
-                         (wheel_travel(2) - wheel_travel(1));
+                         (wheel_travel(2, 3) - wheel_travel(1, 3));
     elseif nominal_idx == n_points
         % Backward difference
         dRC_dz_nominal = (RC_height_array(end) - RC_height_array(end-1)) / ...
-                         (wheel_travel(end) - wheel_travel(end-1));
+                         (wheel_travel(end, 3) - wheel_travel(end-1, 3));
     else
         % Central difference
         dRC_dz_nominal = (RC_height_array(nominal_idx+1) - RC_height_array(nominal_idx-1)) / ...
-                         (wheel_travel(nominal_idx+1) - wheel_travel(nominal_idx-1));
+                         (wheel_travel(nominal_idx+1, 3) - wheel_travel(nominal_idx-1, 3));
     end
     vehicle.(manufacturer).kinematics.(axle).RC_height_array = RC_height_array;
     vehicle.(manufacturer).kinematics.(axle).dRC_dz_nominal = dRC_dz_nominal;
@@ -158,7 +158,7 @@ function vehicle = calculateRollCenter(vehicle, varargin)
         
         % Ground plane
         y_ground = linspace(min(wheel_centre_array(:, 2)) - 200, max(wheel_centre_array(:, 2)) + 200, 2);
-        z_ground = wheel_centre_array(1, 3); % Ground level at contact patch
+        z_ground = 0; % Ground at Z = 0
         plot(y_ground, [z_ground, z_ground], 'k-', 'LineWidth', 2, 'DisplayName', 'Ground');
         
         % Plot each position
@@ -207,7 +207,7 @@ function vehicle = calculateRollCenter(vehicle, varargin)
             plot(RC(2), RC(3), 'x', 'Color', color, 'MarkerSize', 14, 'LineWidth', 3, 'HandleVisibility', 'off');
             
             % Add to legend
-            travel_str = sprintf('%.0f mm', wheel_travel(i));
+            travel_str = sprintf('%.0f mm', wheel_travel(i, 3));
             plot(NaN, NaN, 's', 'Color', color, 'MarkerFaceColor', color, 'MarkerSize', 10, 'DisplayName', travel_str);
         end
         

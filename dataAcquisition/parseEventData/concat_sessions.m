@@ -55,6 +55,11 @@ function [merged, report] = concat_sessions(sessions, opts)
     FPRINT_CANDIDATES = {'Ground_Speed', 'Speedkmh', 'Speed', 'Lateral_Acc', 'Longitudinal_Acc'};
     FPRINT_K     = 50;
     FPRINT_TOL   = 0.01;
+
+    % ---- Distributed sample parameters (Method 4) ----
+    DIST_N      = 200;    % evenly-spaced samples across full channel
+    DIST_TOL    = 0.01;   % per-sample tolerance (same units as channel)
+    DIST_THRESH = 0.99;   % fraction of samples that must match
     build_report = nargout > 1;
 
     n_sessions = numel(sessions);
@@ -129,8 +134,10 @@ function [merged, report] = concat_sessions(sessions, opts)
                     end
                 end
 
-                % ---- METHOD 3: Start+end speed fingerprint (exact duplicate only) ----
-                if ~is_dup && strcmp(gps_method, 'no_gps')
+                % ---- METHOD 3: Start+end speed fingerprint (universal fallback) ----
+                % Runs regardless of GPS presence — handles identical sessions where
+                % GPS lookup failed (non-monotonic GPS, ld quantization noise, etc.).
+                if ~is_dup
                     if ~isempty(fp_start{r})
                         sm = fingerprints_match(fp_start{s}, fp_start{r}, FPRINT_TOL);
                         em = fingerprints_match(fp_end{s},   fp_end{r},   FPRINT_TOL);
@@ -142,6 +149,22 @@ function [merged, report] = concat_sessions(sessions, opts)
                             is_dup = true;
                             method = 'start+end fingerprint';
                         end
+                    end
+                end
+
+                % ---- METHOD 4: Distributed channel sample comparison ----
+                % Samples DIST_N points evenly across the full channel.  Conclusive
+                % for files sharing identical data (e.g. _combined vs _combined_vch).
+                if ~is_dup
+                    [is_dup_d, frac_d, dist_ch] = distributed_match( ...
+                        sessions{s}, sessions{r}, FPRINT_CANDIDATES, DIST_N, DIST_TOL, DIST_THRESH);
+                    if verbose
+                        fprintf('  S%d vs R%d | M4-Dist: ch=%s  frac=%.3f  is_dup=%d\n', ...
+                            s, r, dist_ch, frac_d, is_dup_d);
+                    end
+                    if is_dup_d
+                        is_dup = true;
+                        method = sprintf('distributed sample (%.0f%% match, ch=%s)', frac_d*100, dist_ch);
                     end
                 end
 
@@ -203,12 +226,19 @@ function [merged, report] = concat_sessions(sessions, opts)
         end
 
         % Straight append — no trimming.
-        for c = 1:numel(ch_fields)
-            fn = ch_fields{c};
-            if ~isfield(s2, fn), continue; end
-            merged.(fn).data = [merged.(fn).data(:); s2.(fn).data(:)];
-            merged.(fn).time = [merged.(fn).time(:); s2.(fn).time(:) + t_offset];
-        end
+%         for c = 1:numel(ch_fields)
+%             fn = ch_fields{c};
+%             if ~isfield(s2, fn), continue; end
+%             merged.(fn).data = [merged.(fn).data(:); s2.(fn).data(:)];
+%             merged.(fn).time = [merged.(fn).time(:); s2.(fn).time(:) + t_offset];
+%         end
+for c = 1:numel(ch_fields)
+    fn = ch_fields{c};
+    if ~isfield(s2, fn), continue; end
+    if ~isfield(merged.(fn), 'data') || ~isfield(merged.(fn), 'time'), continue; end   % skip non-channel fields (e.g. .info)
+    merged.(fn).data = [merged.(fn).data(:); s2.(fn).data(:)];
+    merged.(fn).time = [merged.(fn).time(:); s2.(fn).time(:) + t_offset];
+end
     end
 end
 
@@ -456,3 +486,28 @@ end
 %         end
 %     end
 % end
+
+% -------------------------------------------------------------------------
+function [is_dup, frac_match, ch_used] = distributed_match(sess_s, sess_r, candidates, n_samp, tol, thresh)
+% DISTRIBUTED_MATCH  Compare N evenly-distributed samples of a value channel.
+% Both sessions must have equal channel length; >= thresh fraction of the
+% sampled values must agree within tol.  Different stints will virtually
+% always differ in length, so false-positive risk is negligible.
+    is_dup     = false;
+    frac_match = 0;
+    ch_used    = '';
+
+    fn_s = find_field_any(sess_s, candidates);
+    fn_r = find_field_any(sess_r, candidates);
+    if isempty(fn_s) || isempty(fn_r), return; end
+
+    d_s = sess_s.(fn_s).data(:);
+    d_r = sess_r.(fn_r).data(:);
+    if numel(d_s) ~= numel(d_r), return; end   % different lengths → not identical
+
+    n   = numel(d_s);
+    idx = unique(round(linspace(1, n, min(n_samp, n))));
+    frac_match = mean(abs(d_s(idx) - d_r(idx)) <= tol);
+    ch_used    = fn_s;
+    is_dup     = frac_match >= thresh;
+end

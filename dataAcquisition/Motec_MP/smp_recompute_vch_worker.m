@@ -138,9 +138,11 @@ function session = load_and_concat(files, channels_to_extract, verbose, T_gated)
     if numel(files) == 1
         session     = motec_ld_reader(files{1}, channels_to_extract);
         startingVal = startingValues(CHANNELS_FOR_START_VAL, EXCEL_FILTERING, session);
+        before      = fieldnames(session);
         session     = smp_custom_channels(session, 'startingValues', startingVal);
+        vch_names   = setdiff(fieldnames(session), before);
         [session, gated_names]  = smp_gated_channels(session, T_gated);
-        channels_to_extract     = union(channels_to_extract, gated_names);
+        channels_to_extract     = union(channels_to_extract, [vch_names; gated_names]);
         session     = filter_channels(session, channels_to_extract);
         return;
     end
@@ -157,12 +159,14 @@ function session = load_and_concat(files, channels_to_extract, verbose, T_gated)
 
         t0 = tic;
         startingVal = startingValues(CHANNELS_FOR_START_VAL, EXCEL_FILTERING, s);
+        before      = fieldnames(s);
         s = smp_custom_channels(s, 'startingValues', startingVal);
+        vch_names   = setdiff(fieldnames(s), before);
         fprintf('  smp_custom_channels: %.2fs\n', toc(t0));
 
         t0 = tic;
         [s, gated_names]    = smp_gated_channels(s, T_gated);
-        channels_to_extract = union(channels_to_extract, gated_names);
+        channels_to_extract = union(channels_to_extract, [vch_names; gated_names]);
         fprintf('  smp_gated_channels: %.2fs\n', toc(t0));
 
         s = filter_channels(s, channels_to_extract);

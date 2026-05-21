@@ -1,4 +1,5 @@
-function info = motec_ld_info(filepath)
+function info = motec_ld_info(filepath, verbose)
+    if nargin < 2, verbose = true; end
 % MOTEC_LD_INFO  Read metadata from a MoTeC .ld file.
 %
 % Fixed offsets confirmed from hex analysis of Supercars Control Dash files:
@@ -90,19 +91,21 @@ function info = motec_ld_info(filepath)
     end
 
     % ------------------------------------------------------------------ %
-    fprintf('=== MoTeC Log File Info ===\n');
-    fprintf('Filename:     %s\n', info.filename);
-    fprintf('Date:         %s  %s\n', info.date, info.time);
-    fprintf('Driver:       %s\n', info.driver);
-    fprintf('Car Number:   %s\n', info.car_number);
-    fprintf('Team:         %s\n', info.team_name);
-    fprintf('Vehicle:      %s\n', info.vehicle);
-    fprintf('Manufacturer: %s\n', info.manufacturer);
-    fprintf('Engine ID:    %s\n', info.engine_id);
-    fprintf('Venue:        %s\n', info.venue);
-    fprintf('Session:      %s\n', info.session);
-    fprintf('Run:          %s\n', info.run);
-    fprintf('Year:         %s\n', info.year);
+    if verbose
+        fprintf('=== MoTeC Log File Info ===\n');
+        fprintf('Filename:     %s\n', info.filename);
+        fprintf('Date:         %s  %s\n', info.date, info.time);
+        fprintf('Driver:       %s\n', info.driver);
+        fprintf('Car Number:   %s\n', info.car_number);
+        fprintf('Team:         %s\n', info.team_name);
+        fprintf('Vehicle:      %s\n', info.vehicle);
+        fprintf('Manufacturer: %s\n', info.manufacturer);
+        fprintf('Engine ID:    %s\n', info.engine_id);
+        fprintf('Venue:        %s\n', info.venue);
+        fprintf('Session:      %s\n', info.session);
+        fprintf('Run:          %s\n', info.run);
+        fprintf('Year:         %s\n', info.year);
+    end
 end
 
 

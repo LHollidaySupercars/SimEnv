@@ -35,12 +35,12 @@ t_script = tic;
 %  SECTION 1: PATHS
 % =========================================================
 
-TOP_LEVEL_DIR     = 'E:\2025\04_TAS\_TeamData';
+TOP_LEVEL_DIR     = 'E:\2026\T01_QLR\COM';
 
 CHANNELS_FILE     = 'C:\SimEnv\dataAcquisition\Motec_MP\channels\channels.xlsx';
-EVENT_ALIAS_FILE  = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\eventAlias2025.xlsx';
+EVENT_ALIAS_FILE  = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\eventAlias.xlsx';
 DRIVER_ALIAS_FILE = 'C:\SimEnv\dataAcquisition\Motec_MP\alias\driverAlias.xlsx';
-PLOT_CONFIG_FILES  = {'C:\SimEnv\dataAcquisition\Motec_MP\plottingRequest\plottingRequest_SystemsReport.xlsx','C:\SimEnv\dataAcquisition\Motec_MP\plottingRequest\plottingRequest_PerformanceReport.xlsx'};
+PLOT_CONFIG_FILES  = {'C:\SimEnv\dataAcquisition\Motec_MP\plottingRequest\plottingRequest_Devo.xlsx'};
 SEASON_FILE       = 'C:\SimEnv\trackDB\seasonOverview.xlsx';
 
 PPTX_TEMPLATE     = 'C:\SimEnv\dataAcquisition\Motec_MP\plot\templates\SuperCars_PPT.pptx';
@@ -49,15 +49,15 @@ OUTPUT_DIR        = 'C:\SimEnv\dataAcquisition\Motec_MP\plot\output';
 %% =========================================================
 %  SECTION 2: EVENT CONFIG
 % =========================================================
-EVENT                 = 'E04';
-TRACK                 = 'TAS';
-EVENT_NAME            = 'TAS';
+EVENT                 = 'T02';
+TRACK                 = 'QLR';
+EVENT_NAME            = 'QLR';
 TEAM_FILTER           = {};           % {} = all teams, e.g. {'T8R', 'WAU'}
-SESSION_FILTER        = {'R13'};
+SESSION_FILTER        = {'P01'};
 CREATE_PITSTOP_REPORT = false;
 workshop              = false;        % true = no session filter on stint grouping
-SAVE_CACHE            = true;
-PLOTTING              = false;
+SAVE_CACHE            = false;
+PLOTTING              = true;
 %% =========================================================
 %  SECTION 3: PROCESSING + UPLOAD OPTIONS
 % =========================================================
@@ -73,8 +73,8 @@ KEEP_WORKERS_OPEN  = false;   % false = cmd /c (auto-close on success)
                               % true  = cmd /k (leave window open — for debugging)
 
 % ---- VCH recompute options ----
-RUN_RECOMPUTE_VCH = false;     % true = rerun channel math on all cached groups
-RECOMPUTE_MODE    = 'parallel';  % 'serial' | 'parallel'
+RUN_RECOMPUTE_VCH = true;     % true = rerun channel math on all cached groups
+RECOMPUTE_MODE    = 'serial';  % 'serial' | 'parallel'
 
 % ---- VCH debug plot (active when RUN_RECOMPUTE_VCH = true) ----
 VCH_DEBUG_PLOT = true;         % true = plot VCH channels after recompute for inspection
@@ -83,7 +83,8 @@ VCH_DEBUG_X    = 'time';       % x-axis: 'time', or any channel field name
 VCH_DEBUG_Y    = {             % y-axis channels to plot (one subplot each)
     'brakeBiasVCH', ...
     'RL_SlipVCH', ...
-    'rTyreRL_VCH_P_FZ_C' ...
+    'rTyreRL_VCH_P_FZ_C',  ...
+    'CLa_SCz_Braking_VCH'...
 };
 
 % ---- Upload options ----
@@ -93,20 +94,21 @@ BATCH_SIZE = 200;
 OVERWRITE  = false;
 
 % ---- Compile options ----
-compile_opts.mode           = 'stream';
-compile_opts.track          = TRACK;
-compile_opts.max_traces     = 4;
-compile_opts.dist_n_points  = 1000;
-compile_opts.dist_channel   = 'Odometer';
-compile_opts.verbose        = true;
-compile_opts.date_from      = datetime(2025, 4, 10);
-compile_opts.saveCache      = true;
-compile_opts.save_mode      = 'session';   % 'legacy' | 'session'
-compile_opts.session_filter = SESSION_FILTER;
+compile_opts.mode              = 'stream';
+compile_opts.track             = TRACK;
+compile_opts.max_traces        = 4;
+compile_opts.dist_n_points     = 1000;
+compile_opts.dist_channel      = 'Odometer';
+compile_opts.verbose           = true;
+compile_opts.date_from         = datetime(1969, 4, 10);
+compile_opts.saveCache         = true;
+compile_opts.save_mode         = 'session';   % 'legacy' | 'session'
+compile_opts.session_filter    = SESSION_FILTER;
+compile_opts.load_all_channels = true;      % true = load full file, no channel filter (use for COM)
 compile_opts.concat_csv_dir = OUTPUT_DIR;  % '' = skip CSV; non-empty = save concat report here
 compile_opts.showConcatReport = true;      % pop-up summary after each multi-file session group
 compile_opts.br2_channel    = 'BR2_Beacon_Number';
-compile_opts.br2_protocol   = 'TAS2025';  % 'standard' | 'TAS2025'
+compile_opts.br2_protocol   = 'Standard';  % 'standard' | 'TAS2025'
 
 % ---- Plot options ----
 plot_opts.fig_width     = 1200;
@@ -331,10 +333,19 @@ end
 % =========================================================
 
 if RUN_RECOMPUTE_VCH
-    vch_opts.track          = TRACK;
-    vch_opts.session_filter = SESSION_FILTER;
-    vch_opts.verbose        = true;
-    vch_opts.T_gated        = T_gated;   % already loaded in Section 4 — no extra disk read
+    vch_opts.track             = TRACK;
+    vch_opts.session_filter    = SESSION_FILTER;
+    vch_opts.verbose           = true;
+    vch_opts.T_gated           = T_gated;   % already loaded in Section 4 — no extra disk read
+    vch_opts.load_all_channels = compile_opts.load_all_channels;
+    % Propagate lap-slice mode so recompute uses the same boundary detection
+    % as the original compile (Mode A MyLaps / Mode B BR2 / Mode C fallback).
+    vch_opts.detect_pitlane    = compile_opts.detect_pitlane;
+    vch_opts.fcy_channel       = compile_opts.fcy_channel;
+    vch_opts.br2_channel       = compile_opts.br2_channel;
+    vch_opts.br2_protocol      = compile_opts.br2_protocol;
+    vch_opts.beacon_check      = compile_opts.beacon_check;
+    vch_opts.save_mode         = compile_opts.save_mode;
 
     switch lower(RECOMPUTE_MODE)
 
@@ -499,8 +510,53 @@ if RUN_RECOMPUTE_VCH && VCH_DEBUG_PLOT && ~isempty(VCH_DEBUG_Y)
         try
             % ---- Load raw .ld and rerun full math pipeline ----
             fprintf('  Loading .ld and rerunning channel math...\n');
-            dbg_data          = motec_ld_reader(dbg_file, channels);
-            dbg_data          = smp_custom_channels(dbg_data);
+            dbg_rd_channels   = {};   % read all when load_all_channels=true
+            if ~compile_opts.load_all_channels
+                dbg_rd_channels = channels;
+            end
+            dbg_data          = motec_ld_reader(dbg_file, dbg_rd_channels);
+            try,  dbg_info = motec_ld_info(dbg_file, false); catch, dbg_info = struct(); end
+            dbg_mfr = '';
+            if isfield(dbg_info, 'manufacturer'), dbg_mfr = dbg_info.manufacturer; end
+            % Fallback: driver_map lookup when file header has no manufacturer
+            if isempty(dbg_mfr) && ~isempty(driver_map)
+                dbg_drv = '';
+                if isfield(dbg_info, 'driver'),       dbg_drv = dbg_info.driver;
+                elseif ismember('Driver', dbg_row.Properties.VariableNames), dbg_drv = dbg_row.Driver{1};
+                end
+                if ~isempty(dbg_drv)
+                    dbg_key  = regexprep(lower(strtrim(dbg_drv)), '[^a-z0-9]', '');
+                    dm_names = fieldnames(driver_map);
+                    dbg_entry = [];
+                    % 1. Direct key
+                    if isfield(driver_map, dbg_drv), dbg_entry = driver_map.(dbg_drv); end
+                    % 2. Strip-normalised key
+                    if isempty(dbg_entry)
+                        for dmi = 1:numel(dm_names)
+                            if strcmp(dbg_key, regexprep(lower(dm_names{dmi}), '[^a-z0-9]', ''))
+                                dbg_entry = driver_map.(dm_names{dmi}); break;
+                            end
+                        end
+                    end
+                    % 3. Alias search
+                    if isempty(dbg_entry)
+                        for dmi = 1:numel(dm_names)
+                            e = driver_map.(dm_names{dmi});
+                            if ~isfield(e, 'aliases'), continue; end
+                            for ai = 1:numel(e.aliases)
+                                if strcmp(dbg_key, regexprep(lower(e.aliases{ai}), '[^a-z0-9]', ''))
+                                    dbg_entry = e; break;
+                                end
+                            end
+                            if ~isempty(dbg_entry), break; end
+                        end
+                    end
+                    if ~isempty(dbg_entry) && isfield(dbg_entry, 'manufacturer')
+                        dbg_mfr = dbg_entry.manufacturer;
+                    end
+                end
+            end
+            dbg_data = smp_custom_channels(dbg_data, 'manufacturer', dbg_mfr);
             [dbg_data, ~]     = smp_gated_channels(dbg_data, T_gated);
 
             % ---- Build figure ----
@@ -693,12 +749,12 @@ if PLOTTING
         holdFigs = smp_plot_from_config(SMP_filtered, plots, cfg, driver_map, plot_opts);
 
         for i = 1:numel(holdFigs)
-            if ~isempty(holdFigs{i}), set(holdFigs{i}, 'Visible', 'off'); end
+            if ~isempty(holdFigs{i}), set(holdFigs{i}, 'Visible', 'on'); end
         end
 
-        smp_generate_pptx_report(holdFigs, plots, PPTX_TEMPLATE, OUTPUT_DIR, ...
-                                  base_report_name, PLOT_CONFIG_FILES{k}, ...
-                                  SESSION_FILTER, TEAM_FILTER, TRACK);
+%         smp_generate_pptx_report(holdFigs, plots, PPTX_TEMPLATE, OUTPUT_DIR, ...
+%                                   base_report_name, PLOT_CONFIG_FILES{k}, ...
+%                                   SESSION_FILTER, TEAM_FILTER, TRACK);
         close all;
     end
 end

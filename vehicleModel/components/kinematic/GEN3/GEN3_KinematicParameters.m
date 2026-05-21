@@ -1,6 +1,8 @@
 %% Front / Rear Tyre Info
 % Centre point found from cad, upright rotation plane to tyre midplane
 % point
+
+
 vehicle.ford.kinematics.rear.tyrecenterPoint = [0, 63.7124, 327.9533]; %mm
 vehicle.ford.kinematics.front.tyrecenterPoint = [0, 63.7124, 327.9533]; %mm
 % have to remeasure
@@ -18,6 +20,17 @@ vehicle.ford.kinematics.front.tyreRadius = norm(vehicle.ford.kinematics.front.ty
 vehicle.ford.kinematics.rear.tyreWidth =  [0, 302, 0];
 vehicle.ford.kinematics.front.tyreWidth = [0, 302, 0];
 vehicle.ford.kinematics.body.trackWidth = 2760;
+
+vehicle.ford.kinematics.Front.CentreLineLaser = [-2114.0444, 0, -4.9];
+vehicle.ford.kinematics.Rear.CentreLineLaser = [901.5, 0, 11.6];
+
+vehicle.ford.kinematics.Front.RideHeightReferenceLocationLeft = [-2148, -427.74, 26]; 
+vehicle.ford.kinematics.Front.RideHeightReferenceLocationRight = [-2148, 427.74, 26]; 
+
+vehicle.ford.kinematics.Rear.RideHeightReferenceLocationLeft = [925.5, -236.9, 31]; 
+vehicle.ford.kinematics.Rear.RideHeightReferenceLocationRight = [925.5, 236.9, 31]; 
+
+
 %% Front / Rear Shims
 % Camber Shims
 vehicle.kinematics.front.camberShims_5219 = [0, 1.016, 0]; % CAD reference
@@ -83,6 +96,8 @@ vehicle.ford.kinematics.rear.upperAArm.UBJ_UPRIGHT_POS_5 = [0, 0, -15.];
 vehicle.ford.kinematics.front.damper.chassisPickup = [-1948.9736, 420.5562, 562.2953];
 vehicle.ford.kinematics.front.rocker.damperPickup =  [-2008.8413, 718.7937 , 72.1863];
 vehicle.ford.kinematics.front.upright.wheelCenterDelta2KPI = [59.76, -64.2, 0]; 
+vehicle.ford.kinematics.front.lowerAArm.potPickupPoint = [-1961.3725, 669.709, 74.9577];
+vehicle.ford.kinematics.front.chassis.potPickupPoint = [-1919.4866, 427.4791, 421.2424];
 
 vehicle.ford.kinematics.front.upperAArm.fore =       [-2175,      466.5289 , 294.92476] + vehicle.ford.kinematics.front.clevis.yOffset; % done
 vehicle.ford.kinematics.front.upperAArm.ballJoint =  [-1949.2757, 702.919,   331.0431 ];  % done
@@ -135,10 +150,12 @@ vehicle.ford.kinematics.rear.damper.chassisPickup = [680.5, 478.9772 , 588.8103]
 vehicle.ford.kinematics.rear.rocker.ARBPickup =     [680.4979, 689.9381 , 18.1861];
 vehicle.ford.kinematics.rear.rocker.damperPickup =  [680.3829, 693.2589 , 79.3026];
 vehicle.ford.kinematics.rear.rocker.uprightPickup = [680.4974, 801.4376 , 41.009];
+vehicle.ford.kinematics.rear.lowerAArm.potPickupPoint = [648.6657, 640.6254, 50.9849];
+vehicle.ford.kinematics.rear.chassis.potPickupPoint = [671.5284, 463.1357, 342.5956];
 
 vehicle.ford.kinematics.rear.upperAArm.fore = [530.5, 422, 296] + vehicle.ford.kinematics.rear.clevis.yOffset; % Face Reference parallel with x-z face
 vehicle.ford.kinematics.rear.upperAArm.aft = [830.5, 422, 296] + vehicle.ford.kinematics.rear.clevis.yOffset;
-% vehicle.ford.kinematics.rear.upperAArm.ballJoint = [680.5, 682.3263 , 322.7942]; % experimentally found to have 0 camber shims
+vehicle.ford.kinematics.rear.upperAArm.ballJoint = [680.5, 682.3263 , 322.7942]; % experimentally found to have 0 camber shims
 % found by using the rear camber correction, but using -6.6 which is the
 % negation of the nominal length from the cad 
 

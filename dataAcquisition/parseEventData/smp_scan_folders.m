@@ -40,6 +40,8 @@ function result = smp_scan_folders(top_level_dir)
         team_acronym = upper(tok{1}{2});
         team_folder  = fullfile(top_level_dir, name);
 
+        % If a sub-folder is specified (e.g. 'COM' or 'Dash'), restrict
+        % scanning to that sub-folder within the team folder.
         % Recursively find all .ld files under this team folder
         ld_files = recursive_find_ld(team_folder);
 

@@ -6,8 +6,10 @@
 cache_dir       = 'E:\2026\04_RUA\_TeamData';
 timing_base_dir = 'E:\2026\99_seasonTiming';
 event           = 'RUA';
-session         = 'Q11';
-report_type     = 'top_speed';   % 'top_speed' | 'pit_speed'
+session         = 'R11';      % MoTeC cache session name
+timing_session  = '';          % timing CSV session name — leave '' to match session above; set e.g. 'QR11' if PDF was extracted with a different label
+report_type     = 'pit_speed';   % 'top_speed' | 'pit_speed'
+SKIP_PIT_LAP    = false;         % true = exclude pit speed traps from matching
 car_filter      = '88';          % '' = all cars, or e.g. '88' to narrow down
 speed_channel   = 'Ground_Speed';
 TEAM_FILTER     = {'T8R'};
@@ -24,6 +26,10 @@ SEASON_FILE      = 'C:\SimEnv\trackDB\seasonOverview.xlsx';
 % Run this section to do a full recompile using the current lap_slicer,
 % strip traces for cars outside TRACE_CARS_KEEP, then save — keeps the .mat lean.
 % Skip this section if the cache already exists and you just want to debug.
+
+if ~exist('cache_dir', 'var')
+    error('Run the CONFIGURATION section first (Ctrl+Enter on that cell).');
+end
 
 fprintf('\n=== RECOMPILE: %s | %s ===\n', event, session);
 
@@ -91,8 +97,15 @@ end
 fprintf('  manifest rows : %d\n', height(cache.manifest));
 fprintf('  group keys    : %d\n', numel(fieldnames(cache.traces)));
 
+% Resolve effective timing session label
+if isempty(timing_session)
+    timing_session = session;
+end
+
 %% ── 2. RESOLVE TIMING CSV ────────────────────────────────────────────────────
 fprintf('\n=== STEP 2: Resolve timing CSV ===\n');
+fprintf('  cache session   : %s\n', session);
+fprintf('  timing session  : %s\n', timing_session);
 if strcmp(report_type, 'pit_speed')
     kph_col  = 's1_kph';
     type_sub = 'pit_speed';
@@ -108,16 +121,87 @@ d = d([d.isdir]);
 if isempty(d)
     error('No folder matching *_%s under %s', upper(event), timing_base_dir);
 end
-master_csv = fullfile(timing_base_dir, d(1).name, type_sub, [session suffix]);
+master_csv = fullfile(timing_base_dir, d(1).name, type_sub, [timing_session suffix]);
 fprintf('  CSV path      : %s\n', master_csv);
 if ~isfile(master_csv)
     error('CSV not found: %s', master_csv);
+end
+
+%% ── 2b. PIT SPEED CSV INSPECTION ─────────────────────────────────────────────
+fprintf('\n=== STEP 2b: Pit speed CSV inspection ===\n');
+d_pit2b = dir(fullfile(timing_base_dir, ['*_' upper(event)]));
+d_pit2b = d_pit2b([d_pit2b.isdir]);
+pit_csv_path = '';
+if ~isempty(d_pit2b)
+    pit_speed_dir_2b = fullfile(timing_base_dir, d_pit2b(1).name, 'pit_speed');
+    % Try exact timing_session name first, then glob for any CSV containing session
+    candidate_2b = fullfile(pit_speed_dir_2b, [timing_session '_speed_trap.csv']);
+    if isfile(candidate_2b)
+        pit_csv_path = candidate_2b;
+    else
+        % Fallback: find a file whose name contains session (e.g. QR11 when timing_session=Q11)
+        glob_2b = dir(fullfile(pit_speed_dir_2b, '*_speed_trap.csv'));
+        for gi2b = 1:numel(glob_2b)
+            if contains(glob_2b(gi2b).name, session, 'IgnoreCase', true)
+                pit_csv_path = fullfile(pit_speed_dir_2b, glob_2b(gi2b).name);
+                fprintf('  *** filename fallback: using %s\n', glob_2b(gi2b).name);
+                break;
+            end
+        end
+    end
+end
+fprintf('  pit CSV : %s\n', pit_csv_path);
+if ~isempty(pit_csv_path) && isfile(pit_csv_path)
+    T_pit2b = readtable(pit_csv_path, 'Delimiter', ',', 'TextType', 'string');
+    if ismember('parse_error', T_pit2b.Properties.VariableNames)
+        T_pit2b = T_pit2b(~strcmpi(string(T_pit2b.parse_error), 'true'), :);
+    end
+    % Resolve session name inside CSV (may differ from timing_session)
+    pit2b_ses = timing_session;
+    if ismember('session', T_pit2b.Properties.VariableNames)
+        csv_ses_u2b = unique(string(T_pit2b.session));
+        if ~any(strcmpi(csv_ses_u2b, timing_session))
+            for asi2b = 1:numel(csv_ses_u2b)
+                if contains(csv_ses_u2b(asi2b), session, 'IgnoreCase', true) || ...
+                   contains(session, csv_ses_u2b(asi2b), 'IgnoreCase', true)
+                    pit2b_ses = char(csv_ses_u2b(asi2b));
+                    fprintf('  *** session in CSV: ''%s'' (auto-matched from ''%s'')\n', pit2b_ses, session);
+                    break;
+                end
+            end
+        end
+    end
+    T_pit2b = T_pit2b(strcmpi(string(T_pit2b.session), pit2b_ses), :);
+    fprintf('  rows (timing session %s) : %d\n', pit2b_ses, height(T_pit2b));
+    pvars_2b   = T_pit2b.Properties.VariableNames;
+    pit_kph_2b = pvars_2b(~cellfun(@isempty, regexp(pvars_2b, '^s\d+_kph$')));
+    fprintf('  pit trap columns  : %s\n', strjoin(pit_kph_2b, ', '));
+    if height(T_pit2b) > 0
+        T_pit2b.car = strtrim(string(T_pit2b.car));
+        pit_cars_2b = unique(T_pit2b.car);
+        for pc2b = 1:numel(pit_cars_2b)
+            c2b    = pit_cars_2b(pc2b);
+            laps2b = T_pit2b.lap(T_pit2b.car == c2b);
+            if ~isnumeric(laps2b), laps2b = str2double(string(laps2b)); end
+            laps2b = sort(laps2b);
+            fprintf('    car %-5s : %d entries, laps %g–%g\n', ...
+                c2b, numel(laps2b), min(laps2b), max(laps2b));
+        end
+    end
+else
+    fprintf('  *** pit CSV not found\n');
+    pit_csv_path = '';
 end
 
 %% ── 3. LOAD & FILTER CSV ─────────────────────────────────────────────────────
 fprintf('\n=== STEP 3: Load and filter CSV ===\n');
 T = readtable(master_csv, 'Delimiter', ',', 'TextType', 'string');
 fprintf('  raw rows      : %d\n', height(T));
+fprintf('  filtering on  : event=''%s''  timing_session=''%s''\n', event, timing_session);
+if height(T) > 0 && ismember('session', T.Properties.VariableNames)
+    raw_ses_vals = unique(string(T.session));
+    fprintf('  session values in CSV : %s\n', strjoin(raw_ses_vals, ', '));
+end
 
 if ismember('parse_error', T.Properties.VariableNames)
     T = T(~strcmpi(string(T.parse_error), 'true'), :);
@@ -125,12 +209,52 @@ if ismember('parse_error', T.Properties.VariableNames)
 end
 
 T = T(strcmpi(string(T.event), event), :);
-T = T(strcmpi(string(T.session), session), :);
-fprintf('  after filter  : %d rows (event=%s, session=%s)\n', height(T), event, session);
+T = T(strcmpi(string(T.session), timing_session), :);
+fprintf('  after filter  : %d rows (event=%s, timing_session=%s)\n', height(T), event, timing_session);
+
+if height(T) == 0 && ismember('session', T.Properties.VariableNames) || ...
+   (height(T) == 0 && exist('T', 'var'))
+    % Auto-fallback: find a CSV session that contains session as a substring
+    T_raw2 = readtable(master_csv, 'Delimiter', ',', 'TextType', 'string');
+    if ismember('parse_error', T_raw2.Properties.VariableNames)
+        T_raw2 = T_raw2(~strcmpi(string(T_raw2.parse_error), 'true'), :);
+    end
+    T_raw2 = T_raw2(strcmpi(string(T_raw2.event), event), :);
+    if ismember('session', T_raw2.Properties.VariableNames) && height(T_raw2) > 0
+        csv_ses_vals = unique(string(T_raw2.session));
+        % Try: CSV session contains timing_session (e.g. 'QR11' contains 'Q11')
+        %   or timing_session contains CSV session
+        auto_match = '';
+        for asi = 1:numel(csv_ses_vals)
+            sv = csv_ses_vals(asi);
+            if contains(sv, timing_session, 'IgnoreCase', true) || ...
+               contains(timing_session, sv, 'IgnoreCase', true)
+                auto_match = char(sv);
+                break;
+            end
+        end
+        if ~isempty(auto_match)
+            fprintf('  *** auto-matched timing_session ''%s'' → CSV session ''%s''\n', ...
+                timing_session, auto_match);
+            fprintf('      Set timing_session = ''%s'' in CONFIGURATION to suppress this message.\n', auto_match);
+            timing_session = auto_match;
+            T = T_raw2(strcmpi(string(T_raw2.session), timing_session), :);
+            fprintf('  after auto-fallback filter : %d rows\n', height(T));
+        else
+            combo = unique(strcat(string(T_raw2.event), '/', string(T_raw2.session)));
+            fprintf('  *** no rows match — event/session values present in CSV:\n');
+            for ci2 = 1:numel(combo)
+                fprintf('        %s\n', combo(ci2));
+            end
+        end
+    end
+end
 
 T.car = strtrim(string(T.car));
 if ~isnumeric(T.lap),          T.lap          = str2double(string(T.lap));          end
-if ~isnumeric(T.(kph_col)),    T.(kph_col)    = str2double(string(T.(kph_col)));    end
+if ismember(kph_col, T.Properties.VariableNames) && ~isnumeric(T.(kph_col))
+    T.(kph_col) = str2double(string(T.(kph_col)));
+end
 
 if ~isempty(car_filter)
     T = T(strcmp(T.car, car_filter), :);
@@ -138,7 +262,7 @@ if ~isempty(car_filter)
 end
 
 if height(T) == 0
-    error('No CSV rows remain after filtering.');
+    error('No CSV rows remain after filtering — check event/session values printed above.');
 end
 
 %% ── 4. INSPECT MANIFEST ──────────────────────────────────────────────────────
@@ -223,7 +347,36 @@ for gi = 1:numel(all_gk_names)
     end
     fprintf('  [%s]\n', gk);
     for li = 1:n_laps
-        fprintf('    lap %2d  type: %s\n', lap_nums(li), types{li});
+        if isfield(tr, 'lap_times') && numel(tr.lap_times) == n_laps
+            fprintf('    lap %2d  type: %-10s  time: %.3f s\n', lap_nums(li), types{li}, tr.lap_times(li));
+        else
+            fprintf('    lap %2d  type: %s\n', lap_nums(li), types{li});
+        end
+    end
+    % ── inlap → pitlap pairing ────────────────────────────────────────────
+    [sorted_lnums_6b, srt_6b] = sort(lap_nums(:));
+    sorted_types_6b = types(srt_6b);
+    fprintf('    -- inlap→pitlap pairs --\n');
+    found_pair_6b = false;
+    for li = 1:numel(sorted_lnums_6b)
+        if strcmpi(sorted_types_6b{li}, 'inlap')
+            found_pair_6b = true;
+            next_pit_6b = [];
+            for lj = li+1:numel(sorted_lnums_6b)
+                if strcmpi(sorted_types_6b{lj}, 'pitlap')
+                    next_pit_6b = sorted_lnums_6b(lj);
+                    break;
+                end
+            end
+            if ~isempty(next_pit_6b)
+                fprintf('    inlap lap %2d → pitlap lap %2d\n', sorted_lnums_6b(li), next_pit_6b);
+            else
+                fprintf('    inlap lap %2d → *** no following pitlap\n', sorted_lnums_6b(li));
+            end
+        end
+    end
+    if ~found_pair_6b
+        fprintf('    (no inlaps found)\n');
     end
 end
 
@@ -247,15 +400,121 @@ fprintf('  present in %d / %d group keys\n', n_with, n_with + n_without);
 
 %% ── 8. FULL MATCH ────────────────────────────────────────────────────────────
 fprintf('\n=== STEP 8: Run smp_match_speed_trap ===\n');
-opts = struct();
-opts.event           = event;
-opts.session         = session;
-opts.report_type     = report_type;
-opts.timing_base_dir = timing_base_dir;
-opts.speed_channel   = speed_channel;
-opts.master_csv      = master_csv;
 
-T_match = smp_match_speed_trap(cache, opts);
+% ── Resolve top_speed CSV (always needed for combined output) ─────────────
+d8 = dir(fullfile(timing_base_dir, ['*_' upper(event)]));
+d8 = d8([d8.isdir]);
+if isempty(d8)
+    error('No folder matching *_%s under %s', upper(event), timing_base_dir);
+end
+topspeed_csv_8 = fullfile(timing_base_dir, d8(1).name, 'top_speed', [timing_session '_topspeed.csv']);
+if ~isfile(topspeed_csv_8)
+    fprintf('  *** top_speed CSV not found: %s\n', topspeed_csv_8);
+    topspeed_csv_8 = '';
+else
+    fprintf('  top_speed CSV : %s\n', topspeed_csv_8);
+end
+
+opts_base = struct();
+opts_base.event           = event;
+opts_base.session         = timing_session;
+opts_base.report_type     = 'both';
+opts_base.timing_base_dir = timing_base_dir;
+opts_base.speed_channel   = speed_channel;
+opts_base.skip_pit_lap    = SKIP_PIT_LAP;
+if ~isempty(topspeed_csv_8)
+    opts_base.master_csv  = topspeed_csv_8;
+end
+
+if SKIP_PIT_LAP
+    fprintf('  SKIP_PIT_LAP = true — pit speed trap rows excluded\n');
+    T_match = smp_match_speed_trap(cache, opts_base);
+    T_match.trap_col = repmat("top_speed", height(T_match), 1);
+else
+    % ── Use pit_csv_path resolved in section 2b (resolve here if skipped) ──
+    if ~exist('pit_csv_path', 'var') || isempty(pit_csv_path)
+        pit_speed_dir_8 = fullfile(timing_base_dir, d8(1).name, 'pit_speed');
+        candidate_8 = fullfile(pit_speed_dir_8, [timing_session '_speed_trap.csv']);
+        if isfile(candidate_8)
+            pit_csv_path = candidate_8;
+        else
+            glob_8 = dir(fullfile(pit_speed_dir_8, '*_speed_trap.csv'));
+            pit_csv_path = '';
+            for gi8 = 1:numel(glob_8)
+                if contains(glob_8(gi8).name, session, 'IgnoreCase', true)
+                    pit_csv_path = fullfile(pit_speed_dir_8, glob_8(gi8).name);
+                    break;
+                end
+            end
+        end
+    end
+    fprintf('  pit_speed CSV : %s\n', pit_csv_path);
+    pit_trap_cols_8 = {};
+    if ~isempty(pit_csv_path) && isfile(pit_csv_path)
+        T_pit8 = readtable(pit_csv_path, 'Delimiter', ',', 'TextType', 'string');
+        % session value in pit CSV may differ — auto-match
+        if ismember('session', T_pit8.Properties.VariableNames)
+            csv_ses_8 = unique(string(T_pit8.session));
+            pit_ses_8 = timing_session;
+            if ~any(strcmpi(csv_ses_8, timing_session))
+                for asi8 = 1:numel(csv_ses_8)
+                    if contains(csv_ses_8(asi8), session, 'IgnoreCase', true) || ...
+                       contains(session, csv_ses_8(asi8), 'IgnoreCase', true)
+                        pit_ses_8 = char(csv_ses_8(asi8));
+                        break;
+                    end
+                end
+            end
+            T_pit8 = T_pit8(strcmpi(string(T_pit8.session), pit_ses_8), :);
+        end
+        pvars8 = T_pit8.Properties.VariableNames;
+        pit_trap_cols_8 = pvars8(~cellfun(@isempty, regexp(pvars8, '^s\d+_kph$')));
+        if isempty(pit_trap_cols_8)
+            pit_trap_cols_8 = pvars8(~cellfun(@isempty, regexpi(pvars8, 'kph')));
+        end
+        fprintf('  pit trap columns : %s\n', strjoin(pit_trap_cols_8, ', '));
+        opts_base.master_pit_csv = pit_csv_path;
+    else
+        fprintf('  *** pit_speed CSV NOT FOUND — top_speed only\n');
+    end
+
+    % ── First call: both (top_speed + first pit trap) ─────────────────────
+    T_parts = {};
+    opts1 = opts_base;
+    if ~isempty(pit_trap_cols_8)
+        opts1.pit_trap_col = pit_trap_cols_8{1};
+        opts1.pit_trap_n   = 1;
+    end
+    T1 = smp_match_speed_trap(cache, opts1);
+    T1.trap_col = strings(height(T1), 1);
+    is_pit1 = strcmp(string(T1.trap_type), 'pit_speed');
+    T1.trap_col(~is_pit1) = "top_speed";
+    if ~isempty(pit_trap_cols_8)
+        T1.trap_col(is_pit1) = string(pit_trap_cols_8{1});
+    else
+        T1.trap_col(is_pit1) = "pit_speed";
+    end
+    T_parts{end+1} = T1;
+    n_top = sum(~is_pit1); n_pit = sum(is_pit1);
+    fprintf('  [top_speed] %d rows, %d matched\n', n_top, sum(T1.matched(~is_pit1)));
+    if ~isempty(pit_trap_cols_8)
+        fprintf('  [%s]    %d rows, %d matched\n', pit_trap_cols_8{1}, n_pit, sum(T1.matched(is_pit1)));
+    end
+
+    % ── Additional pit trap columns (s2_kph, s3_kph, ...) ────────────────
+    for tc8 = 2:numel(pit_trap_cols_8)
+        opts_tc = opts_base;
+        opts_tc.report_type  = 'pit_speed';
+        opts_tc.pit_trap_col = pit_trap_cols_8{tc8};
+        opts_tc.pit_trap_n   = tc8;
+        T_tc = smp_match_speed_trap(cache, opts_tc);
+        T_tc.trap_col = repmat(string(pit_trap_cols_8{tc8}), height(T_tc), 1);
+        T_parts{end+1} = T_tc;
+        fprintf('  [%s]    %d rows, %d matched\n', pit_trap_cols_8{tc8}, height(T_tc), sum(T_tc.matched));
+    end
+
+    T_match = vertcat(T_parts{:});
+end
 
 n_matched   = sum(T_match.matched);
 n_total     = height(T_match);
@@ -273,14 +532,61 @@ else
 end
 disp(T_display);
 
-% Summary stats for matched rows in display set
+%% ── 9b. PIT SPEED SUMMARY TABLE ──────────────────────────────────────────────
+fprintf('\n=== STEP 9b: Pit speed summary (one row per pit entry) ===\n');
+T_pit_disp = T_display(strcmp(string(T_display.trap_type), 'pit_speed') & T_display.matched, :);
+if height(T_pit_disp) == 0
+    fprintf('  No matched pit_speed rows to summarise.\n');
+else
+    % Build compact summary: timing lap, timing kph, motec lap, motec inlap kph, delta, wheel speeds
+    ws_cols_9b = T_pit_disp.Properties.VariableNames(...
+        ~cellfun(@isempty, regexp(T_pit_disp.Properties.VariableNames, '^ws_')));
+    has_ws = ~isempty(ws_cols_9b);
+
+    fprintf('  %-6s  %-6s  %-10s  %-10s  %-10s  %-10s', ...
+        'TLap', 'MLap', 'Timing_kph', 'Motec_kph', 'Delta_kph', 'LapType');
+    if has_ws
+        for wi9 = 1:numel(ws_cols_9b)
+            lbl9 = strrep(ws_cols_9b{wi9}, 'ws_wheelspeed', 'WS_');
+            lbl9 = strrep(lbl9, 'ws_wheel_speed_', 'WS_');
+            fprintf('  %-8s', lbl9);
+        end
+    end
+    fprintf('\n');
+
+    for ri9 = 1:height(T_pit_disp)
+        row9 = T_pit_disp(ri9, :);
+        fprintf('  %-6g  %-6g  %-10.1f  %-10.1f  %-10.1f  %-10s', ...
+            row9.lap, row9.motec_lap, row9.timing_kph, row9.motec_kph, row9.delta_kph, ...
+            char(row9.motec_lap_type));
+        if has_ws
+            for wi9 = 1:numel(ws_cols_9b)
+                fprintf('  %-8.1f', row9.(ws_cols_9b{wi9}));
+            end
+        end
+        fprintf('\n');
+    end
+end
 T_ok = T_display(T_display.matched, :);
 if height(T_ok) > 0
-    fprintf('\n  Matched rows — delta_kph stats:\n');
-    fprintf('    mean  : %.2f\n', mean(T_ok.delta_kph,   'omitnan'));
-    fprintf('    std   : %.2f\n', std(T_ok.delta_kph,    'omitnan'));
-    fprintf('    min   : %.2f\n', min(T_ok.delta_kph,    [], 'omitnan'));
-    fprintf('    max   : %.2f\n', max(T_ok.delta_kph,    [], 'omitnan'));
+    if ismember('trap_col', T_ok.Properties.VariableNames)
+        trap_groups_9 = unique(T_ok.trap_col);
+        for tgi9 = 1:numel(trap_groups_9)
+            tg9  = trap_groups_9(tgi9);
+            tgm9 = T_ok(T_ok.trap_col == tg9, :);
+            fprintf('\n  [trap: %s]  %d matched rows — delta_kph:\n', tg9, height(tgm9));
+            fprintf('    mean  : %.2f\n', mean(tgm9.delta_kph, 'omitnan'));
+            fprintf('    std   : %.2f\n', std(tgm9.delta_kph,  'omitnan'));
+            fprintf('    min   : %.2f\n', min(tgm9.delta_kph,  [], 'omitnan'));
+            fprintf('    max   : %.2f\n', max(tgm9.delta_kph,  [], 'omitnan'));
+        end
+    else
+        fprintf('\n  Matched rows — delta_kph stats:\n');
+        fprintf('    mean  : %.2f\n', mean(T_ok.delta_kph,   'omitnan'));
+        fprintf('    std   : %.2f\n', std(T_ok.delta_kph,    'omitnan'));
+        fprintf('    min   : %.2f\n', min(T_ok.delta_kph,    [], 'omitnan'));
+        fprintf('    max   : %.2f\n', max(T_ok.delta_kph,    [], 'omitnan'));
+    end
 end
 
 %% ── 10. VISUALISATION ──────────────────────────────────────────────────────
@@ -298,12 +604,27 @@ else
     ax1 = subplot(2, 2, 1);
     hold(ax1, 'on');
     T_ok = T_match(T_match.matched, :);
+    trap_markers_10 = {'o', '^', 's', 'd', 'p'};
+    has_tc_10 = ismember('trap_col', T_ok.Properties.VariableNames);
+    trap_grps_10 = {};
+    if has_tc_10, trap_grps_10 = cellstr(unique(T_ok.trap_col)); end
     for ci = 1:n_cars
         car_str = cars_all(ci);
-        mask    = T_ok.car == car_str;
-        if ~any(mask), continue; end
-        scatter(ax1, T_ok.timing_kph(mask), T_ok.motec_kph(mask), 50, ...
-            cmap(ci,:), 'filled', 'DisplayName', char(car_str));
+        if has_tc_10
+            for tgi = 1:numel(trap_grps_10)
+                mask = T_ok.car == car_str & strcmp(cellstr(T_ok.trap_col), trap_grps_10{tgi});
+                if ~any(mask), continue; end
+                mkr10 = trap_markers_10{min(tgi, numel(trap_markers_10))};
+                lbl10 = sprintf('%s [%s]', char(car_str), trap_grps_10{tgi});
+                scatter(ax1, T_ok.timing_kph(mask), T_ok.motec_kph(mask), 50, ...
+                    cmap(ci,:), mkr10, 'filled', 'DisplayName', lbl10);
+            end
+        else
+            mask = T_ok.car == car_str;
+            if ~any(mask), continue; end
+            scatter(ax1, T_ok.timing_kph(mask), T_ok.motec_kph(mask), 50, ...
+                cmap(ci,:), 'filled', 'DisplayName', char(car_str));
+        end
     end
     % y = x reference
     ax1_lims = [min([ax1.XLim(1) ax1.YLim(1)]) max([ax1.XLim(2) ax1.YLim(2)])];
@@ -318,11 +639,23 @@ else
     hold(ax2, 'on');
     for ci = 1:n_cars
         car_str = cars_all(ci);
-        mask    = T_ok.car == car_str;
-        if ~any(mask), continue; end
-        plot(ax2, T_ok.lap(mask), T_ok.delta_kph(mask), 'o-', ...
-            'Color', cmap(ci,:), 'DisplayName', char(car_str), ...
-            'MarkerFaceColor', cmap(ci,:));
+        if has_tc_10
+            for tgi = 1:numel(trap_grps_10)
+                mask = T_ok.car == car_str & strcmp(cellstr(T_ok.trap_col), trap_grps_10{tgi});
+                if ~any(mask), continue; end
+                mkr10 = [trap_markers_10{min(tgi, numel(trap_markers_10))} '-'];
+                lbl10 = sprintf('%s [%s]', char(car_str), trap_grps_10{tgi});
+                plot(ax2, T_ok.lap(mask), T_ok.delta_kph(mask), mkr10, ...
+                    'Color', cmap(ci,:), 'DisplayName', lbl10, ...
+                    'MarkerFaceColor', cmap(ci,:));
+            end
+        else
+            mask = T_ok.car == car_str;
+            if ~any(mask), continue; end
+            plot(ax2, T_ok.lap(mask), T_ok.delta_kph(mask), 'o-', ...
+                'Color', cmap(ci,:), 'DisplayName', char(car_str), ...
+                'MarkerFaceColor', cmap(ci,:));
+        end
     end
     yline(ax2, 0, 'k--', 'HandleVisibility', 'off');
     xlabel(ax2, 'Lap'); ylabel(ax2, 'Δ kph (timing − MoTeC)');
@@ -381,4 +714,27 @@ else
 
     sgtitle(fig, sprintf('Speed Trap Debug — %s %s (%s)', event, session, report_type), ...
         'FontWeight', 'bold');
+end
+
+%% ── 11. SAVE CSV ─────────────────────────────────────────────────────────────
+fprintf('\n=== STEP 11: Save CSV ===\n');
+if ~exist('T_match', 'var') || isempty(T_match)
+    fprintf('  No T_match — run step 8 first.\n');
+else
+    % Apply car_filter
+    T_save = T_match;
+    if ~isempty(car_filter)
+        T_save = T_save(strcmp(string(T_save.car), car_filter), :);
+        fprintf('  car filter applied: %d rows (car %s)\n', height(T_save), car_filter);
+    end
+    % Build filename: session + team + car (if filtered)
+    team_tag = regexprep(strjoin(TEAM_FILTER, '_'), '[^\w]', '_');
+    if ~isempty(car_filter)
+        csv_fname = sprintf('%s_%s_car%s_speed_traps.csv', timing_session, team_tag, car_filter);
+    else
+        csv_fname = sprintf('%s_%s_speed_traps.csv', timing_session, team_tag);
+    end
+    csv_save_path = fullfile(cache_dir, csv_fname);
+    writetable(T_save, csv_save_path);
+    fprintf('  Saved %d rows to:\n  %s\n', height(T_save), csv_save_path);
 end

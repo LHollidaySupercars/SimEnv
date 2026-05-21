@@ -41,13 +41,8 @@ function vehicle = offsetInPerpendicularPlane(vehicle, manufacturer, axle, varar
     
     % Rotate by angle to get U and V axes
     % 149 x 1,                      149 x 3         149 x 1  % 149 x 3
-    if toeIndex == 1
-        u_hat = cosd(rotationAngle) .* forwardInPlane + sind(rotationAngle) .* lateralInPlane;
-        v_hat = -sind(rotationAngle) .* forwardInPlane + cosd(rotationAngle) .* lateralInPlane;
-    else
-        u_hat = cosd(rotationAngle) .* forwardInPlane + sind(rotationAngle) .* lateralInPlane;
-        v_hat = -sind(rotationAngle) .* forwardInPlane + cosd(rotationAngle) .* lateralInPlane;
-    end
+    u_hat = cosd(rotationAngle) .* forwardInPlane + sind(rotationAngle) .* lateralInPlane;
+    v_hat = -sind(rotationAngle) .* forwardInPlane + cosd(rotationAngle) .* lateralInPlane;
     % Apply offsets
 %     vehicle.(manufacturer).kinematics.(axle).correctedContactPatch = basePoint + offset_u * u_hat + offset_v * v_hat;
     

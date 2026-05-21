@@ -38,11 +38,20 @@ function [to_load, cache] = smp_cache_diff(cache, scan)
                 row            = path_map(fpath);
                 cached_size    = cache.manifest.FileSize(row);
                 cached_modtime = cache.manifest.LastModifiedNum(row);
+                load_ok        = cache.manifest.LoadOK(row);
                 changed = (disk_size ~= cached_size) || ...
                           (abs(disk_modtime - cached_modtime) > 1/86400);
+                failed  = ~logical(load_ok);
 
                 if changed
                     fprintf('  [CHANGED] %s\n', fpath);
+                    n = n + 1;
+                    to_load(n).path         = fpath;
+                    to_load(n).team_index   = team.index;
+                    to_load(n).team_acronym = team.acronym;
+                    cache = smp_cache_remove(cache, fpath);
+                elseif failed
+                    fprintf('  [RETRY] %s\n', fpath);
                     n = n + 1;
                     to_load(n).path         = fpath;
                     to_load(n).team_index   = team.index;
