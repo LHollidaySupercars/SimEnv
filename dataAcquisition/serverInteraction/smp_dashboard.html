@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMP // PIT WALL</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --ford:    #0057B8;
+  --chev:    #F5C400;
+  --toyota:  #EB0A1E;
+  --bg:      #080A0D;
+  --bg2:     #0F1318;
+  --bg3:     #161C24;
+  --bg4:     #1E2733;
+  --line:    rgba(255,255,255,0.06);
+  --line2:   rgba(255,255,255,0.12);
+  --text:    #E8EDF2;
+  --muted:   #5A6678;
+  --bright:  #FFFFFF;
+  --accent:  #00D4FF;
+  --warn:    #FF6B00;
+  --good:    #00E676;
+  --display: 'Barlow Condensed', sans-serif;
+  --mono:    'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 13px; }
+
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── CARBON TEXTURE ─────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,.015) 2px, rgba(255,255,255,.015) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,.015) 2px, rgba(255,255,255,.015) 4px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── HEADER ─────────────────────────────────────────────── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(8,10,13,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line2);
+  display: flex; align-items: stretch;
+  height: 52px;
+}
+
+.logo-block {
+  display: flex; align-items: center;
+  padding: 0 24px;
+  border-right: 1px solid var(--line2);
+  gap: 12px;
+}
+.logo-text {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: 6px;
+  color: var(--bright);
+  text-transform: uppercase;
+}
+.logo-sep { color: var(--accent); }
+.logo-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.header-filters {
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 8px; flex: 1;
+}
+
+.filter-group {
+  display: flex; align-items: center; gap: 6px;
+}
+.filter-label {
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--muted); text-transform: uppercase;
+}
+.filter-select {
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  appearance: none;
+  cursor: pointer;
+  min-width: 90px;
+  transition: border-color .15s;
+}
+.filter-select:focus { outline: none; border-color: var(--accent); }
+.filter-select option { background: var(--bg3); }
+
+.filter-divider {
+  width: 1px; height: 24px;
+  background: var(--line2);
+  margin: 0 4px;
+}
+
+.btn-apply {
+  padding: 6px 18px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 3px;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-apply:hover { opacity: .85; }
+
+.btn-clear {
+  padding: 6px 14px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line2);
+  border-radius: 3px;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-clear:hover { border-color: var(--accent); color: var(--text); }
+
+.header-right {
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 16px;
+  border-left: 1px solid var(--line2);
+  margin-left: auto;
+}
+#status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: background .3s;
+}
+#status-dot.live { background: var(--good); box-shadow: 0 0 8px var(--good); }
+#status-dot.err  { background: var(--toyota); }
+#status-text {
+  font-size: 10px; letter-spacing: 2px;
+  color: var(--muted); text-transform: uppercase;
+}
+#row-count {
+  font-family: var(--display);
+  font-size: 18px; font-weight: 700;
+  color: var(--accent);
+}
+
+/* ─── MFR CHIP FILTERS ───────────────────────────────────── */
+.mfr-chips {
+  display: flex; gap: 4px; align-items: center;
+}
+.mfr-chip {
+  padding: 4px 12px;
+  border-radius: 2px;
+  border: 1px solid var(--line2);
+  background: var(--bg3);
+  color: var(--muted);
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .12s;
+  user-select: none;
+}
+.mfr-chip:hover { border-color: var(--line2); color: var(--text); }
+.mfr-chip.ford-on   { background: var(--ford);  border-color: var(--ford);  color: #fff; }
+.mfr-chip.chev-on   { background: var(--chev);  border-color: var(--chev);  color: #000; }
+.mfr-chip.toyota-on { background: var(--toyota); border-color: var(--toyota); color: #fff; }
+
+/* ─── MAIN LAYOUT ────────────────────────────────────────── */
+.page { position: relative; z-index: 1; padding: 20px 20px 40px; }
+
+/* ─── STAT STRIP ─────────────────────────────────────────── */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--accent);
+  padding: 14px 16px;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 60px; height: 60px;
+  background: radial-gradient(circle, rgba(0,212,255,.06) 0%, transparent 70%);
+}
+.stat-label {
+  font-size: 9px; letter-spacing: 3px;
+  color: var(--muted); text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.stat-value {
+  font-family: var(--display);
+  font-size: 32px; font-weight: 900;
+  color: var(--bright);
+  line-height: 1;
+}
+.stat-sub {
+  font-size: 10px; color: var(--muted);
+  margin-top: 4px; letter-spacing: .5px;
+}
+.stat-card.ford-accent   { border-top-color: var(--ford); }
+.stat-card.chev-accent   { border-top-color: var(--chev); }
+.stat-card.toyota-accent { border-top-color: var(--toyota); }
+.stat-card.warn-accent   { border-top-color: var(--warn); }
+
+/* ─── CHART GRID ─────────────────────────────────────────── */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.chart-card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 16px;
+  position: relative;
+  animation: fadeUp .4s ease both;
+}
+.chart-card:nth-child(2) { animation-delay: .05s; }
+.chart-card:nth-child(3) { animation-delay: .10s; }
+.chart-card:nth-child(4) { animation-delay: .15s; }
+.chart-card:nth-child(5) { animation-delay: .20s; }
+.chart-card:nth-child(6) { animation-delay: .25s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.chart-header {
+  display: flex; align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.chart-title {
+  font-family: var(--display);
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text);
+}
+.chart-subtitle {
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--muted); text-transform: uppercase;
+}
+.chart-wrap { position: relative; height: 200px; }
+
+/* ─── LAP TABLE ──────────────────────────────────────────── */
+.table-section {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.table-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line2);
+  background: var(--bg3);
+}
+.table-title {
+  font-family: var(--display);
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--text);
+}
+#search-in {
+  background: var(--bg);
+  border: 1px solid var(--line2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 2px;
+  width: 200px;
+}
+#search-in:focus { outline: none; border-color: var(--accent); }
+#search-in::placeholder { color: var(--muted); }
+
+.table-scroll { overflow-x: auto; max-height: 380px; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
+thead { position: sticky; top: 0; z-index: 2; }
+th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 9px; letter-spacing: 2.5px;
+  color: var(--muted); text-transform: uppercase;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--line2);
+  cursor: pointer; white-space: nowrap;
+  user-select: none;
+  font-family: var(--mono);
+}
+th:hover { color: var(--text); }
+th.asc::after  { content: ' ▲'; font-size: 8px; color: var(--accent); }
+th.desc::after { content: ' ▼'; font-size: 8px; color: var(--accent); }
+td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  white-space: nowrap;
+  font-size: 11px;
+}
+tr:hover td { background: var(--bg3); }
+tr:last-child td { border-bottom: none; }
+
+.mfr-badge {
+  display: inline-block;
+  padding: 2px 8px; border-radius: 2px;
+  font-family: var(--display);
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.mfr-Ford     { background: rgba(0,87,184,.3); color: #4A9EFF; border: 1px solid rgba(0,87,184,.5); }
+.mfr-Chevrolet{ background: rgba(245,196,0,.2); color: #F5C400; border: 1px solid rgba(245,196,0,.4); }
+.mfr-Toyota   { background: rgba(235,10,30,.25); color: #FF6B7A; border: 1px solid rgba(235,10,30,.4); }
+
+.lap-num { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; }
+.lap-time-cell { font-variant-numeric: tabular-nums; font-weight: 600; }
+.best-lap { color: var(--good); }
+
+.empty-state {
+  padding: 60px; text-align: center;
+  color: var(--muted);
+  font-family: var(--display);
+  font-size: 16px; letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+/* ─── LOADING ────────────────────────────────────────────── */
+#loader {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 999; gap: 20px;
+}
+#loader.gone { display: none; }
+.loader-logo {
+  font-family: var(--display);
+  font-size: 48px; font-weight: 900;
+  letter-spacing: 12px; color: var(--bright);
+  text-transform: uppercase;
+}
+.loader-logo span { color: var(--accent); }
+.loader-bar {
+  width: 200px; height: 2px;
+  background: var(--line2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.loader-bar::after {
+  content: '';
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  animation: load 1.2s ease-in-out infinite;
+}
+@keyframes load {
+  0%   { width: 0%; margin-left: 0; }
+  50%  { width: 60%; margin-left: 20%; }
+  100% { width: 0%; margin-left: 100%; }
+}
+.loader-text {
+  font-size: 10px; letter-spacing: 4px;
+  color: var(--muted); text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">SMP <span>//</span> PIT WALL</div>
+  <div class="loader-bar"></div>
+  <div class="loader-text">Connecting to local database...</div>
+</div>
+
+<header>
+  <div class="logo-block">
+    <div>
+      <div class="logo-text">SMP <span class="logo-sep">//</span> PIT WALL</div>
+      <div class="logo-sub">Telemetry Analysis</div>
+    </div>
+  </div>
+
+  <div class="header-filters">
+    <div class="filter-group">
+      <span class="filter-label">Event</span>
+      <select class="filter-select" id="f-event"><option value="">All</option></select>
+    </div>
+    <div class="filter-divider"></div>
+    <div class="filter-group">
+      <span class="filter-label">Session</span>
+      <select class="filter-select" id="f-session"><option value="">All</option></select>
+    </div>
+    <div class="filter-divider"></div>
+    <div class="filter-group">
+      <span class="filter-label">Team</span>
+      <select class="filter-select" id="f-team"><option value="">All</option></select>
+    </div>
+    <div class="filter-divider"></div>
+    <div class="mfr-chips">
+      <div class="mfr-chip" data-m="Ford"      onclick="togMfr(this)">FORD</div>
+      <div class="mfr-chip" data-m="Chevrolet" onclick="togMfr(this)">CHEV</div>
+      <div class="mfr-chip" data-m="Toyota"    onclick="togMfr(this)">TOYOTA</div>
+    </div>
+    <div class="filter-divider"></div>
+    <button class="btn-apply" onclick="applyFilters()">APPLY</button>
+    <button class="btn-clear" onclick="clearFilters()">RESET</button>
+  </div>
+
+  <div class="header-right">
+    <div id="status-dot"></div>
+    <span id="status-text">OFFLINE</span>
+    <span id="row-count">—</span>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- STAT STRIP -->
+  <div class="stat-strip">
+    <div class="stat-card">
+      <div class="stat-label">Total Laps</div>
+      <div class="stat-value" id="s-laps">—</div>
+      <div class="stat-sub">in current filter</div>
+    </div>
+    <div class="stat-card ford-accent">
+      <div class="stat-label">Best Lap Time</div>
+      <div class="stat-value" id="s-best">—</div>
+      <div class="stat-sub" id="s-best-who">—</div>
+    </div>
+    <div class="stat-card chev-accent">
+      <div class="stat-label">Cars on Track</div>
+      <div class="stat-value" id="s-cars">—</div>
+      <div class="stat-sub" id="s-mfr-split">—</div>
+    </div>
+    <div class="stat-card toyota-accent">
+      <div class="stat-label">Avg Lap Time</div>
+      <div class="stat-value" id="s-avg">—</div>
+      <div class="stat-sub">across all filtered laps</div>
+    </div>
+    <div class="stat-card warn-accent">
+      <div class="stat-label">Sessions</div>
+      <div class="stat-value" id="s-sess">—</div>
+      <div class="stat-sub" id="s-events">—</div>
+    </div>
+  </div>
+
+  <!-- CHART GRID -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Lap Time Distribution</span>
+        <span class="chart-subtitle">by Manufacturer</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c-hist"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Avg Lap Time</span>
+        <span class="chart-subtitle">by Team</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c-team"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Top Speed</span>
+        <span class="chart-subtitle">Max ground speed by driver</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c-speed"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Throttle Application</span>
+        <span class="chart-subtitle">Mean throttle % by team</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c-throttle"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Brake Pressure</span>
+        <span class="chart-subtitle">Peak front brake by driver</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c-brake"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">Lap Count</span>
+        <span class="chart-subtitle">Laps completed by driver</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c-laps"></canvas></div>
+    </div>
+  </div>
+
+  <!-- LAP TABLE -->
+  <div class="table-section">
+    <div class="table-header">
+      <span class="table-title">Lap Data</span>
+      <input id="search-in" type="text" placeholder="search driver / team..." oninput="renderTable()"/>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="srt('event')">Event</th>
+            <th onclick="srt('session')">Session</th>
+            <th onclick="srt('team')">Team</th>
+            <th onclick="srt('driver')">Driver</th>
+            <th onclick="srt('manufacturer')">Mfr</th>
+            <th onclick="srt('car_number')">Car</th>
+            <th onclick="srt('lap_number')">Lap</th>
+            <th onclick="srt('lap_time')">Lap Time</th>
+            <th onclick="srt('ground_speed_max')">Spd Max</th>
+            <th onclick="srt('throttle_position_mean')">Thr%</th>
+            <th onclick="srt('brake_pressure_front_max')">Brk F</th>
+            <th onclick="srt('engine_speed_max')">RPM Max</th>
+          </tr>
+        </thead>
+        <tbody id="t-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────
+const PB = 'http://127.0.0.1:8090';
+const COLLECTION = 'lap_stats';
+
+// ── COLOURS ──────────────────────────────────────────────────
+const MFR = {
+  Ford:      {bg:'rgba(0,87,184,.7)',   bd:'#0057B8', lt:'#4A9EFF'},
+  Chevrolet: {bg:'rgba(245,196,0,.7)',  bd:'#F5C400', lt:'#F5C400'},
+  Toyota:    {bg:'rgba(235,10,30,.7)',  bd:'#EB0A1E', lt:'#FF6B7A'},
+};
+function mc(m,p){return(MFR[m]||{bg:'rgba(90,102,120,.6)',bd:'#5A6678',lt:'#8899AA'})[p];}
+const PAL=['#00D4FF','#00E676','#F5C400','#FF6B00','#FF6B7A','#B48EAD','#88C0D0','#A3BE8C'];
+function gp(i){return PAL[i%PAL.length];}
+
+const CS={
+  ticks:{color:'#5A6678',font:{size:9,family:'JetBrains Mono'}},
+  grid:{color:'rgba(255,255,255,0.04)'}
+};
+const CB={
+  responsive:true,
+  maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:'#5A6678',font:{size:10,family:'JetBrains Mono'},boxWidth:10,padding:10}}}
+};
+
+// ── STATE ─────────────────────────────────────────────────────
+let all=[], fd=[], sc=null, sd='asc';
+let charts={};
+
+// ── INIT ──────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async ()=>{
+  await fetchAll();
+  document.getElementById('loader').classList.add('gone');
+});
+
+async function fetchAll(){
+  try {
+    let page=1, total=Infinity;
+    all=[];
+    while(all.length < total){
+      const url = `${PB}/api/collections/${COLLECTION}/records?perPage=500&page=${page}`;
+      const resp = await fetch(url);
+      if(!resp.ok) throw new Error('HTTP '+resp.status);
+      const data = await resp.json();
+      total = data.totalItems;
+      all = all.concat(data.items);
+      page++;
+      if(data.items.length === 0) break;
+    }
+    setStatus(true, all.length);
+    populateFilters();
+    fd=[...all];
+    refresh();
+  } catch(e){
+    setStatus(false, 0);
+    console.error(e);
+  }
+}
+
+function setStatus(ok, count){
+  const dot  = document.getElementById('status-dot');
+  const txt  = document.getElementById('status-text');
+  const cnt  = document.getElementById('row-count');
+  dot.className  = ok ? 'live' : 'err';
+  txt.textContent = ok ? 'LIVE' : 'ERROR';
+  cnt.textContent = ok ? count+' LAPS' : '—';
+}
+
+// ── FILTERS ───────────────────────────────────────────────────
+function populateFilters(){
+  fill('f-event',   [...new Set(all.map(r=>r.event).filter(Boolean))].sort());
+  fill('f-session', [...new Set(all.map(r=>r.session).filter(Boolean))].sort());
+  fill('f-team',    [...new Set(all.map(r=>r.team).filter(Boolean))].sort());
+}
+function fill(id, vals){
+  const s=document.getElementById(id);
+  s.innerHTML='<option value="">All</option>';
+  vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});
+}
+
+function togMfr(el){
+  const m=el.dataset.m;
+  const cls=m==='Ford'?'ford-on':m==='Chevrolet'?'chev-on':'toyota-on';
+  const was=el.classList.contains(cls);
+  el.classList.remove('ford-on','chev-on','toyota-on');
+  if(!was) el.classList.add(cls);
+}
+function getActiveMfrs(){
+  return[...document.querySelectorAll('.mfr-chip')]
+    .filter(c=>c.classList.contains('ford-on')||c.classList.contains('chev-on')||c.classList.contains('toyota-on'))
+    .map(c=>c.dataset.m);
+}
+
+function applyFilters(){
+  const ev  = document.getElementById('f-event').value;
+  const ses = document.getElementById('f-session').value;
+  const tm  = document.getElementById('f-team').value;
+  const mfrs= getActiveMfrs();
+
+  fd = all.filter(r=>{
+    if(ev  && r.event!==ev)           return false;
+    if(ses && r.session!==ses)         return false;
+    if(tm  && r.team!==tm)             return false;
+    if(mfrs.length && !mfrs.includes(r.manufacturer)) return false;
+    return true;
+  });
+  refresh();
+}
+
+function clearFilters(){
+  document.getElementById('f-event').value='';
+  document.getElementById('f-session').value='';
+  document.getElementById('f-team').value='';
+  document.querySelectorAll('.mfr-chip').forEach(c=>c.classList.remove('ford-on','chev-on','toyota-on'));
+  document.getElementById('search-in').value='';
+  fd=[...all];
+  refresh();
+}
+
+function refresh(){ updateStats(); renderCharts(); renderTable(); }
+
+// ── STATS ─────────────────────────────────────────────────────
+function fmtT(s){
+  if(!s&&s!==0)return'—';
+  const m=Math.floor(s/60);
+  return m+':'+(s%60).toFixed(3).padStart(6,'0');
+}
+
+function updateStats(){
+  const d=fd;
+  document.getElementById('s-laps').textContent = d.length||'—';
+
+  const valid=d.filter(r=>r.lap_time>0);
+  if(valid.length){
+    const b=valid.reduce((a,r)=>r.lap_time<a.lap_time?r:a);
+    document.getElementById('s-best').textContent = fmtT(b.lap_time);
+    document.getElementById('s-best-who').textContent = (b.driver||'—')+' · '+(b.team||'—');
+    const avg=valid.reduce((s,r)=>s+r.lap_time,0)/valid.length;
+    document.getElementById('s-avg').textContent = fmtT(avg);
+  } else {
+    document.getElementById('s-best').textContent='—';
+    document.getElementById('s-best-who').textContent='—';
+    document.getElementById('s-avg').textContent='—';
+  }
+
+  const cars=new Set(d.map(r=>r.car_number).filter(Boolean));
+  document.getElementById('s-cars').textContent = cars.size||'—';
+  const mc2={};
+  d.forEach(r=>{if(r.manufacturer)mc2[r.manufacturer]=(mc2[r.manufacturer]||0)+1;});
+  document.getElementById('s-mfr-split').textContent =
+    Object.entries(mc2).map(([k,v])=>k.substring(0,3).toUpperCase()+' '+v).join('  ')||'—';
+
+  const se=new Set(d.map(r=>r.session).filter(Boolean));
+  const ev=new Set(d.map(r=>r.event).filter(Boolean));
+  document.getElementById('s-sess').textContent = se.size||'—';
+  document.getElementById('s-events').textContent = [...ev].join(', ')||'—';
+}
+
+// ── CHARTS ────────────────────────────────────────────────────
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+function renderCharts(){
+  renderHist();
+  renderTeamBar();
+  renderSpeedBar();
+  renderThrottleBar();
+  renderBrakeBar();
+  renderLapsBar();
+}
+
+function renderHist(){
+  dc('c-hist');
+  const ctx=document.getElementById('c-hist').getContext('2d');
+  const times=fd.map(r=>r.lap_time).filter(v=>v>0);
+  if(!times.length)return;
+  const bsz=0.5;
+  const mn=Math.floor(Math.min(...times)/bsz)*bsz;
+  const mx=Math.ceil(Math.max(...times)/bsz)*bsz;
+  const lbls=[];
+  for(let t=mn;t<mx;t+=bsz)lbls.push(t.toFixed(1));
+  charts['c-hist']=new Chart(ctx,{
+    type:'bar',
+    data:{labels:lbls,datasets:['Ford','Chevrolet','Toyota'].map(mfr=>({
+      label:mfr,
+      data:lbls.map((_,i)=>{
+        const lo=mn+i*bsz,hi=lo+bsz;
+        return fd.filter(r=>r.manufacturer===mfr&&r.lap_time>=lo&&r.lap_time<hi).length;
+      }),
+      backgroundColor:mc(mfr,'bg'),borderColor:mc(mfr,'bd'),borderWidth:1,
+    }))},
+    options:{...CB,scales:{
+      x:{...CS,stacked:true,ticks:{...CS.ticks,maxRotation:45}},
+      y:{...CS,stacked:true}
+    }}
+  });
+}
+
+function renderTeamBar(){
+  dc('c-team');
+  const ctx=document.getElementById('c-team').getContext('2d');
+  const teams=[...new Set(fd.map(r=>r.team).filter(Boolean))].sort();
+  if(!teams.length)return;
+  const avgs=teams.map(t=>{
+    const rs=fd.filter(r=>r.team===t&&r.lap_time>0);
+    return rs.length?rs.reduce((s,r)=>s+r.lap_time,0)/rs.length:null;
+  });
+  const tmfr=teams.map(t=>{
+    const cnt={};
+    fd.filter(r=>r.team===t).forEach(r=>{if(r.manufacturer)cnt[r.manufacturer]=(cnt[r.manufacturer]||0)+1;});
+    return Object.keys(cnt).length?Object.keys(cnt).reduce((a,b)=>cnt[a]>cnt[b]?a:b):'';
+  });
+  charts['c-team']=new Chart(ctx,{
+    type:'bar',
+    data:{labels:teams,datasets:[{
+      label:'Avg Lap Time',data:avgs,
+      backgroundColor:tmfr.map(m=>mc(m,'bg')),
+      borderColor:tmfr.map(m=>mc(m,'bd')),borderWidth:1
+    }]},
+    options:{...CB,plugins:{legend:{display:false}},scales:{
+      x:{...CS,ticks:{...CS.ticks,maxRotation:40}},
+      y:{...CS,ticks:{...CS.ticks,callback:v=>fmtT(v)}}
+    }}
+  });
+}
+
+function renderSpeedBar(){
+  dc('c-speed');
+  const ctx=document.getElementById('c-speed').getContext('2d');
+  const drivers=[...new Set(fd.map(r=>r.driver).filter(Boolean))].sort();
+  if(!drivers.length)return;
+  const speeds=drivers.map(d=>{
+    const rs=fd.filter(r=>r.driver===d&&r.ground_speed_max>0);
+    return rs.length?Math.max(...rs.map(r=>r.ground_speed_max)):null;
+  });
+  const dmfr=drivers.map(d=>{const r=fd.find(r=>r.driver===d);return r?r.manufacturer:'';});
+  charts['c-speed']=new Chart(ctx,{
+    type:'bar',
+    data:{labels:drivers.map(d=>d.replace(/_/g,' ')),datasets:[{
+      label:'Top Speed (km/h)',data:speeds,
+      backgroundColor:dmfr.map(m=>mc(m,'bg')),
+      borderColor:dmfr.map(m=>mc(m,'bd')),borderWidth:1
+    }]},
+    options:{...CB,plugins:{legend:{display:false}},scales:{
+      x:{...CS,ticks:{...CS.ticks,maxRotation:50}},
+      y:{...CS,ticks:{...CS.ticks,callback:v=>v+'km/h'}}
+    }}
+  });
+}
+
+function renderThrottleBar(){
+  dc('c-throttle');
+  const ctx=document.getElementById('c-throttle').getContext('2d');
+  const teams=[...new Set(fd.map(r=>r.team).filter(Boolean))].sort();
+  if(!teams.length)return;
+  const avgs=teams.map(t=>{
+    const rs=fd.filter(r=>r.team===t&&r.throttle_position_mean>0);
+    return rs.length?rs.reduce((s,r)=>s+r.throttle_position_mean,0)/rs.length:null;
+  });
+  const tmfr=teams.map(t=>{
+    const cnt={};
+    fd.filter(r=>r.team===t).forEach(r=>{if(r.manufacturer)cnt[r.manufacturer]=(cnt[r.manufacturer]||0)+1;});
+    return Object.keys(cnt).length?Object.keys(cnt).reduce((a,b)=>cnt[a]>cnt[b]?a:b):'';
+  });
+  charts['c-throttle']=new Chart(ctx,{
+    type:'bar',
+    data:{labels:teams,datasets:[{
+      label:'Mean Throttle %',data:avgs,
+      backgroundColor:tmfr.map(m=>mc(m,'bg')),
+      borderColor:tmfr.map(m=>mc(m,'bd')),borderWidth:1
+    }]},
+    options:{...CB,plugins:{legend:{display:false}},scales:{
+      x:{...CS,ticks:{...CS.ticks,maxRotation:40}},
+      y:{...CS,ticks:{...CS.ticks,callback:v=>v?v.toFixed(1)+'%':''}}
+    }}
+  });
+}
+
+function renderBrakeBar(){
+  dc('c-brake');
+  const ctx=document.getElementById('c-brake').getContext('2d');
+  const drivers=[...new Set(fd.map(r=>r.driver).filter(Boolean))].sort();
+  if(!drivers.length)return;
+  const brakes=drivers.map(d=>{
+    const rs=fd.filter(r=>r.driver===d&&r.brake_pressure_front_max>0);
+    return rs.length?Math.max(...rs.map(r=>r.brake_pressure_front_max)):null;
+  });
+  const dmfr=drivers.map(d=>{const r=fd.find(r=>r.driver===d);return r?r.manufacturer:'';});
+  charts['c-brake']=new Chart(ctx,{
+    type:'bar',
+    data:{labels:drivers.map(d=>d.replace(/_/g,' ')),datasets:[{
+      label:'Peak Brake (bar)',data:brakes,
+      backgroundColor:dmfr.map(m=>mc(m,'bg')),
+      borderColor:dmfr.map(m=>mc(m,'bd')),borderWidth:1
+    }]},
+    options:{...CB,plugins:{legend:{display:false}},scales:{
+      x:{...CS,ticks:{...CS.ticks,maxRotation:50}},
+      y:{...CS}
+    }}
+  });
+}
+
+function renderLapsBar(){
+  dc('c-laps');
+  const ctx=document.getElementById('c-laps').getContext('2d');
+  const drivers=[...new Set(fd.map(r=>r.driver).filter(Boolean))].sort();
+  if(!drivers.length)return;
+  const counts=drivers.map(d=>fd.filter(r=>r.driver===d).length);
+  const dmfr=drivers.map(d=>{const r=fd.find(r=>r.driver===d);return r?r.manufacturer:'';});
+  charts['c-laps']=new Chart(ctx,{
+    type:'bar',
+    data:{labels:drivers.map(d=>d.replace(/_/g,' ')),datasets:[{
+      label:'Laps',data:counts,
+      backgroundColor:dmfr.map(m=>mc(m,'bg')),
+      borderColor:dmfr.map(m=>mc(m,'bd')),borderWidth:1
+    }]},
+    options:{...CB,plugins:{legend:{display:false}},scales:{
+      x:{...CS,ticks:{...CS.ticks,maxRotation:50}},
+      y:{...CS,ticks:{...CS.ticks,stepSize:1}}
+    }}
+  });
+}
+
+// ── TABLE ─────────────────────────────────────────────────────
+let bestLapTime = Infinity;
+
+function renderTable(){
+  const q=document.getElementById('search-in').value.toLowerCase();
+  let rows=fd.filter(r=>{
+    if(!q)return true;
+    return['driver','team','car_number','event','session'].some(k=>(r[k]||'').toLowerCase().includes(q));
+  });
+
+  if(sc){
+    rows=[...rows].sort((a,b)=>{
+      const av=a[sc],bv=b[sc];
+      if(av==null||av===undefined)return 1;
+      if(bv==null||bv===undefined)return-1;
+      return sd==='asc'?(av>bv?1:-1):(av<bv?1:-1);
+    });
+  }
+
+  // Find global best lap time for highlighting
+  const valid=rows.filter(r=>r.lap_time>0);
+  bestLapTime = valid.length ? Math.min(...valid.map(r=>r.lap_time)) : Infinity;
+
+  const tb=document.getElementById('t-body');
+  if(!rows.length){
+    tb.innerHTML=`<tr><td colspan="12" class="empty-state">NO DATA — ADJUST FILTERS</td></tr>`;
+    return;
+  }
+
+  const LIMIT=500;
+  tb.innerHTML=rows.slice(0,LIMIT).map(r=>{
+    const isBest = r.lap_time === bestLapTime;
+    const ltClass = isBest ? 'lap-time-cell best-lap' : 'lap-time-cell';
+    const mfr = (r.manufacturer||'').replace(/\s+/g,'');
+    return `<tr>
+      <td>${r.event||'—'}</td>
+      <td>${r.session||'—'}</td>
+      <td>${r.team||'—'}</td>
+      <td>${(r.driver||'—').replace(/_/g,' ')}</td>
+      <td><span class="mfr-badge mfr-${mfr}">${(r.manufacturer||'').toUpperCase()}</span></td>
+      <td>${r.car_number||'—'}</td>
+      <td class="lap-num">${r.lap_number||'—'}</td>
+      <td class="${ltClass}">${fmtT(r.lap_time)}</td>
+      <td>${r.ground_speed_max?r.ground_speed_max.toFixed(1):'—'}</td>
+      <td>${r.throttle_position_mean?r.throttle_position_mean.toFixed(1)+'%':'—'}</td>
+      <td>${r.brake_pressure_front_max?r.brake_pressure_front_max.toFixed(1):'—'}</td>
+      <td>${r.engine_speed_max?Math.round(r.engine_speed_max):'—'}</td>
+    </tr>`;
+  }).join('');
+
+  if(rows.length>LIMIT){
+    tb.innerHTML+=`<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:10px;font-size:10px;letter-spacing:2px;">SHOWING ${LIMIT} OF ${rows.length} — USE FILTERS TO NARROW</td></tr>`;
+  }
+
+  // Update sort indicators
+  document.querySelectorAll('th').forEach(th=>{
+    th.classList.remove('asc','desc');
+  });
+}
+
+function srt(k){
+  sd = sc===k ? (sd==='asc'?'desc':'asc') : 'asc';
+  sc = k;
+  // Update header indicators
+  const ths = document.querySelectorAll('th');
+  ths.forEach(th=>th.classList.remove('asc','desc'));
+  const cols=['event','session','team','driver','manufacturer','car_number','lap_number','lap_time','ground_speed_max','throttle_position_mean','brake_pressure_front_max','engine_speed_max'];
+  const idx=cols.indexOf(k);
+  if(idx>=0) ths[idx].classList.add(sd);
+  renderTable();
+}
+</script>
+</body>
+</html>

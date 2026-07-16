@@ -1,0 +1,262 @@
+%% Full — date filter + xref against both alias files + export
+% clear opts
+opts.date_from        = datetime(2026, 6, 15);
+
+opts.alias_file       = 'C:\SimEnv/dataAcquisition/Motec_MP/alias/driverAlias.xlsx';
+opts.event_alias_file = 'C:\SimEnv\dataAcquisition\parseEventData\executionScripts\E07_TSV/eventAlias.xlsx';
+opts.xref_export      = 'C:\SimEnv/dataAcquisition/parseEventData/aliasReports/TSV_alias_check.xlsx';
+result = smp_discover_aliases('E:\2026/E07_TSV/_TeamData', opts);
+
+% -----------------------------------------------------------------------
+% Inspect raw strings (paste these into alias Excel files):
+result.drivers;            % -> driverAlias.xlsx          (DRV column)
+result.sessions      ;     % -> eventAlias.xlsx SESSION sheet (col A)
+result.venues         ;    % -> eventAlias.xlsx VENUE sheet   (col A)
+
+% Inspect xref breakdown:
+result.xref.drivers  ;     % .matched / .unmatched / .n_matched / .n_unmatched
+result.xref.sessions ;     % .matched / .unmatched / .n_matched / .n_unmatched
+result.xref.venues   ;     % .matched / .unmatched / .n_matched / .n_unmatched
+
+% Overall status:
+result.xref.ok       ;     % true ONLY when drivers AND sessions are fully matched
+
+result.xref.sessions.unmatched_detail
+result.xref.drivers.unmatched_detail
+result.xref.venues.unmatched_detail
+
+%% Functions to Keep
+
+
+function debug_print_session_field(filepath)
+% DEBUG_PRINT_SESSION_FIELD  Print exactly what is stored at the session
+% name offset (0x5E4, 32 bytes) in a MoTeC .ld file. No scanning, no
+% alias logic — just a direct read of the field motec_ld_info.m reads.
+%
+% Usage:
+%   debug_print_session_field('E:\2026\E07_TSV\_TeamData\01_T8R\20260712-243070002.ld')
+
+SESSION_OFFSET = 0x5E4;
+SESSION_LEN    = 32;
+
+if ~exist(filepath, 'file')
+    error('File not found: %s', filepath);
+end
+
+fid = fopen(filepath, 'rb');
+if fid < 0
+    error('Could not open: %s', filepath);
+end
+c = onCleanup(@() fclose(fid));
+
+fseek(fid, SESSION_OFFSET, 'bof');
+raw = fread(fid, SESSION_LEN, 'uint8=>double')';
+
+fprintf('\n=== %s ===\n', filepath);
+fprintf('Offset: 0x%X (%d)   Length: %d bytes\n\n', SESSION_OFFSET, SESSION_OFFSET, SESSION_LEN);
+
+fprintf('Raw bytes (hex): ');
+fprintf('%02X ', raw);
+fprintf('\n');
+
+fprintf('Raw bytes (dec): ');
+fprintf('%d ', raw);
+fprintf('\n\n');
+
+% Null-terminated ASCII string, same logic as motec_ld_info's fstr()
+nul = find(raw == 0, 1);
+seg = raw;
+if ~isempty(nul), seg = raw(1:nul-1); end
+if isempty(seg) || any(seg < 32 | seg > 126)
+    str = '(non-printable / empty)';
+else
+    str = strtrim(char(seg));
+end
+
+fprintf('Interpreted string: "%s"\n\n', str);
+end
+
+
+
+
+
+
+%% delete after
+
+
+function ld_set_session_name(filepath, new_session, opts)
+% LD_SET_SESSION_NAME  Overwrite the session-name field in a MoTeC .ld
+% file header in place.
+%
+% Fixed offset (from motec_ld_info.m, confirmed via hex analysis):
+%   0x05E4  session   char[32]  null-terminated, null-padded
+%
+% Usage:
+%   ld_set_session_name('E:\2026\E07_TSV\_TeamData\01_T8R\20260712-243070002.ld', 'Qualifying 2')
+%   ld_set_session_name(filepath, 'Race 1', opts)
+%
+% Options (opts struct):
+%   .backup    logical   copy filepath -> filepath.bak before writing (default: true)
+%   .verbose   logical   print before/after                            (default: true)
+%
+% Safety:
+%   - Field is 32 bytes. new_session longer than 31 chars will be
+%     truncated (31 chars + null terminator) — a warning is printed.
+%   - Backup is written once per call as "<filepath>.bak" (overwritten
+%     if it already exists) unless opts.backup = false.
+
+    SESSION_OFFSET = 0x5E4;
+    SESSION_LEN    = 32;
+
+    if nargin < 3 || isempty(opts), opts = struct(); end
+    backup_it = get_opt(opts, 'backup',  true);
+    verbose   = get_opt(opts, 'verbose', true);
+
+    if ~exist(filepath, 'file')
+        error('File not found: %s', filepath);
+    end
+
+    % ---- Read current value for before/after comparison ----------------
+    old_session = read_session(filepath, SESSION_OFFSET, SESSION_LEN);
+
+    if verbose
+        fprintf('\n=== ld_set_session_name ===\n');
+        fprintf('File:        %s\n', filepath);
+        fprintf('Current:     "%s"\n', old_session);
+        fprintf('New:         "%s"\n', new_session);
+    end
+
+    if numel(new_session) > SESSION_LEN - 1
+        warning('new_session ("%s") exceeds %d chars — truncating to fit field.', ...
+            new_session, SESSION_LEN - 1);
+        new_session = new_session(1:SESSION_LEN - 1);
+    end
+
+    % ---- Backup --------------------------------------------------------
+    if backup_it
+        bak_path = [filepath '.bak'];
+        [ok, msg] = copyfile(filepath, bak_path, 'f');
+        if ~ok
+            error('Backup failed, aborting write: %s', msg);
+        end
+        if verbose
+            fprintf('Backup:      %s\n', bak_path);
+        end
+    end
+
+    % ---- Build fixed-width null-padded bytes ---------------------------
+    bytes = zeros(1, SESSION_LEN, 'uint8');
+    raw   = uint8(new_session);
+    bytes(1:numel(raw)) = raw;   % remainder stays zero (null padding)
+
+    % ---- Patch in place --------------------------------------------------
+    fid = fopen(filepath, 'r+b');
+    if fid < 0
+        error('Could not open for writing: %s', filepath);
+    end
+    c = onCleanup(@() fclose(fid));
+
+    fseek(fid, SESSION_OFFSET, 'bof');
+    n_written = fwrite(fid, bytes, 'uint8');
+    if n_written ~= SESSION_LEN
+        error('Write incomplete: wrote %d of %d bytes', n_written, SESSION_LEN);
+    end
+
+    clear c; % force close before readback
+    fclose(fid);
+
+    % ---- Verify ----------------------------------------------------------
+    check_session = read_session(filepath, SESSION_OFFSET, SESSION_LEN);
+    if ~strcmp(check_session, strtrim(new_session))
+        error('Verification FAILED: file now reads "%s", expected "%s"', ...
+            check_session, strtrim(new_session));
+    end
+
+    if verbose
+        fprintf('Verified:    "%s"\n', check_session);
+        fprintf('Done.\n\n');
+    end
+end
+
+
+% ======================================================================= %
+function val = get_opt(s, field, default)
+    if isfield(s, field) && ~isempty(s.(field))
+        val = s.(field);
+    else
+        val = default;
+    end
+end
+
+function str = read_session(filepath, offset, len)
+    fid = fopen(filepath, 'rb');
+    if fid < 0, error('Cannot open: %s', filepath); end
+    c = onCleanup(@() fclose(fid));
+    fseek(fid, offset, 'bof');
+    seg = fread(fid, len, 'uint8=>double')';
+    nul = find(seg == 0, 1);
+    if ~isempty(nul), seg = seg(1:nul-1); end
+    if isempty(seg) || any(seg < 32 | seg > 126)
+        str = '';
+    else
+        str = strtrim(char(seg));
+    end
+end
+
+
+function debug_print_session_field(filepath)
+% DEBUG_PRINT_SESSION_FIELD  Print exactly what is stored at the session
+% name offset (0x5E4, 32 bytes) in a MoTeC .ld file. No scanning, no
+% alias logic — just a direct read of the field motec_ld_info.m reads.
+%
+% Usage:
+%   debug_print_session_field('E:\2026\E07_TSV\_TeamData\01_T8R\20260712-243070002.ld')
+
+SESSION_OFFSET = 0x5E4;
+SESSION_LEN    = 32;
+
+if ~exist(filepath, 'file')
+    error('File not found: %s', filepath);
+end
+
+fid = fopen(filepath, 'rb');
+if fid < 0
+    error('Could not open: %s', filepath);
+end
+c = onCleanup(@() fclose(fid));
+
+fseek(fid, SESSION_OFFSET, 'bof');
+raw = fread(fid, SESSION_LEN, 'uint8=>double')';
+
+fprintf('\n=== %s ===\n', filepath);
+fprintf('Offset: 0x%X (%d)   Length: %d bytes\n\n', SESSION_OFFSET, SESSION_OFFSET, SESSION_LEN);
+
+fprintf('Raw bytes (hex): ');
+fprintf('%02X ', raw);
+fprintf('\n');
+
+fprintf('Raw bytes (dec): ');
+fprintf('%d ', raw);
+fprintf('\n\n');
+
+% Null-terminated ASCII string, same logic as motec_ld_info's fstr()
+nul = find(raw == 0, 1);
+seg = raw;
+if ~isempty(nul), seg = raw(1:nul-1); end
+if isempty(seg) || any(seg < 32 | seg > 126)
+    str = '(non-printable / empty)';
+else
+    str = strtrim(char(seg));
+end
+
+fprintf('Interpreted string: "%s"\n\n', str);
+end
+
+
+function val = get_opt(s, field, default)
+    if isfield(s, field) && ~isempty(s.(field))
+        val = s.(field);
+    else
+        val = default;
+    end
+end

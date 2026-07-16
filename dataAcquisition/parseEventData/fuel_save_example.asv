@@ -1,0 +1,121 @@
+function fuel_save_example()
+% FUEL_SAVE_EXAMPLE Quick-start example for fuel saving analysis
+%
+% This is a minimal example showing how to use the fuel-saving coasting analysis.
+% Copy this, edit the parameters, and run.
+%
+% Prerequisites:
+%   - Session cache with lap data (smp_cache.mat)
+%   - Required channels: Distance, Ground_Speed, Throttle_Pedal, Brake_Pressure_Front
+%   - MATLAB Toolbox: Curve Fitting (for interpolation)
+
+%% SETUP
+clear; clc;
+
+% === USER SETTINGS ===
+cache_file = 'E:\2026\04_RUA\_TeamData\smp_cache_Q13.mat';              % Path to cache
+driver_tla = '';                             % Driver TLA (empty = global fastest)
+output_dir = 'E:\2026\04_RUA\Strategy';           % Where to save results
+accel = -0.5;                                % Deceleration (m/s²)
+fuel_rate = 2.5                              % Fuel consumption (g/s)
+fuel_rate = 2.5                              % Fuel consumption conversion to kg/s 
+auto_detect = true;                          % Auto-detect segments
+config_file = '';                            % Excel config (auto-generate if empty)
+run_diagnostic = true;                       % Run cache diagnostic first
+
+fprintf('\n');
+fprintf('===========================================\n');
+fprintf('  Fuel-Saving Coasting Analysis v1.0\n');
+fprintf('===========================================\n\n');
+
+fprintf('Settings:\n');
+fprintf('  Cache: %s\n', cache_file);
+fprintf('  Driver: %s\n', ifelse(isempty(driver_tla), '(global fastest)', driver_tla));
+fprintf('  Accel: %.2f m/s²\n', accel);
+fprintf('  Fuel Rate: %.4f kg/s\n', fuel_rate);
+fprintf('  Auto-Detect: %s\n', ifelse(auto_detect, 'Yes', 'No'));
+fprintf('  Output: %s\n\n', output_dir);
+
+%% OPTIONAL: Run diagnostic
+if run_diagnostic
+    fprintf('\n>>> Running cache diagnostic...\n\n');
+    smp_cache_inspect(cache_file);
+    fprintf('\n>>> Diagnostic complete. Continuing with analysis...\n\n');
+end
+
+%% RUN ANALYSIS
+try
+    [variants, segments, output_dir] = smp_fuel_save_coasting(...
+        'cache_file', cache_file, ...
+        'driver_tla', driver_tla, ...
+        'output_dir', output_dir, ...
+        'accel', accel, ...
+        'fuel_rate', fuel_rate, ...
+        'auto_detect', auto_detect, ...
+        'config_file', config_file);
+    
+    %% PRINT RESULTS SUMMARY
+    fprintf('\n');
+    fprintf('===========================================\n');
+    fprintf('  RESULTS SUMMARY\n');
+    fprintf('===========================================\n\n');
+    
+    % Group by segment
+    unique_segs = unique([variants.segment_idx]);
+    total_fuel = 0;
+    total_time_penalty = 0;
+    
+    for seg = unique_segs
+        seg_variants = variants([variants.segment_idx] == seg);
+        seg_struct = segments(seg);
+        
+        fprintf('Segment %d: %s\n', seg, seg_struct.segment_name);
+        fprintf('  Brake marker: %.0f m\n', seg_struct.brake_marker);
+        fprintf('  Variants: %d\n', length(seg_variants));
+        
+        successful = [seg_variants([strcmp({seg_variants.status}, 'success')])];
+        if ~isempty(successful)
+            fuel_saved_seg = [successful.fuel_saved_kg];
+            time_penalty_seg = [successful.time_penalty_sec];
+            
+            fprintf('    Fuel saved range: %.4f - %.4f kg\n', min(fuel_saved_seg), max(fuel_saved_seg));
+            fprintf('    Time penalty range: %.3f - %.3f sec\n', min(time_penalty_seg), max(time_penalty_seg));
+            fprintf('    Best ratio: %.4f kg/sec\n', max(fuel_saved_seg ./ (time_penalty_seg + 1e-6)));
+            
+            total_fuel = total_fuel + max(fuel_saved_seg);
+            total_time_penalty = total_time_penalty + max(time_penalty_seg);
+        end
+        fprintf('\n');
+    end
+    
+    fprintf('TOTAL (summed best per segment):\n');
+    fprintf('  Fuel Saved: %.4f kg\n', total_fuel);
+    fprintf('  Time Penalty: %.3f sec\n', total_time_penalty);
+    fprintf('  Trade-off: %.4f kg/sec\n\n', total_fuel / (total_time_penalty + 1e-6));
+    
+    fprintf('Output files:\n');
+    fprintf('  - %s/smp_fuel_save_config.xlsx\n', output_dir);
+    fprintf('  - %s/smp_fuel_save_strategy.xlsx\n', output_dir);
+    fprintf('  - %s/smp_fuel_save_speed_traces_by_segment.png\n', output_dir);
+    fprintf('  - %s/smp_fuel_save_trade_off_analysis.png\n', output_dir);
+    fprintf('  - %s/smp_fuel_save_coasting_sensitivity.png\n', output_dir);
+    fprintf('\n');
+    
+    fprintf('=== COMPLETE ===\n\n');
+    
+catch ME
+    fprintf('\nERROR: %s\n', ME.message);
+    fprintf('Stack:\n');
+    disp(ME.stack);
+end
+
+end
+
+%% Helper: Inline if-else
+function result = ifelse(condition, true_val, false_val)
+    if condition
+        result = true_val;
+    else
+        result = false_val;
+    end
+end

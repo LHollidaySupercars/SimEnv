@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V8SC // PIT WALL</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+<!-- MSAL.js — Microsoft Entra ID authentication -->
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+<script src="smp_config.js"></script>
+<script src="smp_auth.js"></script>
+<script src="smp_data.js"></script>
+<script src="smp_charts.js"></script>
+<style>
+:root{--ford:#0057B8;--chev:#F5C400;--toyota:#EB0A1E;--bg:#080A0D;--bg2:#0F1318;--bg3:#161C24;--bg4:#1E2733;--line:rgba(255,255,255,0.06);--line2:rgba(255,255,255,0.12);--text:#E8EDF2;--muted:#5A6678;--bright:#FFFFFF;--accent:#00D4FF;--warn:#FF6B00;--good:#00E676;--display:'Barlow Condensed',sans-serif;--mono:'JetBrains Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}html{font-size:13px;}
+body{font-family:var(--mono);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.015) 2px,rgba(255,255,255,.015) 4px),repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(255,255,255,.015) 2px,rgba(255,255,255,.015) 4px);pointer-events:none;z-index:0;}
+/* AUTH SCREEN */
+#auth-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:24px;}
+#auth-screen.gone{display:none;}
+.auth-logo{font-family:var(--display);font-size:52px;font-weight:900;letter-spacing:10px;color:var(--bright);}
+.auth-logo span{color:var(--accent);}
+.auth-sub{font-size:10px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;}
+.auth-user{font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;}
+.btn-signin{padding:12px 32px;background:var(--accent);color:var(--bg);border:none;border-radius:4px;font-family:var(--display);font-size:16px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity .15s;}
+.btn-signin:hover{opacity:.85;}
+#auth-error{font-size:10px;letter-spacing:2px;color:var(--toyota);text-transform:uppercase;height:16px;}
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:998;gap:20px;}
+#loader.gone{display:none;}
+.loader-logo{font-family:var(--display);font-size:48px;font-weight:900;letter-spacing:10px;color:var(--bright);}
+.loader-logo span{color:var(--accent);}
+.loader-bar{width:200px;height:2px;background:var(--line2);border-radius:2px;overflow:hidden;}
+.loader-bar::after{content:'';display:block;height:100%;background:var(--accent);animation:lbar 1.2s ease-in-out infinite;}
+@keyframes lbar{0%{width:0%;margin-left:0;}50%{width:60%;margin-left:20%;}100%{width:0%;margin-left:100%;}}
+.loader-text{font-size:10px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;}
+/* HEADER */
+header{position:relative;z-index:100;background:rgba(8,10,13,0.97);border-bottom:1px solid var(--line2);display:flex;align-items:stretch;height:50px;flex-shrink:0;}
+.logo-block{display:flex;align-items:center;padding:0 20px;border-right:1px solid var(--line2);}
+.logo-text{font-family:var(--display);font-weight:900;font-size:20px;letter-spacing:5px;color:var(--bright);}
+.logo-sep{color:var(--accent);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--muted);}
+.tab-nav{display:flex;align-items:stretch;padding:0 12px;gap:2px;border-right:1px solid var(--line2);}
+.tab-btn{padding:0 14px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.tab-btn:hover{color:var(--text);}.tab-btn.on{color:var(--accent);border-bottom-color:var(--accent);}
+.mfr-strip{display:flex;align-items:center;gap:5px;padding:0 14px;border-right:1px solid var(--line2);}
+.mfr-chip{padding:4px 11px;border-radius:2px;border:1px solid var(--line2);background:var(--bg3);color:var(--muted);font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .12s;user-select:none;}
+.mfr-chip:hover{color:var(--text);}.mfr-chip.ford-on{background:var(--ford);border-color:var(--ford);color:#fff;}
+.mfr-chip.chev-on{background:var(--chev);border-color:var(--chev);color:#000;}.mfr-chip.toy-on{background:var(--toyota);border-color:var(--toyota);color:#fff;}
+.hdr-auto{display:flex;align-items:center;gap:8px;padding:0 14px;border-right:1px solid var(--line2);}
+.auto-label{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.toggle{position:relative;width:36px;height:18px;}.toggle input{opacity:0;width:0;height:0;}
+.toggle-track{position:absolute;inset:0;background:var(--bg3);border:1px solid var(--line2);border-radius:9px;cursor:pointer;transition:background .2s;}
+.toggle input:checked+.toggle-track{background:var(--accent);border-color:var(--accent);}
+.toggle-track::before{content:'';position:absolute;width:12px;height:12px;left:2px;top:50%;transform:translateY(-50%);background:var(--muted);border-radius:50%;transition:left .2s,background .2s;}
+.toggle input:checked+.toggle-track::before{left:20px;background:var(--bg);}
+.hdr-actions{display:flex;align-items:center;gap:6px;padding:0 14px;border-right:1px solid var(--line2);}
+.btn-apply{padding:5px 14px;background:var(--accent);color:var(--bg);border:none;border-radius:3px;font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity .15s;}
+.btn-apply:hover{opacity:.85;}
+.btn-reset{padding:5px 11px;background:transparent;color:var(--muted);border:1px solid var(--line2);border-radius:3px;font-family:var(--display);font-size:12px;font-weight:600;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.btn-reset:hover{border-color:var(--accent);color:var(--text);}
+.hdr-right{display:flex;align-items:center;padding:0 16px;gap:10px;margin-left:auto;}
+#status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .3s;}
+#status-dot.live{background:var(--good);box-shadow:0 0 8px var(--good);}.#status-dot.err{background:var(--toyota);}
+#status-text{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+#row-count{font-family:var(--display);font-size:18px;font-weight:700;color:var(--accent);}
+/* SUBTAB BAR */
+.subtab-bar{position:relative;z-index:99;background:var(--bg2);border-bottom:1px solid var(--line2);display:flex;align-items:stretch;height:34px;flex-shrink:0;padding:0 12px;gap:2px;overflow-x:auto;}
+.subtab-bar::-webkit-scrollbar{height:0;}
+.subtab-btn{padding:0 14px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.subtab-btn:hover{color:var(--text);}.subtab-btn.on{color:var(--text);border-bottom-color:var(--accent);}
+/* BODY */
+.body{display:flex;flex:1;overflow:hidden;position:relative;z-index:1;}
+/* SIDEBAR */
+aside{width:190px;min-width:190px;background:var(--bg2);border-right:1px solid var(--line2);display:flex;flex-direction:column;overflow:hidden;padding:10px;gap:8px;}
+.sidebar-title{font-size:9px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;flex-shrink:0;}
+.filter-boxes{display:flex;flex-direction:column;gap:8px;flex:1;overflow:hidden;}
+.filter-box{display:flex;flex-direction:column;flex:1;min-height:0;}
+.filter-box-label{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:3px;flex-shrink:0;}
+.filter-list{flex:1;overflow-y:auto;background:var(--bg3);border:1px solid var(--line2);border-radius:3px;padding:3px 0;}
+.filter-list::-webkit-scrollbar{width:3px;}.filter-list::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px;}
+.filter-item{padding:5px 9px;font-size:11px;color:var(--muted);cursor:pointer;user-select:none;transition:all .1s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.filter-item:hover{background:var(--bg4);color:var(--text);}.filter-item.on{background:var(--bg4);color:var(--accent);}
+.filter-item.hi{color:var(--text);font-weight:600;}.filter-item.hi.on{color:var(--accent);}
+.load-event-wrap{flex-shrink:0;}
+.load-event-label{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:3px;}
+.load-event-row{display:flex;gap:4px;}
+.load-event-select{flex:1;background:var(--bg3);border:1px solid var(--line2);color:var(--text);font-family:var(--mono);font-size:10px;padding:4px 6px;border-radius:3px;appearance:none;cursor:pointer;min-width:0;}
+.btn-load{padding:4px 8px;background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:3px;font-family:var(--display);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-load:hover{background:var(--accent);color:var(--bg);}
+/* MAIN */
+main{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
+main::-webkit-scrollbar{width:5px;}.main::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px;}
+.tab-panel{display:none;flex-direction:column;gap:12px;}.tab-panel.on{display:flex;}
+.subtab-panel{display:none;flex-direction:column;gap:12px;}.subtab-panel.on{display:flex;}
+/* STAT STRIP */
+.stat-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;}
+.stat-card{background:var(--bg2);border:1px solid var(--line);border-top:2px solid var(--accent);padding:11px 13px;border-radius:2px;}
+.stat-card.ford-t{border-top-color:var(--ford);}.stat-card.chev-t{border-top-color:var(--chev);}.stat-card.toy-t{border-top-color:var(--toyota);}.stat-card.warn-t{border-top-color:var(--warn);}
+.stat-label{font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
+.stat-value{font-family:var(--display);font-size:26px;font-weight:900;color:var(--bright);line-height:1;}
+.stat-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+/* CHART CARD */
+.chart-card{background:var(--bg2);border:1px solid var(--line);border-radius:2px;padding:13px;}
+.chart-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;}
+.chart-title{font-family:var(--display);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text);}
+.chart-subtitle{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.chart-wrap{position:relative;height:240px;}
+.chart-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.chart-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+/* CONTROLS */
+.limit-bar{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+.limit-label{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.limit-input{background:var(--bg3);border:1px solid var(--line2);color:var(--text);font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:3px;width:75px;outline:none;}
+.limit-input:focus{border-color:var(--accent);}.limit-input::placeholder{color:var(--muted);}
+.limit-sep{color:var(--line2);font-size:11px;}
+.toggle-wrap{display:flex;align-items:center;gap:6px;}
+.toggle-label{font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
+.btn-replot,.btn-zoom-reset{padding:3px 10px;background:transparent;color:var(--muted);border:1px solid var(--line2);border-radius:3px;font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .15s;}
+.btn-replot:hover,.btn-zoom-reset:hover{border-color:var(--accent);color:var(--accent);}
+.scatter-controls{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.ctrl-label{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.ctrl-select{background:var(--bg3);border:1px solid var(--line2);color:var(--text);font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:3px;appearance:none;cursor:pointer;min-width:170px;}
+.ctrl-select:focus{outline:none;border-color:var(--accent);}
+.ctrl-sep{color:var(--muted);font-size:11px;}
+.btn-plot{padding:4px 13px;background:var(--accent);color:var(--bg);border:none;border-radius:3px;font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;}
+.math-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.math-select{background:var(--bg3);border:1px solid var(--line2);color:var(--text);font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:3px;appearance:none;cursor:pointer;min-width:90px;}
+.math-select:focus{outline:none;border-color:var(--accent);}
+.x-toggle{display:flex;gap:4px;}
+.x-btn{padding:3px 10px;border-radius:2px;border:1px solid var(--line2);background:var(--bg3);color:var(--muted);font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .1s;}
+.x-btn.on{background:var(--accent);border-color:var(--accent);color:var(--bg);}
+/* CHANNELS */
+.channels-wrap{background:var(--bg2);border:1px solid var(--line);border-radius:2px;padding:13px;display:flex;flex-direction:column;gap:10px;}
+.channels-search{background:var(--bg3);border:1px solid var(--line2);color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 12px;border-radius:3px;width:100%;outline:none;}
+.channels-search:focus{border-color:var(--accent);}.channels-search::placeholder{color:var(--muted);}
+.channels-list{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:calc(100vh - 280px);overflow-y:auto;}
+.channels-list::-webkit-scrollbar{width:4px;}.channels-list::-webkit-scrollbar-thumb{background:var(--line2);}
+.channel-item{padding:5px 9px;background:var(--bg3);border:1px solid var(--line);border-radius:2px;font-size:10px;color:var(--muted);}
+.channel-item:hover{border-color:var(--line2);color:var(--text);}
+.subtab-placeholder{background:var(--bg2);border:1px solid var(--line);border-radius:2px;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:200px;}
+.subtab-placeholder-title{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+.subtab-placeholder-hint{font-size:10px;letter-spacing:2px;color:var(--muted);opacity:.5;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div id="auth-screen">
+  <div class="auth-logo">V8SC <span>//</span> PIT WALL</div>
+  <div class="auth-sub">Authorised Access Only — Supercars Staff</div>
+  <div class="auth-user" id="auth-user-name"></div>
+  <button class="btn-signin" id="btn-signin" onclick="startLogin()">SIGN IN WITH MICROSOFT</button>
+  <div id="auth-error"></div>
+</div>
+<div id="loader" class="gone">
+  <div class="loader-logo">V8SC <span>//</span> PIT WALL</div>
+  <div class="loader-bar"></div>
+  <div class="loader-text">Loading telemetry data...</div>
+</div>
+<header>
+  <div class="logo-block">
+    <div><div class="logo-text">V8SC <span class="logo-sep">//</span> PIT WALL</div><div class="logo-sub">Telemetry Analysis</div></div>
+  </div>
+  <div class="tab-nav" id="tab-nav"></div>
+  <div class="mfr-strip">
+    <div class="mfr-chip" data-m="Ford" onclick="togMfr(this)">FORD</div>
+    <div class="mfr-chip" data-m="Chevrolet" onclick="togMfr(this)">CHEV</div>
+    <div class="mfr-chip" data-m="Toyota" onclick="togMfr(this)">TOYOTA</div>
+  </div>
+  <div class="hdr-auto">
+    <span class="auto-label">AUTO</span>
+    <label class="toggle"><input type="checkbox" id="auto-apply" checked/><span class="toggle-track"></span></label>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn-apply" onclick="applyFilters()">APPLY</button>
+    <button class="btn-reset" onclick="resetFilters()">RESET</button>
+  </div>
+  <div class="hdr-right">
+    <div id="status-dot"></div>
+    <span id="status-text">OFFLINE</span>
+    <span id="row-count">—</span>
+  </div>
+</header>
+<div class="subtab-bar" id="subtab-bar"></div>
+<div class="body">
+  <aside>
+    <span class="sidebar-title">Filters</span>
+    <div class="filter-boxes">
+      <div class="filter-box"><span class="filter-box-label">Event</span><div class="filter-list" id="f-event"></div></div>
+      <div class="filter-box"><span class="filter-box-label">Session</span><div class="filter-list" id="f-session"></div></div>
+      <div class="filter-box"><span class="filter-box-label">Team</span><div class="filter-list" id="f-team"></div></div>
+    </div>
+    <div class="load-event-wrap">
+      <div class="load-event-label">Load Event</div>
+      <div class="load-event-row">
+        <select class="load-event-select" id="load-event-select"></select>
+        <button class="btn-load" onclick="loadEvent()">LOAD</button>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <!-- OVERVIEW -->
+    <div class="tab-panel on" id="tab-overview">
+      <div class="subtab-panel on" id="sub-overview-overview">
+        <div class="stat-strip">
+          <div class="stat-card"><div class="stat-label">Total Laps</div><div class="stat-value" id="s-laps">--</div><div class="stat-sub">in filter</div></div>
+          <div class="stat-card ford-t"><div class="stat-label">Best Lap</div><div class="stat-value" id="s-best">--</div><div class="stat-sub" id="s-best-who">--</div></div>
+          <div class="stat-card chev-t"><div class="stat-label">Cars</div><div class="stat-value" id="s-cars">--</div><div class="stat-sub" id="s-mfr-split">--</div></div>
+          <div class="stat-card toy-t"><div class="stat-label">Avg Lap</div><div class="stat-value" id="s-avg">--</div><div class="stat-sub">all filtered</div></div>
+          <div class="stat-card warn-t"><div class="stat-label">Sessions</div><div class="stat-value" id="s-sess">--</div><div class="stat-sub" id="s-events">--</div></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><span class="chart-title">Sorted Falling Max Speed</span><span class="chart-subtitle">per driver - ranked descending</span></div>
+          <div class="limit-bar">
+            <span class="limit-label">Y Min</span><input class="limit-input" id="falling-ymin" type="number" placeholder="auto"/>
+            <span class="limit-sep">--</span>
+            <span class="limit-label">Y Max</span><input class="limit-input" id="falling-ymax" type="number" placeholder="auto"/>
+            <div class="toggle-wrap"><span class="toggle-label">Clip</span><label class="toggle"><input type="checkbox" id="falling-clip"/><span class="toggle-track"></span></label></div>
+            <button class="btn-replot" onclick="SMP_CHARTS.renderFallingSpeed('c-falling','falling')">REPLOT</button>
+            <button class="btn-zoom-reset" onclick="SMP_CHARTS.resetZoom('c-falling')">RESET ZOOM</button>
+          </div>
+          <div class="chart-wrap" style="height:280px"><canvas id="c-falling"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><span class="chart-title">Custom Scatter A</span><span class="chart-subtitle">coloured by manufacturer</span></div>
+          <div class="scatter-controls">
+            <span class="ctrl-label">X</span><select class="ctrl-select" id="sc1-x"></select>
+            <span class="ctrl-sep">vs</span>
+            <span class="ctrl-label">Y</span><select class="ctrl-select" id="sc1-y"></select>
+            <button class="btn-plot" onclick="plotCustom('c-custom1','sc1-x','sc1-xop','sc1-y','sc1-yop','sc1')">PLOT</button>
+            <button class="btn-zoom-reset" onclick="SMP_CHARTS.resetZoom('c-custom1')">RESET ZOOM</button>
+          </div>
+          <div class="math-row">
+            <span class="ctrl-label">X Op</span><select class="math-select" id="sc1-xop"></select>
+            <span class="ctrl-label">Y Op</span><select class="math-select" id="sc1-yop"></select>
+          </div>
+          <div class="limit-bar">
+            <span class="limit-label">Y Min</span><input class="limit-input" id="sc1-ymin" type="number" placeholder="auto"/>
+            <span class="limit-sep">--</span>
+            <span class="limit-label">Y Max</span><input class="limit-input" id="sc1-ymax" type="number" placeholder="auto"/>
+            <div class="toggle-wrap"><span class="toggle-label">Clip</span><label class="toggle"><input type="checkbox" id="sc1-clip"/><span class="toggle-track"></span></label></div>
+          </div>
+          <div class="chart-wrap"><canvas id="c-custom1"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><span class="chart-title">Custom Scatter B</span><span class="chart-subtitle">coloured by manufacturer</span></div>
+          <div class="scatter-controls">
+            <span class="ctrl-label">X</span><select class="ctrl-select" id="sc2-x"></select>
+            <span class="ctrl-sep">vs</span>
+            <span class="ctrl-label">Y</span><select class="ctrl-select" id="sc2-y"></select>
+            <button class="btn-plot" onclick="plotCustom('c-custom2','sc2-x','sc2-xop','sc2-y','sc2-yop','sc2')">PLOT</button>
+            <button class="btn-zoom-reset" onclick="SMP_CHARTS.resetZoom('c-custom2')">RESET ZOOM</button>
+          </div>
+          <div class="math-row">
+            <span class="ctrl-label">X Op</span><select class="math-select" id="sc2-xop"></select>
+            <span class="ctrl-label">Y Op</span><select class="math-select" id="sc2-yop"></select>
+          </div>
+          <div class="limit-bar">
+            <span class="limit-label">Y Min</span><input class="limit-input" id="sc2-ymin" type="number" placeholder="auto"/>
+            <span class="limit-sep">--</span>
+            <span class="limit-label">Y Max</span><input class="limit-input" id="sc2-ymax" type="number" placeholder="auto"/>
+            <div class="toggle-wrap"><span class="toggle-label">Clip</span><label class="toggle"><input type="checkbox" id="sc2-clip"/><span class="toggle-track"></span></label></div>
+          </div>
+          <div class="chart-wrap"><canvas id="c-custom2"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <!-- EXCEL TABS injected here -->
+    <div id="excel-tab-panels"></div>
+    <!-- CHANNELS -->
+    <div class="tab-panel" id="tab-channels">
+      <div class="subtab-panel on" id="sub-channels-channels">
+        <div class="channels-wrap">
+          <input class="channels-search" type="text" placeholder="Search channels..." oninput="filterChannels(this.value)"/>
+          <div class="channels-list" id="channels-list"></div>
+        </div>
+      </div>
+      <div class="subtab-panel" id="sub-channels-custom-channels">
+        <div class="chart-grid-2" id="custom-channels-grid"></div>
+      </div>
+    </div>
+    <!-- TIMING -->
+    <div class="tab-panel" id="tab-timing">
+      <div class="subtab-panel on" id="sub-timing-timing">
+        <div class="subtab-placeholder">
+          <div class="subtab-placeholder-title">Timing Analysis</div>
+          <div class="subtab-placeholder-hint">Coming soon</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+const xState={};
+let currentTab='overview',currentSub='overview';
+
+window.addEventListener('DOMContentLoaded', async () => {
+  // Initialise Entra ID auth
+  const alreadyLoggedIn = await SMP_AUTH.init();
+
+  if (alreadyLoggedIn) {
+    // Already authenticated — show who's logged in and proceed
+    document.getElementById('auth-screen').classList.add('gone');
+    init();
+  }
+  // Otherwise auth-screen stays visible until user clicks Sign In
+  // handleRedirectPromise in SMP_AUTH.init() handles post-redirect return
+});
+
+async function startLogin() {
+  document.getElementById('btn-signin').textContent = 'SIGNING IN...';
+  document.getElementById('btn-signin').disabled = true;
+  document.getElementById('auth-error').textContent = '';
+  try {
+    await SMP_AUTH.login();
+    // If login() redirects, execution stops here and page reloads
+    // If silent login succeeds, continue below
+    document.getElementById('auth-screen').classList.add('gone');
+    init();
+  } catch(e) {
+    document.getElementById('auth-error').textContent = 'LOGIN FAILED — TRY AGAIN';
+    document.getElementById('btn-signin').textContent = 'SIGN IN WITH MICROSOFT';
+    document.getElementById('btn-signin').disabled = false;
+    console.error(e);
+  }
+}
+
+async function init(){
+  document.getElementById('loader').classList.remove('gone');
+  buildAllTabs();buildChannelsList();buildCustomChannelsGrid();
+  try{
+    await SMP_DATA.fetchRecent();
+    setStatus(true,SMP_DATA.getAll().length);
+    buildFilterLists();buildLoadEventSelect();buildScatterDropdowns();refreshAll();
+  }catch(e){setStatus(false,0);console.error(e);}
+  document.getElementById('loader').classList.add('gone');
+}
+
+function buildAllTabs(){
+  const nav=document.getElementById('tab-nav');
+  appendTabBtn(nav,'overview','OVERVIEW',true);
+  const ec=document.getElementById('excel-tab-panels');
+  (SMP_CONFIG.EXCEL_TABS||[]).forEach(tab=>{
+    appendTabBtn(nav,tab.id,tab.label,false);
+    xState[tab.id]='lap_number';
+    const panel=document.createElement('div');
+    panel.className='tab-panel';panel.id='tab-'+tab.id;
+    tab.subtabs.forEach((sub,si)=>{
+      const sp=document.createElement('div');
+      sp.className='subtab-panel'+(si===0?' on':'');
+      sp.id='sub-'+tab.id+'-'+sub.id;
+      sp.innerHTML=`<div class="scatter-controls"><span class="ctrl-label">X Axis</span>
+        <div class="x-toggle">
+          <div class="x-btn on" data-tab="${tab.id}" data-x="lap_number" onclick="setXAxis(this)">LAP NUMBER</div>
+          <div class="x-btn" data-tab="${tab.id}" data-x="lap_time" onclick="setXAxis(this)">LAP TIME</div>
+        </div></div>
+        <div class="chart-grid-2" id="grid-${tab.id}-${sub.id}">${sub.plots.map((p,pi)=>buildChartCard(p,`c-${tab.id}-${sub.id}-${pi}`,`${tab.id}-${sub.id}-${pi}`)).join('')}</div>`;
+      panel.appendChild(sp);
+    });
+    ec.appendChild(panel);
+  });
+  appendTabBtn(nav,'channels','CHANNELS',false);
+  appendTabBtn(nav,'timing','TIMING',false);
+  buildSubTabBar('overview');
+}
+
+function appendTabBtn(nav,id,label,active){
+  const btn=document.createElement('button');
+  btn.className='tab-btn'+(active?' on':'');btn.textContent=label;btn.dataset.tabid=id;
+  btn.onclick=()=>switchTab(id,btn);nav.appendChild(btn);
+}
+
+function buildChartCard(plot,cid,prefix){
+  const yMin=plot.yLim&&plot.yLim[0]!=null?plot.yLim[0]:'';
+  const yMax=plot.yLim&&plot.yLim[1]!=null?plot.yLim[1]:'';
+  return `<div class="chart-card">
+    <div class="chart-header"><span class="chart-title">${plot.title}</span><span class="chart-subtitle">${plot.plotType||'scatter'}</span></div>
+    <div class="limit-bar">
+      <span class="limit-label">Y Min</span><input class="limit-input" id="${prefix}-ymin" type="number" placeholder="auto" value="${yMin}"/>
+      <span class="limit-sep">--</span>
+      <span class="limit-label">Y Max</span><input class="limit-input" id="${prefix}-ymax" type="number" placeholder="auto" value="${yMax}"/>
+      <div class="toggle-wrap"><span class="toggle-label">Clip</span><label class="toggle"><input type="checkbox" id="${prefix}-clip"/><span class="toggle-track"></span></label></div>
+      <button class="btn-replot" onclick="replotCard('${cid}','${prefix}')">REPLOT</button>
+      <button class="btn-zoom-reset" onclick="SMP_CHARTS.resetZoom('${cid}')">RESET ZOOM</button>
+    </div>
+    <div class="chart-wrap"><canvas id="${cid}"></canvas></div>
+  </div>`;
+}
+
+function replotCard(cid,prefix){
+  const parts=prefix.split('-');
+  const pi=parseInt(parts[parts.length-1]);
+  const sid=parts[parts.length-2];
+  const tid=parts.slice(0,parts.length-2).join('-');
+  const tab=(SMP_CONFIG.EXCEL_TABS||[]).find(t=>t.id===tid);if(!tab)return;
+  const sub=tab.subtabs.find(s=>s.id===sid);if(!sub)return;
+  const plot=sub.plots[pi];if(!plot)return;
+  SMP_CHARTS.renderSinglePlot(plot,xState[tid]||'lap_number',cid);
+}
+
+function buildSubTabBar(tabId){
+  const bar=document.getElementById('subtab-bar');bar.innerHTML='';
+  let subs=[];
+  if(tabId==='overview') subs=[{id:'overview',label:'OVERVIEW'}];
+  else if(tabId==='channels') subs=[{id:'channels',label:'CHANNELS'},{id:'custom-channels',label:'CUSTOM CHANNELS'}];
+  else if(tabId==='timing') subs=[{id:'timing',label:'TIMING'}];
+  else{const tab=(SMP_CONFIG.EXCEL_TABS||[]).find(t=>t.id===tabId);if(tab)subs=tab.subtabs.map(s=>({id:s.id,label:s.label}));}
+  subs.forEach((s,i)=>{
+    const btn=document.createElement('button');
+    btn.className='subtab-btn'+(i===0?' on':'');btn.textContent=s.label;
+    btn.dataset.tab=tabId;btn.dataset.sub=s.id;btn.onclick=()=>onSubTabClick(btn);bar.appendChild(btn);
+  });
+}
+
+function onSubTabClick(btn){
+  const tabId=btn.dataset.tab,subId=btn.dataset.sub;
+  document.querySelectorAll('[data-tab="'+tabId+'"].subtab-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');currentSub=subId;
+  switchSubTab(tabId,subId);renderTabCharts(tabId,subId);
+}
+
+function switchSubTab(tabId,subId){
+  const tabEl=document.getElementById('tab-'+tabId);if(!tabEl)return;
+  tabEl.querySelectorAll('.subtab-panel').forEach(p=>p.classList.remove('on'));
+  const t=document.getElementById('sub-'+tabId+'-'+subId);if(t)t.classList.add('on');
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');currentTab=id;
+  const panel=document.getElementById('tab-'+id);if(panel)panel.classList.add('on');
+  buildSubTabBar(id);
+  const first=document.querySelector('.subtab-btn');
+  if(first){first.classList.add('on');currentSub=first.dataset.sub;switchSubTab(id,currentSub);}
+  renderTabCharts(id,currentSub);
+}
+
+function renderTabCharts(tabId,subId){
+  if(tabId==='overview'){SMP_CHARTS.renderFallingSpeed('c-falling','falling');return;}
+  if(tabId==='channels'||tabId==='timing')return;
+  const tab=(SMP_CONFIG.EXCEL_TABS||[]).find(t=>t.id===tabId);if(!tab)return;
+  const sub=tab.subtabs.find(s=>s.id===subId);if(!sub)return;
+  const xField=xState[tabId]||'lap_number';
+  sub.plots.forEach((plot,pi)=>{
+    SMP_CHARTS.renderSinglePlot(plot,xField,'c-'+tabId+'-'+subId+'-'+pi);
+  });
+}
+
+function setXAxis(btn){
+  const tab=btn.dataset.tab;xState[tab]=btn.dataset.x;
+  document.querySelectorAll('[data-tab="'+tab+'"].x-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');renderTabCharts(tab,currentSub);
+}
+
+function buildChannelsList(){
+  document.getElementById('channels-list').innerHTML=(SMP_CONFIG.ALL_CHANNELS||[]).map(ch=>`<div class="channel-item">${ch}</div>`).join('');
+}
+function filterChannels(q){
+  const lq=q.toLowerCase();
+  document.querySelectorAll('.channel-item').forEach(el=>{el.style.display=el.textContent.toLowerCase().includes(lq)?'':'none';});
+}
+
+function buildCustomChannelsGrid(){
+  const grid=document.getElementById('custom-channels-grid');
+  for(let i=0;i<6;i++){
+    grid.innerHTML+=`<div class="chart-card">
+      <div class="chart-header"><span class="chart-title">Custom Plot ${i+1}</span></div>
+      <div class="scatter-controls">
+        <span class="ctrl-label">X</span><select class="ctrl-select" id="cc${i}-x"></select>
+        <span class="ctrl-sep">vs</span>
+        <span class="ctrl-label">Y</span><select class="ctrl-select" id="cc${i}-y"></select>
+      </div>
+      <div class="math-row">
+        <span class="ctrl-label">X Op</span><select class="math-select" id="cc${i}-xop"></select>
+        <span class="ctrl-label">Y Op</span><select class="math-select" id="cc${i}-yop"></select>
+        <select class="math-select" id="cc${i}-type">
+          <option value="scatter">Scatter</option><option value="line">Line</option><option value="bar">Bar</option>
+        </select>
+        <button class="btn-plot" onclick="plotCC(${i})">PLOT</button>
+        <button class="btn-zoom-reset" onclick="SMP_CHARTS.resetZoom('cc${i}-c')">RESET ZOOM</button>
+      </div>
+      <div class="limit-bar">
+        <span class="limit-label">Y Min</span><input class="limit-input" id="cc${i}-ymin" type="number" placeholder="auto"/>
+        <span class="limit-sep">--</span>
+        <span class="limit-label">Y Max</span><input class="limit-input" id="cc${i}-ymax" type="number" placeholder="auto"/>
+        <div class="toggle-wrap"><span class="toggle-label">Clip</span><label class="toggle"><input type="checkbox" id="cc${i}-clip"/><span class="toggle-track"></span></label></div>
+      </div>
+      <div class="chart-wrap"><canvas id="cc${i}-c"></canvas></div>
+    </div>`;
+  }
+}
+
+function plotCC(i){
+  const xBase=document.getElementById('cc'+i+'-x').value;
+  const yBase=document.getElementById('cc'+i+'-y').value;
+  const xOp=document.getElementById('cc'+i+'-xop').value;
+  const yOp=document.getElementById('cc'+i+'-yop').value;
+  const fixed=['lap_number','lap_time'];
+  const xField=fixed.includes(xBase)?xBase:xBase+'_'+xOp;
+  const yField=fixed.includes(yBase)?yBase:yBase+'_'+yOp;
+  const type = document.getElementById('cc'+i+'-type').value;
+  SMP_CHARTS.renderCustomScatter('cc'+i+'-c',xField,yField,'cc'+i,type);
+}
+
+function buildScatterDropdowns(){
+  const mathOps=SMP_DATA.getMathOps();
+  const channels=SMP_CONFIG.ALL_CHANNELS||[];
+  const fixed=['lap_number','lap_time'];
+  const baseSet=new Set();
+  channels.forEach(ch=>{
+    let found=false;
+    mathOps.forEach(op=>{if(ch.endsWith('_'+op)){baseSet.add(ch.slice(0,-(op.length+1)));found=true;}});
+    if(!found&&!fixed.includes(ch))baseSet.add(ch);
+  });
+  const bases=[...baseSet];
+  const xOpts='<option value="lap_number">Lap Number</option><option value="lap_time">Lap Time (s)</option><option value="------" disabled>------</option>'+
+    bases.map(ch=>'<option value="'+ch+'">'+ch.replace(/_/g,' ')+'</option>').join('');
+  const yOpts=bases.map(ch=>'<option value="'+ch+'">'+ch.replace(/_/g,' ')+'</option>').join('');
+  const opOpts=mathOps.map(op=>'<option value="'+op+'">'+op+'</option>').join('');
+  ['sc1-x','sc2-x'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=xOpts;});
+  ['sc1-y','sc2-y'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=yOpts;});
+  ['sc1-xop','sc1-yop','sc2-xop','sc2-yop'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opOpts;});
+  for(let i=0;i<6;i++){
+    const xe=document.getElementById('cc'+i+'-x');if(xe)xe.innerHTML=xOpts;
+    const ye=document.getElementById('cc'+i+'-y');if(ye)ye.innerHTML=yOpts;
+    const xoe=document.getElementById('cc'+i+'-xop');if(xoe)xoe.innerHTML=opOpts;
+    const yoe=document.getElementById('cc'+i+'-yop');if(yoe)yoe.innerHTML=opOpts;
+  }
+  const s1y=document.getElementById('sc1-y');if(s1y)s1y.value='lap_time';
+  const s2y=document.getElementById('sc2-y');if(s2y)s2y.value='ground_speed';
+}
+
+function plotCustom(cid,xid,xopid,yid,yopid,prefix){
+  const fixed=['lap_number','lap_time'];
+  const xBase=document.getElementById(xid).value;
+  const yBase=document.getElementById(yid).value;
+  const xOp=document.getElementById(xopid).value;
+  const yOp=document.getElementById(yopid).value;
+  const xField=fixed.includes(xBase)?xBase:xBase+'_'+xOp;
+  const yField=fixed.includes(yBase)?yBase:yBase+'_'+yOp;
+  SMP_CHARTS.renderCustomScatter(cid,xField,yField,prefix);
+}
+
+function buildLoadEventSelect(){
+  const all=SMP_CONFIG.EVENT_ORDER||[];
+  const loaded=new Set(SMP_DATA.getLoadedEvents());
+  const sel=document.getElementById('load-event-select');
+  const opts=all.filter(e=>!loaded.has(e)).map(e=>'<option value="'+e+'">'+e+'</option>').join('');
+  sel.innerHTML=opts||'<option value="">All loaded</option>';
+}
+
+async function loadEvent(){
+  const sel=document.getElementById('load-event-select');
+  const ev=sel.value;if(!ev)return;
+  sel.disabled=true;document.querySelector('.btn-load').textContent='...';
+  try{
+    await SMP_DATA.fetchEvent(ev,true);
+    setStatus(true,SMP_DATA.getAll().length);
+    buildFilterLists();buildLoadEventSelect();refreshAll();
+  }catch(e){console.error(e);}
+  sel.disabled=false;document.querySelector('.btn-load').textContent='LOAD';
+}
+
+function buildFilterLists(){
+  buildFilterList('f-event',SMP_DATA.getAllUniqueEvents());
+  buildFilterList('f-session',SMP_DATA.getAllUnique('session'));
+  buildFilterList('f-team',SMP_DATA.getAllUnique('team'));
+}
+function buildFilterList(id,vals){
+  document.getElementById(id).innerHTML=vals.map(v=>`<div class="filter-item" data-val="${v}" onclick="togFilter(this,'${id}')">${v}</div>`).join('');
+}
+function togFilter(el,listId){
+  el.classList.toggle('on');
+  if(listId==='f-event')updateSessionHighlights();
+  if(document.getElementById('auto-apply').checked)applyFilters();
+}
+function updateSessionHighlights(){
+  const sel=[...document.querySelectorAll('#f-event .filter-item.on')].map(e=>e.dataset.val);
+  const rel=new Set();
+  if(sel.length>0)SMP_DATA.getAll().forEach(r=>{if(sel.includes(r.event)&&r.session)rel.add(r.session);});
+  document.querySelectorAll('#f-session .filter-item').forEach(el=>{el.classList.toggle('hi',sel.length>0&&rel.has(el.dataset.val));});
+}
+function togMfr(el){
+  const cls=el.dataset.m==='Ford'?'ford-on':el.dataset.m==='Chevrolet'?'chev-on':'toy-on';
+  const was=el.classList.contains(cls);el.classList.remove('ford-on','chev-on','toy-on');
+  if(!was)el.classList.add(cls);
+  if(document.getElementById('auto-apply').checked)applyFilters();
+}
+function getActiveMfrs(){
+  return [...document.querySelectorAll('.mfr-chip')].filter(c=>c.classList.contains('ford-on')||c.classList.contains('chev-on')||c.classList.contains('toy-on')).map(c=>c.dataset.m);
+}
+function applyFilters(){
+  const events=[...document.querySelectorAll('#f-event .filter-item.on')].map(e=>e.dataset.val);
+  const sessions=[...document.querySelectorAll('#f-session .filter-item.on')].map(e=>e.dataset.val);
+  const teams=[...document.querySelectorAll('#f-team .filter-item.on')].map(e=>e.dataset.val);
+  SMP_DATA.applyFilters(events,sessions,teams,getActiveMfrs());refreshAll();
+}
+function resetFilters(){
+  document.querySelectorAll('.filter-item').forEach(e=>e.classList.remove('on','hi'));
+  document.querySelectorAll('.mfr-chip').forEach(c=>c.classList.remove('ford-on','chev-on','toy-on'));
+  SMP_DATA.reset();refreshAll();
+}
+function refreshAll(){updateStats();renderTabCharts(currentTab,currentSub);}
+function updateStats(){
+  const d=SMP_DATA.getFiltered();
+  document.getElementById('s-laps').textContent=d.length||'--';
+  document.getElementById('row-count').textContent=d.length+' LAPS';
+  const valid=d.filter(r=>r.lap_time>0);
+  if(valid.length){
+    const b=valid.reduce((a,r)=>r.lap_time<a.lap_time?r:a);
+    document.getElementById('s-best').textContent=SMP_DATA.fmtTime(b.lap_time);
+    document.getElementById('s-best-who').textContent=(b.driver||'--').replace(/_/g,' ')+' - '+(b.team||'--');
+    document.getElementById('s-avg').textContent=SMP_DATA.fmtTime(valid.reduce((s,r)=>s+r.lap_time,0)/valid.length);
+  }else{['s-best','s-avg'].forEach(id=>document.getElementById(id).textContent='--');document.getElementById('s-best-who').textContent='--';}
+  const cars=new Set(d.map(r=>r.car_number).filter(Boolean));
+  document.getElementById('s-cars').textContent=cars.size||'--';
+  const mc={};d.forEach(r=>{if(r.manufacturer)mc[r.manufacturer]=(mc[r.manufacturer]||0)+1;});
+  document.getElementById('s-mfr-split').textContent=Object.entries(mc).map(([k,v])=>k.substring(0,3).toUpperCase()+' '+v).join('  ')||'--';
+  const se=new Set(d.map(r=>r.session).filter(Boolean));const ev=new Set(d.map(r=>r.event).filter(Boolean));
+  document.getElementById('s-sess').textContent=se.size||'--';
+  document.getElementById('s-events').textContent=[...ev].join(', ')||'--';
+}
+function setStatus(ok,count){
+  document.getElementById('status-dot').className=ok?'live':'err';
+  document.getElementById('status-text').textContent=ok?'LIVE':'ERROR';
+  document.getElementById('row-count').textContent=ok?count+' LAPS':'--';
+}
+</script>
+</body>
+</html>

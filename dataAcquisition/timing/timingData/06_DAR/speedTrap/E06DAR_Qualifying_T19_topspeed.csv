@@ -1,0 +1,11 @@
+event,session,car,driver,lap,kph,parse_error,vehicle
+DAR,E06DAR_QUALIFYING_T19,1,Chaz Mostert,1,260,false,Toyota
+DAR,E06DAR_QUALIFYING_T19,4,Jack Le Brocq,1,262,false,Chevrolet
+DAR,E06DAR_QUALIFYING_T19,6,Cameron Waters,1,261,false,Ford
+DAR,E06DAR_QUALIFYING_T19,8,Andre Heimgartner,1,260,false,Toyota
+DAR,E06DAR_QUALIFYING_T19,10,Zach Bates,1,263,false,Chevrolet
+DAR,E06DAR_QUALIFYING_T19,14,Cameron Hill,1,261,false,Toyota
+DAR,E06DAR_QUALIFYING_T19,18,Anton De Pasquale,1,262,false,Chevrolet
+DAR,E06DAR_QUALIFYING_T19,19,Matthew Payne,1,262,false,Ford
+DAR,E06DAR_QUALIFYING_T19,88,Broc Feeney,1,261,false,Ford
+DAR,E06DAR_QUALIFYING_T19,888,William Brown,1,259,false,Ford

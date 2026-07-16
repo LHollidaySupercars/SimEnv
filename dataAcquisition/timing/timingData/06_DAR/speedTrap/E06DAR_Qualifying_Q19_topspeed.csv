@@ -1,0 +1,247 @@
+event,session,car,driver,lap,kph,parse_error,vehicle
+DAR,Q09,1,Chaz Mostert,1,81,false,Toyota
+DAR,Q09,1,Chaz Mostert,2,87,false,Toyota
+DAR,Q09,1,Chaz Mostert,3,261,false,Toyota
+DAR,Q09,1,Chaz Mostert,4,261,false,Toyota
+DAR,Q09,1,Chaz Mostert,5,83,false,Toyota
+DAR,Q09,1,Chaz Mostert,6,262,false,Toyota
+DAR,Q09,1,Chaz Mostert,7,262,false,Toyota
+DAR,Q09,1,Chaz Mostert,8,82,false,Toyota
+DAR,Q09,1,Chaz Mostert,9,262,false,Toyota
+DAR,Q09,2,Ryan Wood,1,56,false,Toyota
+DAR,Q09,2,Ryan Wood,2,262,false,Toyota
+DAR,Q09,2,Ryan Wood,3,262,false,Toyota
+DAR,Q09,2,Ryan Wood,4,261,false,Toyota
+DAR,Q09,2,Ryan Wood,5,73,false,Toyota
+DAR,Q09,2,Ryan Wood,6,263,false,Toyota
+DAR,Q09,2,Ryan Wood,7,264,false,Toyota
+DAR,Q09,2,Ryan Wood,8,115,false,Toyota
+DAR,Q09,2,Ryan Wood,9,261,false,Toyota
+DAR,Q09,2,Ryan Wood,10,262,false,Toyota
+DAR,Q09,2,Ryan Wood,11,92,false,Toyota
+DAR,Q09,2,Ryan Wood,12,261,false,Toyota
+DAR,Q09,2,Ryan Wood,13,261,false,Toyota
+DAR,Q09,3,Aaron Cameron,1,72,false,Ford
+DAR,Q09,3,Aaron Cameron,2,261,false,Ford
+DAR,Q09,3,Aaron Cameron,3,261,false,Ford
+DAR,Q09,3,Aaron Cameron,4,261,false,Ford
+DAR,Q09,3,Aaron Cameron,5,89,false,Ford
+DAR,Q09,3,Aaron Cameron,6,263,false,Ford
+DAR,Q09,3,Aaron Cameron,7,262,false,Ford
+DAR,Q09,3,Aaron Cameron,8,81,false,Ford
+DAR,Q09,3,Aaron Cameron,9,262,false,Ford
+DAR,Q09,3,Aaron Cameron,10,261,false,Ford
+DAR,Q09,4,Jack Le Brocq,1,101,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,2,266,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,3,265,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,4,252,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,5,110,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,6,264,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,7,264,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,8,105,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,9,266,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,10,266,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,11,139,false,Chevrolet
+DAR,Q09,4,Jack Le Brocq,12,265,false,Chevrolet
+DAR,Q09,6,Cameron Waters,1,66,false,Ford
+DAR,Q09,6,Cameron Waters,2,262,false,Ford
+DAR,Q09,6,Cameron Waters,3,262,false,Ford
+DAR,Q09,6,Cameron Waters,4,89,false,Ford
+DAR,Q09,6,Cameron Waters,5,262,false,Ford
+DAR,Q09,6,Cameron Waters,6,263,false,Ford
+DAR,Q09,6,Cameron Waters,7,121,false,Ford
+DAR,Q09,6,Cameron Waters,8,263,false,Ford
+DAR,Q09,6,Cameron Waters,9,263,false,Ford
+DAR,Q09,6,Cameron Waters,10,104,false,Ford
+DAR,Q09,7,James Golding,1,60,false,Ford
+DAR,Q09,7,James Golding,2,265,false,Ford
+DAR,Q09,7,James Golding,3,262,false,Ford
+DAR,Q09,7,James Golding,4,262,false,Ford
+DAR,Q09,7,James Golding,5,95,false,Ford
+DAR,Q09,7,James Golding,6,264,false,Ford
+DAR,Q09,7,James Golding,7,264,false,Ford
+DAR,Q09,8,Andre Heimgartner,1,75,false,Toyota
+DAR,Q09,8,Andre Heimgartner,2,261,false,Toyota
+DAR,Q09,8,Andre Heimgartner,3,261,false,Toyota
+DAR,Q09,8,Andre Heimgartner,4,260,false,Toyota
+DAR,Q09,8,Andre Heimgartner,5,92,false,Toyota
+DAR,Q09,8,Andre Heimgartner,6,263,false,Toyota
+DAR,Q09,8,Andre Heimgartner,7,263,false,Toyota
+DAR,Q09,8,Andre Heimgartner,8,91,false,Toyota
+DAR,Q09,8,Andre Heimgartner,9,262,false,Toyota
+DAR,Q09,8,Andre Heimgartner,10,262,false,Toyota
+DAR,Q09,9,Jobe Stewart,1,115,false,Chevrolet
+DAR,Q09,9,Jobe Stewart,2,261,false,Chevrolet
+DAR,Q09,9,Jobe Stewart,3,261,false,Chevrolet
+DAR,Q09,9,Jobe Stewart,4,260,false,Chevrolet
+DAR,Q09,9,Jobe Stewart,5,110,false,Chevrolet
+DAR,Q09,9,Jobe Stewart,6,262,false,Chevrolet
+DAR,Q09,10,Zach Bates,1,143,false,Chevrolet
+DAR,Q09,10,Zach Bates,2,264,false,Chevrolet
+DAR,Q09,10,Zach Bates,3,265,false,Chevrolet
+DAR,Q09,10,Zach Bates,4,263,false,Chevrolet
+DAR,Q09,10,Zach Bates,5,80,false,Chevrolet
+DAR,Q09,10,Zach Bates,6,264,false,Chevrolet
+DAR,Q09,10,Zach Bates,7,265,false,Chevrolet
+DAR,Q09,10,Zach Bates,8,115,false,Chevrolet
+DAR,Q09,10,Zach Bates,9,266,false,Chevrolet
+DAR,Q09,10,Zach Bates,10,265,false,Chevrolet
+DAR,Q09,10,Zach Bates,11,115,false,Chevrolet
+DAR,Q09,10,Zach Bates,12,264,false,Chevrolet
+DAR,Q09,10,Zach Bates,13,265,false,Chevrolet
+DAR,Q09,11,Jackson Walls,1,135,false,Ford
+DAR,Q09,11,Jackson Walls,2,261,false,Ford
+DAR,Q09,11,Jackson Walls,3,264,false,Ford
+DAR,Q09,11,Jackson Walls,4,262,false,Ford
+DAR,Q09,11,Jackson Walls,5,151,false,Ford
+DAR,Q09,11,Jackson Walls,6,261,false,Ford
+DAR,Q09,11,Jackson Walls,7,261,false,Ford
+DAR,Q09,14,Cameron Hill,1,109,false,Toyota
+DAR,Q09,14,Cameron Hill,2,263,false,Toyota
+DAR,Q09,14,Cameron Hill,3,263,false,Toyota
+DAR,Q09,14,Cameron Hill,4,262,false,Toyota
+DAR,Q09,14,Cameron Hill,5,83,false,Toyota
+DAR,Q09,14,Cameron Hill,6,264,false,Toyota
+DAR,Q09,14,Cameron Hill,7,264,false,Toyota
+DAR,Q09,14,Cameron Hill,8,93,false,Toyota
+DAR,Q09,14,Cameron Hill,9,264,false,Toyota
+DAR,Q09,14,Cameron Hill,10,264,false,Toyota
+DAR,Q09,17,Todd Hazelwood,1,53,false,
+DAR,Q09,17,Todd Hazelwood,2,262,false,
+DAR,Q09,17,Todd Hazelwood,3,263,false,
+DAR,Q09,17,Todd Hazelwood,4,262,false,
+DAR,Q09,17,Todd Hazelwood,5,262,false,
+DAR,Q09,17,Todd Hazelwood,6,80,false,
+DAR,Q09,17,Todd Hazelwood,7,265,false,
+DAR,Q09,17,Todd Hazelwood,8,264,false,
+DAR,Q09,17,Todd Hazelwood,9,114,false,
+DAR,Q09,17,Todd Hazelwood,10,265,false,
+DAR,Q09,17,Todd Hazelwood,11,265,false,
+DAR,Q09,17,Todd Hazelwood,12,263,false,
+DAR,Q09,17,Todd Hazelwood,13,91,false,
+DAR,Q09,17,Todd Hazelwood,14,264,false,
+DAR,Q09,17,Todd Hazelwood,15,264,false,
+DAR,Q09,18,Anton De Pasquale,1,63,false,Chevrolet
+DAR,Q09,18,Anton De Pasquale,2,262,false,Chevrolet
+DAR,Q09,18,Anton De Pasquale,3,263,false,Chevrolet
+DAR,Q09,18,Anton De Pasquale,4,263,false,Chevrolet
+DAR,Q09,18,Anton De Pasquale,5,79,false,Chevrolet
+DAR,Q09,18,Anton De Pasquale,6,265,false,Chevrolet
+DAR,Q09,18,Anton De Pasquale,7,265,false,Chevrolet
+DAR,Q09,18,Anton De Pasquale,8,113,false,Chevrolet
+DAR,Q09,18,Anton De Pasquale,9,265,false,Chevrolet
+DAR,Q09,18,Anton De Pasquale,10,265,false,Chevrolet
+DAR,Q09,19,Matthew Payne,1,66,false,Ford
+DAR,Q09,19,Matthew Payne,2,261,false,Ford
+DAR,Q09,19,Matthew Payne,3,263,false,Ford
+DAR,Q09,19,Matthew Payne,4,262,false,Ford
+DAR,Q09,19,Matthew Payne,5,71,false,Ford
+DAR,Q09,19,Matthew Payne,6,262,false,Ford
+DAR,Q09,19,Matthew Payne,7,263,false,Ford
+DAR,Q09,19,Matthew Payne,8,112,false,Ford
+DAR,Q09,19,Matthew Payne,9,261,false,Ford
+DAR,Q09,19,Matthew Payne,10,262,false,Ford
+DAR,Q09,19,Matthew Payne,11,60,false,Ford
+DAR,Q09,19,Matthew Payne,12,261,false,Ford
+DAR,Q09,19,Matthew Payne,13,261,false,Ford
+DAR,Q09,20,David Reynolds,1,62,false,Chevrolet
+DAR,Q09,20,David Reynolds,2,264,false,Chevrolet
+DAR,Q09,20,David Reynolds,3,263,false,Chevrolet
+DAR,Q09,20,David Reynolds,4,263,false,Chevrolet
+DAR,Q09,20,David Reynolds,5,101,false,Chevrolet
+DAR,Q09,20,David Reynolds,6,263,false,Chevrolet
+DAR,Q09,20,David Reynolds,7,263,false,Chevrolet
+DAR,Q09,20,David Reynolds,8,132,false,Chevrolet
+DAR,Q09,20,David Reynolds,9,263,false,Chevrolet
+DAR,Q09,20,David Reynolds,10,262,false,Chevrolet
+DAR,Q09,20,David Reynolds,11,254,false,Chevrolet
+DAR,Q09,20,David Reynolds,12,90,false,Chevrolet
+DAR,Q09,20,David Reynolds,13,263,false,Chevrolet
+DAR,Q09,20,David Reynolds,14,264,false,Chevrolet
+DAR,Q09,26,Kai Allen,1,65,false,Ford
+DAR,Q09,26,Kai Allen,2,260,false,Ford
+DAR,Q09,26,Kai Allen,3,260,false,Ford
+DAR,Q09,26,Kai Allen,4,261,false,Ford
+DAR,Q09,26,Kai Allen,5,69,false,Ford
+DAR,Q09,26,Kai Allen,6,261,false,Ford
+DAR,Q09,26,Kai Allen,7,261,false,Ford
+DAR,Q09,26,Kai Allen,8,118,false,Ford
+DAR,Q09,26,Kai Allen,9,261,false,Ford
+DAR,Q09,26,Kai Allen,10,262,false,Ford
+DAR,Q09,26,Kai Allen,11,62,false,Ford
+DAR,Q09,26,Kai Allen,12,261,false,Ford
+DAR,Q09,26,Kai Allen,13,261,false,Ford
+DAR,Q09,31,Jayden Ojeda,1,143,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,2,264,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,3,262,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,4,262,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,5,80,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,6,265,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,7,265,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,8,93,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,9,265,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,10,265,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,11,94,false,Chevrolet
+DAR,Q09,31,Jayden Ojeda,12,265,false,Chevrolet
+DAR,Q09,38,Rylan Gray,1,68,false,Ford
+DAR,Q09,38,Rylan Gray,2,260,false,Ford
+DAR,Q09,38,Rylan Gray,3,261,false,Ford
+DAR,Q09,38,Rylan Gray,4,258,false,Ford
+DAR,Q09,38,Rylan Gray,5,96,false,Ford
+DAR,Q09,38,Rylan Gray,6,262,false,Ford
+DAR,Q09,38,Rylan Gray,7,262,false,Ford
+DAR,Q09,38,Rylan Gray,8,89,false,Ford
+DAR,Q09,38,Rylan Gray,9,262,false,Ford
+DAR,Q09,38,Rylan Gray,10,262,false,Ford
+DAR,Q09,38,Rylan Gray,11,263,false,Ford
+DAR,Q09,38,Rylan Gray,12,65,false,Ford
+DAR,Q09,38,Rylan Gray,13,261,false,Ford
+DAR,Q09,55,Thomas Randle,1,66,false,Ford
+DAR,Q09,55,Thomas Randle,2,261,false,Ford
+DAR,Q09,55,Thomas Randle,3,262,false,Ford
+DAR,Q09,55,Thomas Randle,4,262,false,Ford
+DAR,Q09,55,Thomas Randle,5,97,false,Ford
+DAR,Q09,55,Thomas Randle,6,263,false,Ford
+DAR,Q09,55,Thomas Randle,7,263,false,Ford
+DAR,Q09,55,Thomas Randle,8,130,false,Ford
+DAR,Q09,55,Thomas Randle,9,263,false,Ford
+DAR,Q09,55,Thomas Randle,10,264,false,Ford
+DAR,Q09,55,Thomas Randle,11,102,false,Ford
+DAR,Q09,55,Thomas Randle,12,264,false,Ford
+DAR,Q09,55,Thomas Randle,13,263,false,Ford
+DAR,Q09,88,Broc Feeney,1,66,false,Ford
+DAR,Q09,88,Broc Feeney,2,259,false,Ford
+DAR,Q09,88,Broc Feeney,3,261,false,Ford
+DAR,Q09,88,Broc Feeney,4,242,false,Ford
+DAR,Q09,88,Broc Feeney,5,70,false,Ford
+DAR,Q09,88,Broc Feeney,6,260,false,Ford
+DAR,Q09,88,Broc Feeney,7,262,false,Ford
+DAR,Q09,88,Broc Feeney,8,94,false,Ford
+DAR,Q09,88,Broc Feeney,9,263,false,Ford
+DAR,Q09,88,Broc Feeney,10,255,false,Ford
+DAR,Q09,96,Macauley Jones,1,90,false,Toyota
+DAR,Q09,96,Macauley Jones,2,262,false,Toyota
+DAR,Q09,96,Macauley Jones,3,262,false,Toyota
+DAR,Q09,96,Macauley Jones,4,95,false,Toyota
+DAR,Q09,96,Macauley Jones,5,262,false,Toyota
+DAR,Q09,96,Macauley Jones,6,262,false,Toyota
+DAR,Q09,99,Cooper Murray,1,138,false,Chevrolet
+DAR,Q09,99,Cooper Murray,2,262,false,Chevrolet
+DAR,Q09,99,Cooper Murray,3,261,false,Chevrolet
+DAR,Q09,777,Declan Fraser,1,163,false,Chevrolet
+DAR,Q09,777,Declan Fraser,2,263,false,Chevrolet
+DAR,Q09,777,Declan Fraser,3,265,false,Chevrolet
+DAR,Q09,777,Declan Fraser,4,264,false,Chevrolet
+DAR,Q09,777,Declan Fraser,5,74,false,Chevrolet
+DAR,Q09,777,Declan Fraser,6,263,false,Chevrolet
+DAR,Q09,777,Declan Fraser,7,264,false,Chevrolet
+DAR,Q09,888,William Brown,1,68,false,Ford
+DAR,Q09,888,William Brown,2,261,false,Ford
+DAR,Q09,888,William Brown,3,262,false,Ford
+DAR,Q09,888,William Brown,4,251,false,Ford
+DAR,Q09,888,William Brown,5,71,false,Ford
+DAR,Q09,888,William Brown,6,262,false,Ford
+DAR,Q09,888,William Brown,7,262,false,Ford
+DAR,Q09,888,William Brown,8,95,false,Ford
+DAR,Q09,888,William Brown,9,262,false,Ford
+DAR,Q09,888,William Brown,10,253,false,Ford

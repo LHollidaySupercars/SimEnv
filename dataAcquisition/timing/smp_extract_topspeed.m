@@ -1,0 +1,174 @@
+function T = smp_extract_topspeed(pdf_path, event, session)
+% SMP_EXTRACT_TOPSPEED  Extract on-track top speed data from a Speed Trap Report PDF.
+%
+% Calls the Node.js PDF engine internally, reads the output CSV back as a
+% MATLAB table, and merges the result into the master speed trap CSV.
+%
+% Layout handled: per-driver 2D matrix with lap numbers across the top and
+% +10 lap continuation rows (10, 20, 30...) below each driver block.
+% Output is flattened to one row per (car, driver, lap, kph).
+%
+% Usage:
+%   T = smp_extract_topspeed('E:\2026\99_seasonTiming\04_RAU\top_speed\Qualifying Race 12.pdf', 'RAU', 'QR12')
+%
+% Inputs:
+%   pdf_path  - full path to the PDF file
+%   event     - event code e.g. 'RAU'
+%   session   - session alias e.g. 'QR12'
+%
+% Output:
+%   T  - MATLAB table with columns:
+%          event, session, car, driver, lap, kph, parse_error,
+%          report_type, round, v8sc_name, source_file, extracted_at
+
+    % ── Input validation ──────────────────────────────────────────────────────
+    if nargin < 3
+        error('smp_extract_topspeed: requires three inputs — (pdf_path, event, session)');
+    end
+    if ~isfile(pdf_path)
+        error('smp_extract_topspeed: PDF not found:\n  %s', pdf_path);
+    end
+
+    % ── Locate Node.js engine ─────────────────────────────────────────────────
+    timing_dir  = fileparts(mfilename('fullpath'));
+    node_script = fullfile(timing_dir, 'extract_topspeed.js');
+
+    if ~isfile(node_script)
+        error('smp_extract_topspeed: extract_topspeed.js not found in:\n  %s', timing_dir);
+    end
+
+    % ── Verify Node.js is on PATH ─────────────────────────────────────────────
+    [node_check, ~] = system('node --version');
+    if node_check ~= 0
+        error(['smp_extract_topspeed: Node.js not found on PATH.\n' ...
+               'Install from https://nodejs.org and restart MATLAB.']);
+    end
+
+    % ── Install npm dependencies on first run ─────────────────────────────────
+    pdf_parse_dir = fullfile(timing_dir, 'node_modules', 'pdf-parse');
+    if ~isfolder(pdf_parse_dir)
+        fprintf('Installing Node.js dependencies (first run only)...\n');
+        [npm_s, npm_o] = system(sprintf('cd /d "%s" && npm install --silent 2>&1', timing_dir));
+        if npm_s ~= 0
+            error('smp_extract_topspeed: npm install failed:\n%s', npm_o);
+        end
+        fprintf('Dependencies installed.\n');
+    end
+
+    % ── Run the Node.js extractor ─────────────────────────────────────────────
+    cmd = sprintf('node "%s" "%s" --event "%s" --session "%s" 2>&1', ...
+        node_script, pdf_path, event, session);
+
+    [status, raw_output] = system(cmd);
+
+    out_lines = splitlines(string(raw_output));
+    visible   = out_lines(~startsWith(out_lines, '__CSV__'));
+    if any(strlength(visible) > 0)
+        fprintf('%s\n', strjoin(visible(strlength(visible) > 0), newline));
+    end
+
+    if status ~= 0
+        error('smp_extract_topspeed: extractor failed (exit %d). See output above.', status);
+    end
+
+    % ── Find CSV path from sentinel line ─────────────────────────────────────
+    sentinel = out_lines(startsWith(out_lines, '__CSV__'));
+    if isempty(sentinel)
+        error('smp_extract_topspeed: extractor did not report output CSV path.');
+    end
+    csv_path = char(strtrim(extractAfter(sentinel(1), '__CSV__')));
+
+    if ~isfile(csv_path)
+        error('smp_extract_topspeed: expected output CSV not found:\n  %s', csv_path);
+    end
+
+    % ── Read CSV into MATLAB table ────────────────────────────────────────────
+    T = readtable(csv_path, 'Delimiter', ',', 'TextType', 'string');
+
+    % Ensure lap and kph are numeric
+    if ismember('lap', T.Properties.VariableNames) && isstring(T.lap)
+        T.lap = str2double(T.lap);
+    end
+    if ismember('kph', T.Properties.VariableNames) && isstring(T.kph)
+        T.kph = str2double(T.kph);
+    end
+
+    % ── Upgrade session alias if filename gave a raw fallback ─────────────────
+    if is_raw_session(session)
+        pdf_ses = extract_sentinel(out_lines, '__SESSION__');
+        if ~isempty(pdf_ses)
+            better = session_alias_from_text(pdf_ses);
+            if ~is_raw_session(better)
+                session = better;
+                fprintf('[INFO] Session alias upgraded from PDF text: %s -> %s\n', pdf_ses, better);
+            else
+                session = pdf_ses;
+                fprintf('[INFO] Session set from PDF text: %s\n', pdf_ses);
+            end
+            T.session(:) = string(session);
+            writetable(T, csv_path);
+        end
+    end
+
+    % ── Report any parse errors ───────────────────────────────────────────────
+    if ismember('parse_error', T.Properties.VariableNames)
+        bad = T(strcmpi(T.parse_error, 'true'), :);
+        if height(bad) > 0
+            fprintf('[WARN] %d row(s) have parse_error=true — open the CSV to correct them:\n', height(bad));
+            fprintf('       %s\n', csv_path);
+        end
+    end
+
+    % ── Add vehicle column from driverAlias lookup ────────────────────────────
+    T = timing_vehicle_lookup(T);
+    writetable(T, csv_path);   % overwrite per-session CSV with vehicle column
+
+    % ── Tag report type then update master CSV ────────────────────────────────
+    T.report_type = repmat("top_speed", height(T), 1);
+    smp_update_master_speed_trap(T, pdf_path);
+
+end
+% ═════════════════════════════════════════════════════════════════════════════
+% Local helpers
+% ═════════════════════════════════════════════════════════════════════════════
+
+function result = extract_sentinel(lines, prefix)
+    match = lines(startsWith(lines, prefix));
+    if isempty(match)
+        result = '';
+    else
+        result = char(strtrim(extractAfter(match(1), prefix)));
+    end
+end
+
+function tf = is_raw_session(s)
+    tf = ~isempty(regexp(s, '_', 'once')) || isempty(regexp(s, '^[A-Z]{1,3}\d{2}$', 'once'));
+end
+
+function alias = session_alias_from_text(s)
+    prefix_map = struct( ...
+        'Race',            'R',  ...
+        'QualifyingRace',  'QR', ...
+        'Qualifying',      'Q',  ...
+        'Practice',        'P',  ...
+        'WarmUp',          'W',  ...
+        'Sprint',          'S'   ...
+    );
+    tok = regexp(strtrim(s), ...
+        '^(Qualifying\s+Race|Race|Qualifying|Practice|Warm[\s_\-]?Up|Sprint)\s+[A-Z]?(\d+)$', ...
+        'tokens', 'ignorecase', 'once');
+    if ~isempty(tok)
+        word   = regexprep(tok{1}, '[\s_\-]', '');
+        word(1) = upper(word(1));
+        num    = str2double(tok{2});
+        if isfield(prefix_map, word)
+            letter = prefix_map.(word);
+        else
+            letter = upper(word(1));
+        end
+        alias = sprintf('%s%02d', letter, num);
+    else
+        alias = regexprep(upper(strtrim(s)), '[^A-Z0-9]', '_');
+        alias = regexprep(alias, '_+', '_');
+    end
+end
