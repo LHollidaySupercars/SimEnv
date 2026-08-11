@@ -86,7 +86,14 @@ function stats = lap_stats(laps, channels, opts)
     operations  = get_opt(opts, 'operations',      default_ops);
     percentiles = get_opt(opts, 'percentiles',     []);
     per_ch_ops  = get_opt(opts, 'per_channel_ops', []);   % containers.Map or []
-
+    
+    % ---- Corner-phase config (optional) ----
+    corner_cfg     = get_opt(opts, 'corner_cfg',        []);
+    dist_ch_field  = get_opt(opts, 'dist_channel_field', 'Odometer');
+    phase_channels = get_opt(opts, 'phase_channels', struct( ...
+        'Braking', 'brakingGateVCH', 'Entry', 'entryGateVCH', ...
+        'MidCrn',  'midCrnGateVCH',  'Exit',  'exitGateVCH'));
+    
     n_laps = numel(laps);
     stats  = struct();
 
@@ -203,6 +210,61 @@ function stats = lap_stats(laps, channels, opts)
         end
 
         stats.(out_field) = res;
+        
+        % ------------------------------------------------------------------
+    %  Corner-phase time + sensitivity (optional, needs corner_cfg)
+    % ------------------------------------------------------------------
+    if ~isempty(corner_cfg)
+        lap_times_all = zeros(1, n_laps);
+        for k = 1:n_laps, lap_times_all(k) = laps(k).lap_time; end
+        phases = fieldnames(phase_channels);
+
+        for c = 1:numel(corner_cfg)
+            cn = corner_cfg(c).corner_num;
+            for ph = 1:numel(phases)
+                ph_name    = phases{ph};
+                gate_field = phase_channels.(ph_name);
+                out_field  = sanitise_fieldname(sprintf('Corner%d_%s_TimeVCH', cn, ph_name));
+
+                res = struct('lap_numbers', zeros(1,n_laps), 'lap_times', lap_times_all, ...
+                    'time', NaN(1,n_laps), 'units','s', ...
+                    'raw_name', sprintf('Corner%d_%s_TimeVCH', cn, ph_name));
+
+                for k = 1:n_laps
+                    res.lap_numbers(k) = laps(k).lap_number;
+                    if ~isfield(laps(k).channels, gate_field) || ...
+                       ~isfield(laps(k).channels, dist_ch_field)
+                        continue;
+                    end
+                    dist = laps(k).channels.(dist_ch_field).data;
+                    gate = laps(k).channels.(gate_field).data;
+                    dt   = 1 / laps(k).channels.(gate_field).sample_rate;
+
+                    mask = (dist >= corner_cfg(c).start_dist) & ...
+                           (dist < corner_cfg(c).end_dist) & logical(gate);
+
+                    if nnz(mask) < 3, continue; end
+                    res.time(k) = sum(mask) * dt;
+                end
+                stats.(out_field) = res;
+
+                % ---- Sensitivity scalars ----
+                ok = isfinite(res.time) & isfinite(lap_times_all);
+                sres = struct('raw_name', sprintf('Corner%d_%s_LapTimeCorrVCH', cn, ph_name), ...
+                               'units','corr', 'scalar', NaN);
+                vres = struct('raw_name', sprintf('Corner%d_%s_TimeVarianceVCH', cn, ph_name), ...
+                               'units','s', 'scalar', NaN);
+                if nnz(ok) >= 3
+                    cc = corrcoef(res.time(ok), lap_times_all(ok));
+                    sres.scalar = cc(1,2);
+                    vres.scalar = std(res.time(ok));
+                end
+                stats.(sanitise_fieldname(sres.raw_name)) = sres;
+                stats.(sanitise_fieldname(vres.raw_name)) = vres;
+            end
+        end
+    end
+        
     end
 
     % ------------------------------------------------------------------
