@@ -222,7 +222,8 @@ function figs = smp_plot_from_config(SMP, plots, cfg, driver_map, opts)
                     figs{p} = make_table2csv(plot_run_list, pd, driver_map, opts);
                 case 'trace_scatter_all'
                     figs{p} = trace_scatter_all(plot_run_list, pd, colour_cfg, driver_map, opts, SHAPES, ax_in);
-                
+                case 'spider'
+                    figs{p} = make_spider(plot_run_list, pd, colour_cfg, driver_map, opts, ax_in);
                 otherwise
                     warning('smp_plot_from_config: plot type "%s" not supported.', pd.type);
             end
@@ -4521,6 +4522,176 @@ function fig = make_phase_profile(run_list, pd, colour_cfg, driver_map, opts, ax
 
     apply_legend(ax, leg_h, leg_l, opts);
     apply_axis_limits(ax, pd);
+end
+
+function fig = make_spider(run_list, pd, colour_cfg, driver_map, opts, ax_in)
+% MAKE_SPIDER  Radar/spider chart, one polygon per driver/manufacturer.
+%
+% Excel config:
+%   type              = spider
+%   yAxis1..yAxisN    = stats field names (phase/corner channels)
+%   mathFunction      = per-lap stat (ignored when spider_scalar = true)
+%   colours           = driver | manufacturer
+%   spider_normalize  = TRUE (default) | FALSE
+%                        TRUE  -> each axis min-max scaled 0-1 across cars
+%                        FALSE -> raw values plotted directly
+%   spider_scalar     = TRUE | FALSE (default)
+%                        TRUE  -> reads entry.stats.(field).scalar directly
+%                                 (for LapTimeCorr / TimeVariance fields)
+%                        FALSE -> per-lap median via mathFunction (default)
+%   spider_highlight_fastest = TRUE (default) | FALSE
+%                        auto-disabled when spider_scalar = TRUE
+
+    if nargin < 6, ax_in = []; end
+    [fig, ax] = new_fig(pd, opts, ax_in);
+    fs = get_opt(opts, 'font_size', 11);
+
+    axis_labels = pd.y_channels;
+    n_axes = numel(axis_labels);
+
+    if n_axes < 3
+        warning('make_spider: need at least 3 y_channels for "%s".', pd.name);
+        return;
+    end
+
+    use_scalar = isfield(pd, 'spider_scalar') && pd.spider_scalar;
+
+    % ---- Gather per-run, per-axis values -------------------------------
+    vals   = NaN(numel(run_list), n_axes);
+    labels = cell(numel(run_list), 1);
+    cols   = cell(numel(run_list), 1);
+
+    for r = 1:numel(run_list)
+        entry = run_list(r);
+        for ai = 1:n_axes
+            y_field = sanitise_fn(pd.y_channels{ai});
+            if ~isfield(entry.stats, y_field)
+                continue;
+            end
+            if use_scalar
+                if isfield(entry.stats.(y_field), 'scalar')
+                    vals(r, ai) = entry.stats.(y_field).scalar;
+                end
+            else
+                per_lap = local_apply_math(entry.stats.(y_field), pd.math_fn);
+                finite_vals = per_lap(isfinite(per_lap));
+                if ~isempty(finite_vals)
+                    vals(r, ai) = median(finite_vals);
+                end
+            end
+        end
+        labels{r} = build_label(entry, pd, 1, driver_map);
+        cols{r}   = resolve_colour(entry, pd.colour_mode, colour_cfg, driver_map);
+    end
+
+    keep = any(isfinite(vals), 2);
+    vals   = vals(keep, :);
+    labels = labels(keep);
+    cols   = cols(keep);
+
+    if isempty(vals)
+        warning('make_spider: no valid data for "%s".', pd.name);
+        return;
+    end
+
+    % ---- Normalize (optional) ------------------------------------------
+    do_norm = true;
+    if isfield(pd, 'spider_normalize') && ~isempty(pd.spider_normalize)
+        do_norm = logical(pd.spider_normalize);
+    end
+
+    if do_norm
+        ax_min = min(vals, [], 1, 'omitnan');
+        ax_max = max(vals, [], 1, 'omitnan');
+        rng_   = ax_max - ax_min;
+        rng_(rng_ == 0) = 1;
+        vals_plot = (vals - ax_min) ./ rng_;
+        ring_labels = @(ring) sprintf('%.0f%%', 100*ring);
+    else
+        m = max(abs(vals(:)), [], 'omitnan');
+        if m == 0, m = 1; end
+        vals_plot = vals ./ m;
+        ring_labels = @(ring) sprintf('%.2f', ring * m);
+    end
+
+    % ---- Geometry --------------------------------------------------------
+    theta = linspace(0, 2*pi, n_axes + 1);
+    theta = theta(1:end-1) + pi/2;
+
+    hold(ax, 'on');
+    axis(ax, 'equal');
+    axis(ax, 'off');
+
+    n_rings = 5;
+    ring_ang = linspace(0, 2*pi, 100);
+    for ring = 1:n_rings
+        rr = ring / n_rings;
+        plot(ax, rr*cos(ring_ang), rr*sin(ring_ang), '-', ...
+            'Color', [0.88 0.88 0.88], 'LineWidth', 0.75);
+        text(ax, 0.02, rr, ring_labels(rr), 'FontSize', fs-3, 'Color', [0.55 0.55 0.55]);
+    end
+
+    for ai = 1:n_axes
+        plot(ax, [0 cos(theta(ai))], [0 sin(theta(ai))], '-', ...
+            'Color', [0.8 0.8 0.8], 'LineWidth', 0.75);
+        lx = 1.15 * cos(theta(ai));
+        ly = 1.15 * sin(theta(ai));
+        text(ax, lx, ly, axis_labels{ai}, 'HorizontalAlignment', 'center', ...
+            'FontSize', fs, 'Interpreter', 'none');
+    end
+    ax.XLim = [-1.35 1.35];
+    ax.YLim = [-1.35 1.35];
+
+    % ---- Polygons ----------------------------------------------------
+    leg_h = [];
+    leg_l = {};
+    for r = 1:size(vals_plot, 1)
+        rr = vals_plot(r, :);
+        rr(~isfinite(rr)) = 0;
+        xx = [rr .* cos(theta), rr(1) * cos(theta(1))];
+        yy = [rr .* sin(theta), rr(1) * sin(theta(1))];
+
+        h = plot(ax, xx, yy, '-o', 'Color', cols{r}, 'LineWidth', 1.5, ...
+            'MarkerFaceColor', cols{r}, 'MarkerSize', 5);
+        leg_h(end+1) = h;    %#ok
+        leg_l{end+1} = labels{r}; %#ok
+    end
+
+    % ---- Fastest-per-axis gold star (auto-off for scalar plots) --------
+    highlight_fastest = true;
+    if isfield(pd, 'spider_highlight_fastest') && ~isempty(pd.spider_highlight_fastest)
+        highlight_fastest = logical(pd.spider_highlight_fastest);
+    end
+    if use_scalar
+        highlight_fastest = false;
+    end
+
+    if highlight_fastest
+        for ai = 1:n_axes
+            col_vals = vals(:, ai);
+            if all(~isfinite(col_vals)), continue; end
+
+            best_val = min(col_vals);
+            best_idx = find(col_vals == best_val & isfinite(col_vals));
+
+            for bi = best_idx(:)'
+                rr = vals_plot(bi, ai);
+                if ~isfinite(rr), rr = 0; end
+                sx = rr * cos(theta(ai));
+                sy = rr * sin(theta(ai));
+
+                plot(ax, sx, sy, 'p', 'MarkerSize', 16, ...
+                    'MarkerFaceColor', [1 0.84 0], ...
+                    'MarkerEdgeColor', [0.6 0.45 0], 'LineWidth', 1);
+                text(ax, sx, sy, ['  ' labels{bi}], 'FontSize', fs-4, ...
+                    'Color', [0.45 0.34 0], 'FontWeight', 'bold', ...
+                    'VerticalAlignment', 'bottom');
+            end
+        end
+    end
+
+    title(ax, pd.name, 'FontSize', fs+1, 'Interpreter', 'none');
+    apply_legend(ax, leg_h, leg_l, opts);
 end
 
 function fig = make_speed_gate(run_list, pd, colour_cfg, driver_map, opts, ax_in)
