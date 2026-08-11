@@ -2,7 +2,8 @@ function smp_generate_pptx_report(figs, plots, pptx_template, output_dir, ...
                                    base_report_name, plot_config_file, ...
                                    session_filter, team_filter, track, ...
                                    produce_pdf)
-% SMP_GENERATE_PPTX_REPORT  Export a set of figures to a PowerPoint report.
+% SMP_GENERATE_PPTX_REPORT  Export a set of figures to a PowerPo
+% int report.
 %
 % produce_pdf (optional, default false) — if true, also exports a PDF
 % alongside the .pptx (same base name) via smp_pptx_export_pdf, using
@@ -34,7 +35,6 @@ function smp_generate_pptx_report(figs, plots, pptx_template, output_dir, ...
 % e.g. 'plottingRequest_BV_recreate.xlsx' → suffix = 'BV_recreate'
 % If the filename does not start with 'plottingRequest_', the full
 % filename (minus extension) is used as the suffix.
-
     % ------------------------------------------------------------------
     %  Derive output filename suffix from plot config path
     % ------------------------------------------------------------------
@@ -162,12 +162,15 @@ function smp_generate_pptx_report(figs, plots, pptx_template, output_dir, ...
             end
             final_left = (slide_width  - 610) / 2;
             final_top  = (slide_height - 360) / 2;
-
             tmp = [tempname, '.png'];
+            set(fig, 'Renderer', 'painters');     % <-- add: force stable renderer
+            drawnow;                               % <-- add: let graphics pipeline settle
+            pause(0.05);                           % <-- add
+
             exportgraphics(fig, tmp, 'Resolution', 150, 'BackgroundColor', 'white');
             [pkg, slide] = smp_pptx_add_picture(pkg, slide, tmp, final_left, final_top, img_w, img_h);
             try; delete(tmp); catch; end
-
+            close(fig);
             pending_slides{end+1} = slide; %#ok<AGROW>
 
             % --- TOC entry ---

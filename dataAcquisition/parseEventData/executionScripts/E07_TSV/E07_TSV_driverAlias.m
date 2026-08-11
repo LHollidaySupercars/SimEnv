@@ -1,10 +1,10 @@
 %% Full — date filter + xref against both alias files + export
 % clear opts
-opts.date_from        = datetime(2026, 6, 15);
+opts.date_from        = datetime(2026, 6, 10);   % auto-filled: earliest session date for this event/track
 
-opts.alias_file       = 'C:\SimEnv/dataAcquisition/Motec_MP/alias/driverAlias.xlsx';
-opts.event_alias_file = 'C:\SimEnv\dataAcquisition\parseEventData\executionScripts\E07_TSV/eventAlias.xlsx';
-opts.xref_export      = 'C:\SimEnv/dataAcquisition/parseEventData/aliasReports/TSV_alias_check.xlsx';
+opts.alias_file       = fullfile(pwd, 'dataAcquisition/Motec_MP/alias/driverAlias.xlsx');
+opts.event_alias_file = fullfile(pwd, 'dataAcquisition\parseEventData\executionScripts\E07_TSV/eventAlias.xlsx');
+opts.xref_export      = fullfile(pwd, 'dataAcquisition/parseEventData/aliasReports/TSV_alias_check.xlsx');
 % opts.verbose          = false;
 result = smp_discover_aliases('E:\2026/E07_TSV/_TeamData', opts);
 
@@ -21,29 +21,27 @@ result.xref.venues   ;     % .matched / .unmatched / .n_matched / .n_unmatched
 
 % Overall status:
 result.xref.ok       ;     % true ONLY when drivers AND sessions are fully matched
+%%
 
-result.xref.sessions.unmatched_detail
-result.xref.drivers.unmatched_detail
-result.xref.venues.unmatched_detail
+result.xref.sessions.unmatched_detail;
+result.xref.drivers.unmatched_detail;
+result.xref.venues.unmatched_detail;
 
-
-%% Identify — check what a specific file's PRIMARY header session field says
-% (Quick sanity check only. The correction block, if present, is what
-% motec_ld_info.m actually reports — this just shows the raw primary field.)
-debug_print_session_field('E:\...\that_file.ld')
-
-
-%% Rewrite — patches BOTH the primary header field and the correction
-%  block (if one exists), so motec_ld_info.m and i2 Pro agree afterwards.
-warning('This will overwrite the session name in the file below.');
-answerTheQuestion = input('Do you want to continue with the rewrite? [Y/N] ', 's');
-if strcmpi(answerTheQuestion, 'Y')
-    problematicFile = 'E:\...\that_file.ld';
-    ld_set_session_all(problematicFile, 'Qualifying 22');
-else
-    fprintf('Rewrite cancelled.\n');
+%% =========================================================================
+%  MANUAL DEBUG / PATCH TOOLS  (one-off use only — NOT auto-templated)
+% =========================================================================
+problematicFiles = result.xref.sessions.unmatched_detail.Path;
+for i = 1:numel(problematicFiles)
+  debug_print_session_field(problematicFiles{i})
+  answerTheQuestion = input('Do you want to continue with the rewrite? [Y/N] ', 's');
+  if strcmpi(answerTheQuestion, 'Y')
+      % debug_print_session_field(problematgicFiles{i})
+      pause(0.5)
+      ld_set_session_all(problematicFiles{i}, 'Qualifying 9 - Part 2');
+  elseif strcmp(answerTheQuestion, 'end')
+      return
+  end
 end
-
 
 %% ======================================================================= %
 %  FUNCTIONS
@@ -57,7 +55,7 @@ function debug_print_session_field(filepath)
 % field only. No scanning, no correction-block logic — just a direct read.
 %
 % Usage:
-%   debug_print_session_field('E:\2026\E07_TSV\_TeamData\01_T8R\20260712-243070002.ld')
+%   debug_print_session_field('E:\2026\E07_TSV\_TeamData\01_T8R\<file>.ld')
 
     SESSION_OFFSET = 0x5E4;
     SESSION_LEN    = 32;

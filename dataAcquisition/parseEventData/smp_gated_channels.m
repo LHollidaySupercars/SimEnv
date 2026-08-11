@@ -116,15 +116,16 @@ function [data, new_names] = smp_gated_channels(data, T)
             unit_str = 'bool';
         end
 
-        % --- Build output channel struct --------------------------------
-        ch            = struct();
-        ch.data       = result(:);
-        ch.time       = ref_ch.time;
-        ch.units      = unit_str;
+         % --- Build output channel struct --------------------------------
+        ch             = struct();
+        ch.data        = result(:);
+        ch.time        = ref_ch.time;
+        ch.units       = unit_str;
         ch.sample_rate = ref_ch.sample_rate;
         ch.raw_name    = out_name;
         ch.write_to_ld = true;
-        ch.dec_places  = 2;
+        ch.overwrite   = true;
+        ch.dec_places  = gated_auto_dec_places(ch.data);
         % Gate output if result is strictly 0/1
         if all(ismember(unique(ch.data(isfinite(ch.data))), [0; 1]))
             ch.interp_method = 'nearest';
@@ -168,4 +169,27 @@ function result = eval_in_ws(ws, tokens, expr)
         end
     end
     result = eval(expr);
+end
+
+function dec = gated_auto_dec_places(values)
+% GATED_AUTO_DEC_PLACES  Same logic as smp_custom_channels' auto_dec_places,
+% duplicated locally since that one is a private local function and not
+% callable across files. Keep in sync if the original changes.
+finite_vals = values(isfinite(values));
+if isempty(finite_vals)
+    dec = 2;
+    return;
+end
+data_range = max(finite_vals) - min(finite_vals);
+if data_range == 0
+    dec = 2;
+    return;
+end
+dec = 0;
+for d = 4:-1:0
+    if data_range * 10^d <= 32767
+        dec = d;
+        break;
+    end
+end
 end

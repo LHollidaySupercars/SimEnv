@@ -1079,14 +1079,17 @@ function laps = lap_slicer(session, opts)
         fprintf('\n');
     end
 
-    % ------------------------------------------------------------------
-    %  8. Enrich all channels with .dist field
-    % ------------------------------------------------------------------
-    laps = enrich_with_distance(laps, verbose);
-
-    % ------------------------------------------------------------------
-    %  9. Beacon check plot (diagnostic)
-    % ------------------------------------------------------------------
+        % ------------------------------------------------------------------
+        %  8. Enrich all channels with .dist field
+        % ------------------------------------------------------------------
+        t0_enrich = tic;
+        laps = enrich_with_distance(laps, verbose);
+        fprintf('  enrich_with_distance: %.2fs\n', toc(t0_enrich));
+        % laps = enrich_with_distance(laps, verbose);
+    
+        % ------------------------------------------------------------------
+        %  9. Beacon check plot (diagnostic)
+        % ------------------------------------------------------------------
     % beacon_check = 1;
     % if beacon_check
     % if ~exist('br2_field_orig', 'var'), br2_field_orig = br2_field; end
@@ -1135,6 +1138,139 @@ end
 %% beacon_check_plot(session, laps, 'MyLaps_X2TRA_DeviceShortId, lap_num_data, lap_num_time, beacon_label)
 
 % ======================================================================= %
+% function laps = enrich_with_distance(laps, verbose)
+% % ENRICH_WITH_DISTANCE  Add .dist (metres) to every channel by resampling
+% %                       onto the master distance grid.
+% %
+% % Distance source priority:
+% %   1. Ground_Speed  — integrated via cumtrapz, zeroed at beacon (t=0).
+% %                      Cleanest option: no cross-lap contamination, starts
+% %                      exactly at 0 regardless of odometer state.
+% %   2. Corr_Dist     — corrected cumulative distance, zeroed at first sample
+% %   3. Odometer      — cumulative, zeroed at first sample
+% 
+%     SPEED_CANDIDATES = {'Ground_Speed'};
+%     DIST_CANDIDATES  = {'Corr_Dist', 'Odometer'};
+% 
+%     if isempty(laps), return; end
+% 
+%     for k = 1:numel(laps)
+%         ch_names        = fieldnames(laps(k).channels);
+%         dist_field      = '';
+%         dist_source     = '';
+%         use_integration = false;
+% 
+%         % PRIMARY: integrate Ground_Speed — clean zero at beacon
+%         for i = 1:numel(SPEED_CANDIDATES)
+%             f = find_ch_field_local(laps(k).channels, SPEED_CANDIDATES{i});
+%             if ~isempty(f)
+%                 dist_field      = f;
+%                 dist_source     = SPEED_CANDIDATES{i};
+%                 use_integration = true;
+%                 break;
+%             end
+%         end
+% 
+%         % FALLBACK: use a distance channel if no speed channel found
+%         if isempty(dist_field)
+%             for i = 1:numel(DIST_CANDIDATES)
+%                 f = find_ch_field_local(laps(k).channels, DIST_CANDIDATES{i});
+%                 if ~isempty(f)
+%                     dist_field  = f;
+%                     dist_source = DIST_CANDIDATES{i};
+%                     break;
+%                 end
+%             end
+%         end
+% 
+%         if isempty(dist_field)
+%             if verbose
+%                 fprintf('  [WARN] Lap %d: no speed or distance channel — .dist not added.\n', ...
+%                     laps(k).lap_number);
+%             end
+%             continue;
+%         end
+% 
+%         % ---- Build master distance vector ----
+%         dist_ch  = laps(k).channels.(dist_field);
+%         t_master = dist_ch.time(:);
+%         d_raw    = dist_ch.data(:);
+% 
+%         if numel(t_master) < 2
+%             if verbose
+%                 fprintf('  [WARN] Lap %d: speed/distance channel has < 2 samples — .dist not added.\n', ...
+%                     laps(k).lap_number);
+%             end
+%             continue;
+%         end
+% 
+%         if use_integration
+%             % Integrate Ground_Speed (km/h -> m/s), zero at beacon (t=0)
+%             zero_idx = find(t_master >= 0, 1);
+%             if isempty(zero_idx), zero_idx = 1; end
+%             speed_ms = max(d_raw, 0) / 3.6;
+%             d_master = cumtrapz(t_master, speed_ms);
+%             d_master = d_master - d_master(zero_idx);
+%         else
+%             % Zero distance at first sample
+%             d_master = d_raw - d_raw(1);
+%         end
+% 
+%         if verbose && k == 1
+%             if use_integration
+%                 fprintf('  [INFO] Distance: integrating %s (%.0f Hz)\n', ...
+%                     dist_source, laps(k).channels.(dist_field).sample_rate);
+%             else
+%                 fprintf('  [INFO] Distance source: %s\n', dist_source);
+%             end
+%         end
+% 
+%         % Enforce monotonically increasing distance
+%         mono_mask = [true; diff(d_master) > 0];
+%         t_master  = t_master(mono_mask);
+%         d_master  = d_master(mono_mask);
+% 
+%         if numel(t_master) < 2
+%             if verbose
+%                 fprintf('  [WARN] Lap %d: distance has < 2 monotonic points.\n', ...
+%                     laps(k).lap_number);
+%             end
+%             continue;
+%         end
+% 
+%         % ---- Resample all channels onto master distance time grid ----
+%         for c = 1:numel(ch_names)
+%             fn   = ch_names{c};
+%             ch   = laps(k).channels.(fn);
+%             t_ch = ch.time(:);
+%             d_ch = ch.data(:);
+% 
+%             if numel(t_ch) < 2
+%                 laps(k).channels.(fn).dist = NaN(size(d_ch));
+%                 continue;
+%             end
+% 
+%             [t_ch_u, ia] = unique(t_ch, 'stable');
+%             d_ch_u = d_ch(ia);
+% 
+%             t_lo      = max(t_master(1),  t_ch_u(1));
+%             t_hi      = min(t_master(end), t_ch_u(end));
+%             data_full = NaN(numel(t_master), 1);
+% 
+%             if t_lo < t_hi
+%                 in_range = t_master >= t_lo & t_master <= t_hi;
+%                 data_full(in_range) = interp1(t_ch_u, d_ch_u, ...
+%                     t_master(in_range), 'linear', NaN);
+%             end
+% 
+%             laps(k).channels.(fn).data = data_full;
+%             laps(k).channels.(fn).time = t_master;
+%             laps(k).channels.(fn).dist = d_master;
+%         end
+%     end
+% end
+
+
 function laps = enrich_with_distance(laps, verbose)
 % ENRICH_WITH_DISTANCE  Add .dist (metres) to every channel by resampling
 %                       onto the master distance grid.
@@ -1145,6 +1281,16 @@ function laps = enrich_with_distance(laps, verbose)
 %                      exactly at 0 regardless of odometer state.
 %   2. Corr_Dist     — corrected cumulative distance, zeroed at first sample
 %   3. Odometer      — cumulative, zeroed at first sample
+%
+% PERFORMANCE NOTE (rewritten): channels are grouped by identical time
+% vector before interpolation. Channels sharing a sample rate typically
+% share an exact time array (same acquisition, same formula), so instead
+% of calling unique()+interp1() once per channel (~1000+ individual calls
+% per lap), we call it once per DISTINCT time vector and interpolate all
+% channels in that group in a single batched interp1 call. Same math,
+% same result per channel — only the call count changes. Groups are
+% verified with isequal before batching, so a hash collision or unusual
+% edge case falls back safely rather than silently producing wrong output.
 
     SPEED_CANDIDATES = {'Ground_Speed'};
     DIST_CANDIDATES  = {'Corr_Dist', 'Odometer'};
@@ -1193,14 +1339,6 @@ function laps = enrich_with_distance(laps, verbose)
         t_master = dist_ch.time(:);
         d_raw    = dist_ch.data(:);
 
-        if numel(t_master) < 2
-            if verbose
-                fprintf('  [WARN] Lap %d: speed/distance channel has < 2 samples — .dist not added.\n', ...
-                    laps(k).lap_number);
-            end
-            continue;
-        end
-
         if use_integration
             % Integrate Ground_Speed (km/h -> m/s), zero at beacon (t=0)
             zero_idx = find(t_master >= 0, 1);
@@ -1235,38 +1373,125 @@ function laps = enrich_with_distance(laps, verbose)
             continue;
         end
 
-        % ---- Resample all channels onto master distance time grid ----
-        for c = 1:numel(ch_names)
-            fn   = ch_names{c};
-            ch   = laps(k).channels.(fn);
-            t_ch = ch.time(:);
-            d_ch = ch.data(:);
+        % ------------------------------------------------------------
+        %  Group channels by identical time vector, then batch-interp
+        % ------------------------------------------------------------
+        n_ch = numel(ch_names);
 
-            if numel(t_ch) < 2
-                laps(k).channels.(fn).dist = NaN(size(d_ch));
-                continue;
+        % Channels with < 2 samples: NaN out immediately, same as original.
+        keep_mask = false(n_ch, 1);
+        for c = 1:n_ch
+            fn = ch_names{c};
+            ch = laps(k).channels.(fn);
+            if numel(ch.time) < 2
+                laps(k).channels.(fn).dist = NaN(size(ch.data(:)));
+            else
+                keep_mask(c) = true;
+            end
+        end
+        active_names = ch_names(keep_mask);
+        n_active = numel(active_names);
+
+        % Build a cheap grouping key per channel: length + first/last time
+        % value. Channels with identical keys are verified with isequal
+        % before being batched — this makes the grouping safe even if two
+        % genuinely different time vectors happen to share length/endpoints.
+        group_key = strings(n_active, 1);
+        for c = 1:n_active
+            t_ch = laps(k).channels.(active_names{c}).time(:);
+            group_key(c) = sprintf('%d_%.9g_%.9g', numel(t_ch), t_ch(1), t_ch(end));
+        end
+
+        [uniq_keys, ~, key_idx] = unique(group_key);
+
+        for g = 1:numel(uniq_keys)
+            members = find(key_idx == g);   % indices into active_names sharing this key
+
+            % Verify true equality within the group (guards against hash collision)
+            t_ref = laps(k).channels.(active_names{members(1)}).time(:);
+            same_time = true(numel(members), 1);
+            for m = 2:numel(members)
+                t_m = laps(k).channels.(active_names{members(m)}).time(:);
+                if ~isequal(t_m, t_ref)
+                    same_time(m) = false;
+                end
             end
 
-            [t_ch_u, ia] = unique(t_ch, 'stable');
-            d_ch_u = d_ch(ia);
+            batch_idx   = members(same_time);
+            solo_idx    = members(~same_time);
 
-            t_lo      = max(t_master(1),  t_ch_u(1));
-            t_hi      = min(t_master(end), t_ch_u(end));
-            data_full = NaN(numel(t_master), 1);
+            % ---- Batched path: all channels in batch_idx share t_ref exactly ----
+            if ~isempty(batch_idx)
+                [t_ch_u, ia] = unique(t_ref, 'stable');
 
-            if t_lo < t_hi
+                t_lo = max(t_master(1),  t_ch_u(1));
+                t_hi = min(t_master(end), t_ch_u(end));
                 in_range = t_master >= t_lo & t_master <= t_hi;
-                data_full(in_range) = interp1(t_ch_u, d_ch_u, ...
-                    t_master(in_range), 'linear', NaN);
+
+                n_batch = numel(batch_idx);
+                D = NaN(numel(t_ch_u), n_batch);
+                for bi = 1:n_batch
+                    fn = active_names{batch_idx(bi)};
+                    d_full = laps(k).channels.(fn).data(:);
+                    D(:, bi) = d_full(ia);
+                end
+
+                data_out = NaN(numel(t_master), n_batch);
+                if t_lo < t_hi
+                    data_out(in_range, :) = interp1(t_ch_u, D, t_master(in_range), 'linear', NaN);
+                end
+
+                for bi = 1:n_batch
+                    fn = active_names{batch_idx(bi)};
+                    laps(k).channels.(fn).data = data_out(:, bi);
+                    laps(k).channels.(fn).time = t_master;
+                    laps(k).channels.(fn).dist = d_master;
+                end
             end
 
-            laps(k).channels.(fn).data = data_full;
-            laps(k).channels.(fn).time = t_master;
-            laps(k).channels.(fn).dist = d_master;
+            % ---- Fallback path: any hash-collision mismatches, one at a time ----
+            for si = 1:numel(solo_idx)
+                fn   = active_names{solo_idx(si)};
+                ch   = laps(k).channels.(fn);
+                t_ch = ch.time(:);
+                d_ch = ch.data(:);
+
+                [t_ch_u, ia] = unique(t_ch, 'stable');
+                d_ch_u = d_ch(ia);
+
+                t_lo = max(t_master(1),  t_ch_u(1));
+                t_hi = min(t_master(end), t_ch_u(end));
+                data_full = NaN(numel(t_master), 1);
+
+                if t_lo < t_hi
+                    in_range = t_master >= t_lo & t_master <= t_hi;
+                    data_full(in_range) = interp1(t_ch_u, d_ch_u, ...
+                        t_master(in_range), 'linear', NaN);
+                end
+
+                laps(k).channels.(fn).data = data_full;
+                laps(k).channels.(fn).time = t_master;
+                laps(k).channels.(fn).dist = d_master;
+            end
         end
     end
 end
 
+
+% ======================================================================= %
+function field = find_ch_field_local(channels_struct, name)
+    if isfield(channels_struct, name), field = name; return; end
+    san = regexprep(name, '[^a-zA-Z0-9_]', '_');
+    if isfield(channels_struct, san),  field = san;  return; end
+    all_f = fieldnames(channels_struct);
+    for i = 1:numel(all_f)
+        if strcmpi(all_f{i}, name) || strcmpi(all_f{i}, san)
+            field = all_f{i};
+            return;
+        end
+    end
+    field = '';
+end
 
 % ======================================================================= %
 function ps = build_pit_segment(channels, pit_entry_t, pit_exit_t)
@@ -1356,19 +1581,19 @@ function [data_out, time_out] = beacon_to_zoh(data, time, min_hold_s)
 end
 
 % ======================================================================= %
-function field = find_ch_field_local(channels_struct, name)
-    if isfield(channels_struct, name), field = name; return; end
-    san = regexprep(name, '[^a-zA-Z0-9_]', '_');
-    if isfield(channels_struct, san),  field = san;  return; end
-    all_f = fieldnames(channels_struct);
-    for i = 1:numel(all_f)
-        if strcmpi(all_f{i}, name) || strcmpi(all_f{i}, san)
-            field = all_f{i};
-            return;
-        end
-    end
-    field = '';
-end
+% function field = find_ch_field_local(channels_struct, name)
+%     if isfield(channels_struct, name), field = name; return; end
+%     san = regexprep(name, '[^a-zA-Z0-9_]', '_');
+%     if isfield(channels_struct, san),  field = san;  return; end
+%     all_f = fieldnames(channels_struct);
+%     for i = 1:numel(all_f)
+%         if strcmpi(all_f{i}, name) || strcmpi(all_f{i}, san)
+%             field = all_f{i};
+%             return;
+%         end
+%     end
+%     field = '';
+% end
 
 % ======================================================================= %
 % function field = find_ch_field_local(channels_struct, name)

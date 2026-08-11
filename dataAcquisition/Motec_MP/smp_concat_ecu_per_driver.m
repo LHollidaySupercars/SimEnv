@@ -114,6 +114,14 @@ for fi = 1 : numel(ld_files)
 
         % Prefer TLA > canonical > raw driver as group key
         [canon, ~, ~, ~, tla] = resolve_driver_info(raw_drv, driver_map);
+        if isfield(hdr, 'driver'), raw_driver = strtrim(hdr.driver); end
+        [~, ~, ~, driver_tla, ~] = ...
+            resolve_driver_display(raw_driver, driver_map);
+        if isfield(cfg, 'DriverFilter') && ~isempty(cfg.DriverFilter)
+            if ~strcmp(tla, cfg.DriverFilter) | ~strcmp(driver_tla, cfg.DriverFilter)
+                continue
+            end
+        end
         if ~isempty(tla)
             drv_key = tla;
         elseif ~isempty(canon)

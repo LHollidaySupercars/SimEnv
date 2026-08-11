@@ -1,0 +1,6 @@
+
+# Ignore Produced Reports
+*.pptx
+
+# Ignore matlab backups scripts
+*.asv

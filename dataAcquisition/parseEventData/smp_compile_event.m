@@ -62,7 +62,7 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
 %     saveCache     = get_opt(opts, 'saveCache',       true);
     saveCache     = get_opt(opts, 'saveCache',      true);
     channel_rules  = get_opt(opts, 'channel_rules',   []);
-    save_mode      = get_opt(opts, 'save_mode',        'legacy');
+    save_mode      = get_opt(opts, 'save_mode',        'stream');
     session_filter = get_opt(opts, 'session_filter',   {});
     detect_pitlane = get_opt(opts, 'detect_pitlane',   false);
     fcy_channel    = get_opt(opts, 'fcy_channel',      'FCY_Flag');
@@ -105,12 +105,19 @@ if ~isempty(pre_groups)
     if ~ismember('GroupKey', cache.manifest.Properties.VariableNames)
         cache.manifest.GroupKey = repmat({''}, 0, 1);
     end
+    % cache = process_stream(cache, pre_groups, channels_to_extract, ...
+    %                        min_lt, max_lt, max_traces, dist_npts, ...
+    %                        dist_ch, driver_map, verbose, channel_rules, ...
+    %                        detect_pitlane, fcy_channel, ...
+    %                        br2_channel, br2_protocol, ...
+    %                        unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode);
     cache = process_stream(cache, pre_groups, channels_to_extract, ...
-                           min_lt, max_lt, max_traces, dist_npts, ...
-                           dist_ch, driver_map, verbose, channel_rules, ...
-                           detect_pitlane, fcy_channel, ...
-                           br2_channel, br2_protocol, ...
-                           unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode);
+        min_lt, max_lt, max_traces, dist_npts, ...
+        dist_ch, driver_map, verbose, channel_rules, ...
+        detect_pitlane, fcy_channel, ...
+        br2_channel, br2_protocol, ...
+        unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode, ...
+        get_opt(opts, 'channel_ops_map', []));   % <-- NEW — this is where get_opt(opts,...) belongs
     return;
 end
     % ------------------------------------------------------------------
@@ -216,12 +223,20 @@ end
 %                                min_lt, max_lt, max_traces, dist_npts, ...
 %                                dist_ch, driver_map, verbose);
     if strcmp(mode, 'stream')
+        % cache = process_stream(cache, groups, channels_to_extract, ...
+        %                min_lt, max_lt, max_traces, dist_npts, ...
+        %                dist_ch, driver_map, verbose, channel_rules, ...
+        %                detect_pitlane, fcy_channel, ...
+        %                br2_channel, br2_protocol, ...
+        %                unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode);
         cache = process_stream(cache, groups, channels_to_extract, ...
-                       min_lt, max_lt, max_traces, dist_npts, ...
-                       dist_ch, driver_map, verbose, channel_rules, ...
-                       detect_pitlane, fcy_channel, ...
-                       br2_channel, br2_protocol, ...
-                       unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode);
+            min_lt, max_lt, max_traces, dist_npts, ...
+            dist_ch, driver_map, verbose, channel_rules, ...
+            detect_pitlane, fcy_channel, ...
+            br2_channel, br2_protocol, ...
+            unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode, ...
+            get_opt(opts, 'channel_ops_map', []));   % <-- NEW — this is where get_opt(opts,...) belongs
+        
     else
         cache = process_bulk(cache, groups, channels_to_extract, verbose);
     end
@@ -250,7 +265,7 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
                                  dist_ch, driver_map, verbose, channel_rules, ...
                                  detect_pitlane, fcy_channel, ...
                                  br2_channel, br2_protocol, ...
-                                 unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode)
+                                 unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode, channel_ops_map)
     if nargin < 11, channel_rules  = [];                  end
     if nargin < 12, detect_pitlane = false;               end
     if nargin < 13, fcy_channel    = 'FCY_Flag';          end
@@ -263,6 +278,7 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
     if nargin < 20, load_all_ch    = false;               end
     if nargin < 21, T_gated        = table();             end
     if nargin < 22, l180_mode      = 'drop_duplicate';    end
+    if nargin < 23, channel_ops_map = [];                 end   % <-- NEW
     MYLAPS_CH_DEFAULT        = 'MyLaps X2TRA DeviceShortId';
     lap_opts.min_lap_time    = min_lt;
     lap_opts.max_lap_time    = max_lt;
@@ -316,6 +332,7 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
 
         % ---- Lap slice ----
         try
+
             laps = lap_slicer(session, lap_opts);
         catch ME
             fprintf('  [ERROR] lap_slicer: %s\n', ME.message);
@@ -356,9 +373,26 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
             end
 
             stat_channels = unique([channels_to_extract(:); gated_names(:); custom_fields(:)]);
-                        stats = lap_stats(laps, stat_channels, ...
-            struct('operations', {{'max','min','mean','median','std','var','range',...
-            'max non zero','min non zero','mean non zero','median non zero','std non zero','sample_rate','change'}}));
+
+            % ---- Original (pre-optimization) call, kept for easy revert ----
+            % stats = lap_stats(laps, stat_channels, ...
+            %     struct('operations', {{'max','min','mean','median','std','var','range',...
+            %     'max non zero','min non zero','mean non zero','median non zero','std non zero','sample_rate','change'}}));
+
+            stat_ops = {'max','min','mean','median','std','var','range',...
+                        'max non zero','min non zero','mean non zero','median non zero','std non zero','sample_rate','change'};
+
+            if ~isempty(channel_ops_map)
+                stats_channels = keys(channel_ops_map);
+                lap_stats_opts = struct('per_channel_ops', channel_ops_map);
+            else
+                stats_channels = stat_channels;
+                lap_stats_opts = struct('operations', {stat_ops});
+            end
+
+            t0_stats = tic;
+            stats = lap_stats(laps, stats_channels, lap_stats_opts);
+            fprintf('  lap_stats: %.2fs\n', toc(t0_stats));
         catch ME
             fprintf('  [ERROR] lap_stats: %s\n', ME.message);
             clear session laps;
@@ -490,18 +524,117 @@ end
 %     session = concat_sessions(all_sessions);
 % end
 
+% function session = load_and_concat(files, channels_to_extract, verbose, unique_fp, show_report, label, csv_out_dir, load_all, driver_map, T_gated, l180_mode)
+%     if nargin < 4,  unique_fp    = false;   end
+%     if nargin < 5,  show_report  = false;   end
+%     if nargin < 6,  label        = '';      end
+%     if nargin < 7,  csv_out_dir  = '';      end
+%     if nargin < 8,  load_all     = false;   end
+%     if nargin < 9,  driver_map   = [];      end
+%     if nargin < 10, T_gated      = table(); end
+%     if nargin < 11, l180_mode = 'drop_duplicate'; end
+%     % When load_all=true, pass {} to motec_ld_reader (reads every channel)
+%     % and skip filter_channels so the full file is available downstream.
+% 
+%     files = dedupe_prefer_l180(files, verbose, l180_mode);
+% 
+%     if load_all
+%         rd_channels = {};
+%     else
+%         rd_channels = channels_to_extract;
+%     end
+% 
+%     if numel(files) == 1
+%         session = motec_ld_reader(files{1}, rd_channels);
+%         session.info = read_file_info(files{1}, driver_map);
+%         % Augmentation (smp_custom_channels + smp_gated_channels) removed —
+%         % VCH channels are now pre-baked into COM files by VCS Phase 6.
+%         if ~load_all
+%             session = filter_channels(session, channels_to_extract);
+%         end
+%         return;
+%     end
+% 
+%     % Multi-stint — incremental concat to limit peak memory usage.
+%     % Each file is loaded, processed, filtered, then immediately merged
+%     % into the accumulated session before being cleared from memory.
+%     concat_opts.uniqueFingerprint = unique_fp;
+%     session   = [];
+%     fp_report = struct('session_idx', {}, 'status', {}, 'reason', {}, ...
+%                        'matched_idx', {}, 'tag',    {}, ...
+%                        'fp_start',    {}, 'fp_end', {});
+% 
+%     for f = 1:numel(files)
+%         if verbose
+%             [~, fname] = fileparts(files{f});
+%             fprintf('    Loading stint %d/%d: %s\n', f, numel(files), fname);
+%         end
+%         totalTic = tic;
+%         t0 = tic;
+%         s = motec_ld_reader(files{f}, rd_channels);
+%         s.info = read_file_info(files{f}, driver_map);
+%         fprintf('  motec_ID_reader: %.2fs\n', toc(t0));
+%         % Augmentation (smp_custom_channels + smp_gated_channels) removed —
+%         % VCH channels are now pre-baked into COM files by VCS Phase 6.
+%         if ~load_all
+%             t0 = tic;
+%             s = filter_channels(s, channels_to_extract);
+%             fprintf('  filter_channels: %.2fs\n', toc(t0));
+%         end
+% 
+%         if isempty(session)
+%             session = s;
+%         else
+%             [session, rep] = concat_sessions({session, s}, concat_opts);
+%             if ~isempty(rep)
+%                 fp_report = [fp_report, rep(:)'];  %#ok<AGROW>
+%             end
+%         end
+%         clear s;
+%         fprintf('  Total Time: %.2fs\n', toc(totalTic));
+%     end
+% 
+%     if show_report && ~isempty(fp_report)
+%         smp_show_concat_report(fp_report, label, files, {}, session);
+%     end
+%     n_dropped = sum(strcmp({fp_report.status}, 'dropped'));
+%     if n_dropped > 0 && ~isempty(csv_out_dir)
+%         if ~exist(csv_out_dir, 'dir'), mkdir(csv_out_dir); end
+%         ts       = datestr(now, 'yyyymmdd_HHMMSS');
+%         csv_path = fullfile(csv_out_dir, sprintf('concat_report_%s.csv', ts));
+%         n_rep    = numel(fp_report);
+%         file_col = repmat({''}, n_rep, 1);
+%         for ri = 1:n_rep
+%             if ri <= numel(files), file_col{ri} = files{ri}; end
+%         end
+%         T = table((1:n_rep)', file_col, ...
+%                   {fp_report.status}', {fp_report.reason}', ...
+%                   [fp_report.matched_idx]', {fp_report.tag}', ...
+%                   'VariableNames', {'session_idx','file','status','reason','matched_idx','tag'});
+%         writetable(T, csv_path);
+%         fprintf('  [concat] CSV saved: %s\n', csv_path);
+%     end
+% end
 function session = load_and_concat(files, channels_to_extract, verbose, unique_fp, show_report, label, csv_out_dir, load_all, driver_map, T_gated, l180_mode)
-    if nargin < 4,  unique_fp    = false;   end
-    if nargin < 5,  show_report  = false;   end
-    if nargin < 6,  label        = '';      end
-    if nargin < 7,  csv_out_dir  = '';      end
-    if nargin < 8,  load_all     = false;   end
-    if nargin < 9,  driver_map   = [];      end
-    if nargin < 10, T_gated      = table(); end
-    if nargin < 11, l180_mode = 'drop_duplicate'; end
+% LOAD_AND_CONCAT  Load one or more .ld files and concatenate their
+%   channels in time order.
+%
+%   Augmentation (smp_custom_channels + smp_gated_channels) removed —
+%   VCH channels are now pre-baked into COM files by VCS Phase 6. This
+%   step only loads, filters, and concatenates already-augmented data;
+%   it does not recompute derived channels.
+
+    if nargin < 4,  unique_fp   = false;         end
+    if nargin < 5,  show_report = false;         end
+    if nargin < 6,  label       = '';            end
+    if nargin < 7,  csv_out_dir = '';             end
+    if nargin < 8,  load_all    = false;         end
+    if nargin < 9,  driver_map  = [];            end
+    if nargin < 10, T_gated     = table();       end
+    if nargin < 11, l180_mode   = 'drop_duplicate'; end
+
     % When load_all=true, pass {} to motec_ld_reader (reads every channel)
     % and skip filter_channels so the full file is available downstream.
-
     files = dedupe_prefer_l180(files, verbose, l180_mode);
 
     if load_all
@@ -510,41 +643,41 @@ function session = load_and_concat(files, channels_to_extract, verbose, unique_f
         rd_channels = channels_to_extract;
     end
 
+    % ---- Single file ----
     if numel(files) == 1
-        session = motec_ld_reader(files{1}, rd_channels);
+        session      = motec_ld_reader(files{1}, rd_channels);
         session.info = read_file_info(files{1}, driver_map);
-        % Augmentation (smp_custom_channels + smp_gated_channels) removed —
-        % VCH channels are now pre-baked into COM files by VCS Phase 6.
+
         if ~load_all
             session = filter_channels(session, channels_to_extract);
         end
         return;
     end
 
-    % Multi-stint — incremental concat to limit peak memory usage.
-    % Each file is loaded, processed, filtered, then immediately merged
-    % into the accumulated session before being cleared from memory.
+    % ---- Multi-stint — incremental concat to limit peak memory usage ----
+    % Each file is loaded, filtered, then immediately merged into the
+    % accumulated session before being cleared from memory.
     concat_opts.uniqueFingerprint = unique_fp;
     session   = [];
     fp_report = struct('session_idx', {}, 'status', {}, 'reason', {}, ...
-                       'matched_idx', {}, 'tag',    {}, ...
-                       'fp_start',    {}, 'fp_end', {});
+                        'matched_idx', {}, 'tag',    {}, ...
+                        'fp_start',    {}, 'fp_end', {});
 
     for f = 1:numel(files)
         if verbose
             [~, fname] = fileparts(files{f});
             fprintf('    Loading stint %d/%d: %s\n', f, numel(files), fname);
         end
+
         totalTic = tic;
         t0 = tic;
-        s = motec_ld_reader(files{f}, rd_channels);
+        s      = motec_ld_reader(files{f}, rd_channels);
         s.info = read_file_info(files{f}, driver_map);
         fprintf('  motec_ID_reader: %.2fs\n', toc(t0));
-        % Augmentation (smp_custom_channels + smp_gated_channels) removed —
-        % VCH channels are now pre-baked into COM files by VCS Phase 6.
+
         if ~load_all
             t0 = tic;
-            s = filter_channels(s, channels_to_extract);
+            s  = filter_channels(s, channels_to_extract);
             fprintf('  filter_channels: %.2fs\n', toc(t0));
         end
 
@@ -556,6 +689,7 @@ function session = load_and_concat(files, channels_to_extract, verbose, unique_f
                 fp_report = [fp_report, rep(:)'];  %#ok<AGROW>
             end
         end
+
         clear s;
         fprintf('  Total Time: %.2fs\n', toc(totalTic));
     end
@@ -563,16 +697,21 @@ function session = load_and_concat(files, channels_to_extract, verbose, unique_f
     if show_report && ~isempty(fp_report)
         smp_show_concat_report(fp_report, label, files, {}, session);
     end
+
+    % ---- Optional CSV export of dropped/duplicate stints ----
     n_dropped = sum(strcmp({fp_report.status}, 'dropped'));
     if n_dropped > 0 && ~isempty(csv_out_dir)
         if ~exist(csv_out_dir, 'dir'), mkdir(csv_out_dir); end
+
         ts       = datestr(now, 'yyyymmdd_HHMMSS');
         csv_path = fullfile(csv_out_dir, sprintf('concat_report_%s.csv', ts));
+
         n_rep    = numel(fp_report);
         file_col = repmat({''}, n_rep, 1);
         for ri = 1:n_rep
             if ri <= numel(files), file_col{ri} = files{ri}; end
         end
+
         T = table((1:n_rep)', file_col, ...
                   {fp_report.status}', {fp_report.reason}', ...
                   [fp_report.matched_idx]', {fp_report.tag}', ...
@@ -581,7 +720,6 @@ function session = load_and_concat(files, channels_to_extract, verbose, unique_f
         fprintf('  [concat] CSV saved: %s\n', csv_path);
     end
 end
-
 
 % ======================================================================= %
 function info = read_file_info(filepath, driver_map)

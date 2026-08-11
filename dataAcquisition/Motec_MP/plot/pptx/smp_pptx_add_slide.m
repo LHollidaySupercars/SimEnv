@@ -1,11 +1,12 @@
-function [pkg, slide] = smp_pptx_add_slide(pkg, layout_name, insert_pos)
+function [pkg, slide] = smp_pptx_add_slide(pkg, layout_name, insert_pos, force_blank_bg)
 % SMP_PPTX_ADD_SLIDE  Add a new slide based on a named layout from the
 %                      template (e.g. 'blank'), and insert it at a given
 %                      1-based position in the slide order.
 %
 % Usage:
-%   [pkg, slide] = smp_pptx_add_slide(pkg, 'blank')              % append
-%   [pkg, slide] = smp_pptx_add_slide(pkg, 'blank', 2)           % insert at position 2
+%   [pkg, slide] = smp_pptx_add_slide(pkg, 'blank')                    % append
+%   [pkg, slide] = smp_pptx_add_slide(pkg, 'blank', 2)                 % insert at position 2
+%   [pkg, slide] = smp_pptx_add_slide(pkg, 'blank', [], true)          % append, force white bg
 %
 % Returns:
 %   slide.file   - 'slideN.xml' filename for this new slide
@@ -17,11 +18,27 @@ function [pkg, slide] = smp_pptx_add_slide(pkg, layout_name, insert_pos)
 %   slide.media_rels   - cell array of {rId, target} for images used
 %
 % layout_name is matched against slideLayouts/*.xml <p:cSld name="...">
-% (case-insensitive). 'blank' resolves to the template's true blank
-% layout (no placeholders) — the equivalent of COM's ppLayoutBlank.
+% (case-insensitive). 'blank' resolves to whichever layout in the
+% template is literally named "Blank" — but note that a layout named
+% "Blank" can still inherit a background fill/image from the slide
+% master, since a layout only needs to omit *placeholders*, not
+% necessarily override the master's background.
+%
+% force_blank_bg (optional, default false) — if true, writes an explicit
+% <p:bg> with a solid white fill into the new slide's own XML. A
+% slide-level <p:bg> always wins over whatever the layout/master would
+% otherwise paint, so this guarantees a genuinely blank white background
+% regardless of what the chosen layout inherits — useful when no layout
+% in the template is "clean" enough on its own. (Deliberately solid
+% white rather than <a:noFill/> — noFill just removes the override and
+% leaves the renderer to fall back to whatever's underneath, which isn't
+% guaranteed to be white; an explicit solidFill is unambiguous.)
 
     if nargin < 3 || isempty(insert_pos)
         insert_pos = numel(pkg.slide_order) + 1;
+    end
+    if nargin < 4 || isempty(force_blank_bg)
+        force_blank_bg = false;
     end
 
     layout_file = find_layout_by_name(pkg, layout_name);
@@ -33,13 +50,21 @@ function [pkg, slide] = smp_pptx_add_slide(pkg, layout_name, insert_pos)
     slide_path  = fullfile(pkg.work_dir, 'ppt', 'slides', slide_file);
     rels_path   = fullfile(pkg.work_dir, 'ppt', 'slides', '_rels', sprintf('%s.rels', slide_file));
 
+    % --- Optional explicit background override (must be the first child
+    %     of <p:cSld>, ahead of <p:spTree>, per the schema) ---
+    if force_blank_bg
+        bg_xml = '<p:bg><p:bgPr><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill><a:effectLst/></p:bgPr></p:bg>';
+    else
+        bg_xml = '';
+    end
+
     % --- Minimal empty slide XML (shapes appended later via smp_pptx_add_*) ---
     slide_xml = [...
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' ...
         '<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ' ...
         'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ' ...
         'xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">' ...
-        '<p:cSld><p:spTree>' ...
+        '<p:cSld>' , bg_xml, '<p:spTree>' ...
         '<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>' ...
         '<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/>' ...
         '<a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>' ...

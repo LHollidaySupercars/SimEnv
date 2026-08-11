@@ -211,7 +211,7 @@ function V8PRV_Pitwall()
     lbl = makeLabel22(cgr, 'Text', 'Plot Name'); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
     hPlotName = uieditfield(cgr, 'text', 'Value', 'My Plot'); hPlotName.Layout.Row = 1; hPlotName.Layout.Column = 2;
     r = r + 1;
-
+    
     PLOT_TYPES = {'scatter', 'line', 'timeseries', 'timeseries_align', ...
                   'boxplot', 'violin', 'histogram', 'ranked_box', ...
                   'lapwise_box', 'sessionlapwise', 'psd', 'big_scatter', 'scatter_trace'};
@@ -265,7 +265,10 @@ function V8PRV_Pitwall()
     lbl = makeLabel22(cgr, 'Text', 'Use Secondary Y'); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
     hSecondary = uicheckbox(cgr, 'Text', '', 'Value', false); hSecondary.Layout.Row = 1; hSecondary.Layout.Column = 2;
     r = r + 1;
-
+    cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
+    lbl = makeLabel22(cgr, 'Text', 'Show Legend'); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
+    hShowLegend = uicheckbox(cgr, 'Text', '', 'Value', true); hShowLegend.Layout.Row = 1; hShowLegend.Layout.Column = 2;
+    r = r + 1;
     cgr = uigridlayout(CG, [1 2]); cgr.Layout.Row = r; cgr.ColumnWidth = {130,'1x'}; cgr.Padding = [0 0 0 0]; cgr.RowSpacing = 0;
     lbl = makeLabel22(cgr, 'Text', 'X Limits'); lbl.Layout.Row = 1; lbl.Layout.Column = 1;
     hXLim = uieditfield(cgr, 'text', 'Value', ''); hXLim.Layout.Row = 1; hXLim.Layout.Column = 2;
@@ -532,6 +535,7 @@ function V8PRV_Pitwall()
     app.handles.colourMode    = hColourMode;
     app.handles.differ        = hDiffer;
     app.handles.secondary     = hSecondary;
+    app.handles.showLegend    = hShowLegend;
     app.handles.xLim          = hXLim;
     app.handles.yLim          = hYLim;
     app.handles.outliers      = hOutliers;
@@ -989,7 +993,7 @@ function onLoadCache(fig, pathField)
     end
 
     try
-        driverAliasFile = fullfile(thisDir, '..', 'Motec_MP', 'alias', 'driverAlias.xlsx');
+        driverAliasFile = fullfile(thisDir, '..', 'Motec_MP', 'alias', 'driverAlias_specific.xlsx');
         if isfile(driverAliasFile)
             app.driver_map = smp_driver_alias_load(driverAliasFile);
             appendLog(h.log, '  Driver alias file loaded.');
@@ -1299,7 +1303,13 @@ function onPlotDirect(fig)
                     newAx.Title.String  = srcAx.Title.String;
                 end
             end
-
+            % ---- Legend ----
+            if h.showLegend.Value
+                allNewAx = findobj(h.plotPnl, 'Type', 'axes');
+                for ai2 = 1:numel(allNewAx)
+                    buildLegendForAxes(allNewAx(ai2));
+                end
+            end
             % Close all generated figures
             for fi = 1:numel(figs)
                 if ~isempty(figs{fi}) && ishandle(figs{fi})
@@ -2084,6 +2094,61 @@ function onApplyFit(fig, degree)
     end
 
     guidata(fig, app);
+end
+
+%% =========================================================================
+%  HELPER: Build a legend for an axes, using DisplayName where available,
+%  falling back to a synthetic legend built from unique marker/line colours.
+%% =========================================================================
+function buildLegendForAxes(ax)
+objs = getDataObjects(ax);
+if isempty(objs), return; end
+
+named = objs(arrayfun(@(o) ~isempty(o.DisplayName), objs));
+
+if ~isempty(named)
+    % Collapse to one entry per unique DisplayName (avoid duplicate
+    % legend rows when a category is split across multiple series,
+    % e.g. per-team scatter groups under the same manufacturer colour)
+    names = {named.DisplayName};
+    [~, firstIdx] = unique(names, 'stable');
+    legend(ax, named(firstIdx), 'Location', 'bestoutside', 'FontSize', 8);
+    return;
+end
+
+% ---- Fallback: synthesize legend from unique colours present ----
+entries = {};
+labels  = {};
+for oi = 1:numel(objs)
+    obj = objs(oi);
+    if isa(obj, 'matlab.graphics.chart.primitive.Scatter')
+        c = obj.CData;
+        if isempty(c), continue; end
+        if size(c,1) == 1 || (isvector(c) && numel(c) == 3)
+            col = c(1,:);
+            key = mat2str(round(col,3));
+            if ~ismember(key, labels)
+                labels{end+1}  = key; %#ok<AGROW>
+                ph = scatter(ax, NaN, NaN, obj.SizeData(1), col, 'filled');
+                ph.DisplayName = sprintf('RGB %s', key);
+                entries{end+1} = ph; %#ok<AGROW>
+            end
+        end
+    elseif isa(obj, 'matlab.graphics.chart.primitive.Line')
+        col = obj.Color;
+        key = mat2str(round(col,3));
+        if ~ismember(key, labels)
+            labels{end+1}  = key; %#ok<AGROW>
+            ph = line(ax, NaN, NaN, 'Color', col, 'LineWidth', obj.LineWidth);
+            ph.DisplayName = sprintf('RGB %s', key);
+            entries{end+1} = ph; %#ok<AGROW>
+        end
+    end
+end
+
+if ~isempty(entries)
+    legend(ax, [entries{:}], 'Location', 'bestoutside', 'FontSize', 8);
+end
 end
 
 %% =========================================================================

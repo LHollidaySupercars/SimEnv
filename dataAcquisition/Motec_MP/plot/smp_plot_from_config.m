@@ -537,8 +537,9 @@ function fig = make_scatter(run_list, pd, colour_cfg, driver_map, opts, SHAPES, 
                     % --- FIX 2: x-axis always uses 'mean' not pd.math_fn ---
                     % pd.math_fn (e.g. 'change') is only meaningful for y.
                     % Applying it to an x-axis channel produces nonsense.
-                    xv     = local_apply_math(entry.stats.(x_field), 'mean');
-                    x_vals = xv(valid);
+                    % xv     = local_apply_math(entry.stats.(x_field), 'mean');
+
+                    xv = local_apply_math(entry.stats.(x_field), pd.math_fn);x_vals = xv(valid);
                     x_lbl  = pd.x_axis;
                 else
                     x_vals = lap_nums;

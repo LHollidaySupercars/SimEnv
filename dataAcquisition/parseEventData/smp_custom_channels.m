@@ -38,7 +38,7 @@ function data = smp_custom_channels(data, varargin)
             driver = data.info.driver;
         end
     end
-
+    AERO_MAP_DIR = fullfile(pwd, '\vehicleModel\components\aerodynamics');
     fprintf('smp_custom_channels: computing derived channels...\n');
     ref = longest_channel(data);   % highest-frequency channel — shared time base for all align_to calls
 
@@ -127,7 +127,7 @@ function data = smp_custom_channels(data, varargin)
         if isfield(data, 'Wheel_Speed_Front_Left') && isfield(data, 'Wheel_Speed_Front_Right') 
 
             tempData = movmean((data.Wheel_Speed_Front_Right.data - data.Wheel_Speed_Front_Left.data)/10,20);
-            data.Wheel_Speed_Yaw_Rate = make_channel(tempData, ref, 'N', 'Wheel Speed Yaw Rate');
+            data.Wheel_Speed_Yaw_Rate = make_channel(tempData, ref, 'w', 'Wheel Speed Yaw Rate');
             fprintf('  [+] Wheel_Speed_Yaw_Rate\n');
 
         end
@@ -140,7 +140,7 @@ function data = smp_custom_channels(data, varargin)
     try
         if isfield(data, 'Steering_Angle')
             
-            Steering_Aggression = cumtrapz(data.Steering_Angle.time, lowpass_filter(data.Steering_Angle.data, data.Steering_Angle.time, 0.8) - data.Steering_Angle.data)
+            Steering_Aggression = cumtrapz(data.Steering_Angle.time, abs(lowpass_filter(data.Steering_Angle.data, data.Steering_Angle.time, 0.8) - data.Steering_Angle.data))
             
             thr_lp = lowpass_filter(data.Throttle_Pedal.data, data.Throttle_Pedal.time, 0.8);
 
@@ -318,7 +318,7 @@ function data = smp_custom_channels(data, varargin)
     %  Model:  r = (28.2200 + 0.0505*P + -0.000340*FZ + 0.0004*rotSpeed) * 10 [mm]
     %  Source: CALSPAN data
     % ==================================================================
-    try
+    try % encorporate pacejka formula
         if isfield(data, 'Wheel_Speed_Front_Left') && isfield(data, 'TPM1S_FL_WS_PRESS')
             data.Wheel_Speed_Loaded_Radius_FL = make_channel( ...
                 tyreRadiusV1(data.TPM1S_FL_WS_PRESS, data.Wheel_Speed_Front_Left, 'front'), ...
@@ -342,6 +342,7 @@ function data = smp_custom_channels(data, varargin)
     % ==================================================================
     %  Tyre Pressure / Temperature Averages
     % ==================================================================
+
     try
         if isfield(data, 'TPM1S_RR_WS_PRESS') && isfield(data, 'TPM1S_RL_WS_PRESS')
             if length(data.TPM1S_RR_WS_PRESS.data) > length(data.TPM1S_RL_WS_PRESS.data)
@@ -510,23 +511,23 @@ function data = smp_custom_channels(data, varargin)
         fn_frh_aero_kin = find_field(data, 'Kinematic_Ride_Height_Front');
         fn_rrh_aero_kin = find_field(data, 'Kinematic_Ride_Height_Rear');
 
-
-        AERO_MAP_DIR = 'C:\SimEnv\vehicleModel\components\aerodynamics';
-        
+       
         if ~isempty(fn_frh_aero_kin) && ~isempty(fn_rrh_aero_kin) && ~isempty(manufacturer)
             aero = aeroMapChannels(data.(fn_frh_aero_kin), data.(fn_rrh_aero_kin), manufacturer, AERO_MAP_DIR);
             if ~isempty(aero)
-                data.CLa_SCz_VCH = make_channel(aero.CLa_SCz, ref, '-', 'CLa_SCz_VCH_KIN', 'overwrite', true);
-                data.AB_FRT_VCH  = make_channel(aero.AB_FRT,  ref, '%', 'AB_FRT_VCH_KIN', 'overwrite', true);
-                data.CDa_SCx_VCH = make_channel(aero.CDa_SCx, ref, '-', 'CDa_SCx_VCH_KIN', 'overwrite', true);
-                data.EFF_VCH     = make_channel(aero.EFF,     ref, '-', 'EFF_VCH_KIN');
+                data.CLa_SCz_VCH_KIN = make_channel(aero.CLa_SCz, ref, '-', 'CLa_SCz_VCH_KIN', 'overwrite', true);
+                newBalance = aero.CLf_SCzF ./ (aero.CLf_SCzF + aero.CLr_SCzR);
+                data.AB_FRT_VCH_KIN  = make_channel(newBalance,  ref, '%', 'AB_FRT_VCH_KIN', 'overwrite', true);
+                data.CDa_SCx_VCH_KIN = make_channel(aero.CDa_SCx, ref, '-', 'CDa_SCx_VCH_KIN', 'overwrite', true);
+                newEfficiency = aero.CLa_SCz ./ CDa_SCx;
+                data.EFF_VCH_KIN     = make_channel(newEfficiency,     ref, '-', 'EFF_VCH_KIN');
                 fprintf('  [+] CLa_SCz_VCH  AB_FRT_VCH  CDa_SCx_VCH  EFF_VCH  (%s map, roll=0)\n', manufacturer);
 
                 aero2 = aeroMapChannels(data.(fn_frh_aero_kin), data.(fn_rrh_aero_kin), manufacturer, AERO_MAP_DIR, -2);
                 if ~isempty(aero2)
-                    data.CSa_Scy_VCH  = make_channel(aero2.CSa_Scy,  ref, '-', 'CSa_Scy_VCH_KIN', 'overwrite', true);
-                    data.CSf_SCyF_VCH = make_channel(aero2.CSf_SCyF, ref, '-', 'CSf_SCyF_VCH_KIN', 'overwrite', true);
-                    data.CSr_SCyR_VCH = make_channel(aero2.CSr_SCyR, ref, '-', 'CSr_SCyR_VCH_KIN', 'overwrite', true);
+                    data.CSa_Scy_VCH_KIN  = make_channel(aero2.CSa_Scy,  ref, '-', 'CSa_Scy_VCH_KIN', 'overwrite', true);
+                    data.CSf_SCyF_VCH_KIN = make_channel(aero2.CSf_SCyF, ref, '-', 'CSf_SCyF_VCH_KIN', 'overwrite', true);
+                    data.CSr_SCyR_VCH_KIN = make_channel(aero2.CSr_SCyR, ref, '-', 'CSr_SCyR_VCH_KIN', 'overwrite', true);
                     fprintf('  [+] CSa_Scy_VCH  CSf_SCyF_VCH  CSr_SCyR_VCH  (%s map, roll=-2)\n', manufacturer);
                 end
             end
@@ -592,7 +593,9 @@ function data = smp_custom_channels(data, varargin)
             data.FRH_corrected = make_channel(rawRideHeightCorrection(data, vehicle, 'front',...
                 'L180_Laser_Ride_Height_Front_Ra',  'L180_Laser_Ride_Height_Rear_Raw'), ...
                 ref, 'mm', 'Front Ride Height Corr','overwrite', true);
-            data.RRH_corrected = make_channel(rawRideHeightCorrection(data, vehicle, 'rear', 'L180_Laser_Ride_Height_Front_Ra', 'L180_Laser_Ride_Height_Rear_Raw' ),  ref, 'mm', 'Rear Ride Height Corr','overwrite', true);
+            data.RRH_corrected = make_channel(rawRideHeightCorrection(data, vehicle, 'rear',...
+                'L180_Laser_Ride_Height_Front_Ra', 'L180_Laser_Ride_Height_Rear_Raw' ), ....
+                ref, 'mm', 'Rear Ride Height Corr','overwrite', true);
             fprintf('  [+] FRH_corrected  RRH_corrected  (matched: %s)\n', fn_rrh_corr);
         end
     catch ME; fprintf('  [!] rawRideHeightCorrection failed: %s\n', ME.message); end
@@ -601,8 +604,12 @@ function data = smp_custom_channels(data, varargin)
         warning('[Error] ECU RH Channel')
         fn_rrh_corr = find_field(data, 'Suspension');
         if ~isempty(fn_rrh_corr) && ~isempty(manufacturer)
-            data.FRH_corrected = make_channel(rawRideHeightCorrection(data, vehicle, 'front', 'ECU_Suspension_Ride_Height_Fron', 'ECU_Suspension_Ride_Height_Rear'), ref, 'mm', 'Front Ride Height Corr','overwrite', true);
-            data.RRH_corrected = make_channel(rawRideHeightCorrection(data, vehicle, 'rear', 'ECU_Suspension_Ride_Height_Fron', 'ECU_Suspension_Ride_Height_Rear'),  ref, 'mm', 'Rear Ride Height Corr','overwrite', true);
+            data.FRH_corrected = make_channel(rawRideHeightCorrection(data, vehicle, 'front', ...
+                'ECU_Suspension_Ride_Height_Fron', 'ECU_Suspension_Ride_Height_Rear'), ...
+                ref, 'mm', 'Front Ride Height Corr','overwrite', true);
+            data.RRH_corrected = make_channel(rawRideHeightCorrection(data, vehicle, 'rear', ...
+                'ECU_Suspension_Ride_Height_Fron', 'ECU_Suspension_Ride_Height_Rear'), ...
+                ref, 'mm', 'Rear Ride Height Corr','overwrite', true);
             fprintf('  [+] FRH_corrected  RRH_corrected  (matched: %s)\n', fn_rrh_corr);
         end
     catch ME; fprintf('  [!] rawRideHeightCorrection failed: %s\n', ME.message); end
@@ -667,22 +674,23 @@ function data = smp_custom_channels(data, varargin)
     try
         fn_frh_aero = find_field(data, 'Front_Ride_Height_Corr');
         fn_rrh_aero = find_field(data, 'Rear_Ride_Height_Corr');
-        AERO_MAP_DIR = 'C:\SimEnv\vehicleModel\components\aerodynamics';
 
         if ~isempty(fn_frh_aero) && ~isempty(fn_rrh_aero) && ~isempty(manufacturer)
             aero = aeroMapChannels(data.(fn_frh_aero), data.(fn_rrh_aero), manufacturer, AERO_MAP_DIR);
             if ~isempty(aero)
-                data.CLa_SCz_VCH = make_channel(aero.CLa_SCz, ref, '-', 'CLa_SCz_VCH');
-                data.AB_FRT_VCH  = make_channel(aero.AB_FRT,  ref, '%', 'AB_FRT_VCH');
-                data.CDa_SCx_VCH = make_channel(aero.CDa_SCx, ref, '-', 'CDa_SCx_VCH');
-                data.EFF_VCH     = make_channel(aero.EFF,     ref, '-', 'EFF_VCH');
+                data.CLa_SCz_VCH = make_channel(aero.CLa_SCz, ref, '-', 'CLz_MEAS');
+                newBalance = aero.CLf_SCzF ./ (aero.CLf_SCzF + aero.CLr_SCzR);
+                data.AB_FRT_VCH  = make_channel(newBalance,  ref, '%', 'ABf_MEAS');
+                data.CDa_SCx_VCH = make_channel(aero.CDa_SCx, ref, '-', 'CDx_MEAS');
+                newEfficiency = aero.CLa_SCz ./ CDa_SCx;
+                data.EFF_VCH     = make_channel(newEfficiency,     ref, '-', 'EFF_MEAS');
                 fprintf('  [+] CLa_SCz_VCH  AB_FRT_VCH  CDa_SCx_VCH  EFF_VCH  (%s map, roll=0)\n', manufacturer);
 
                 aero2 = aeroMapChannels(data.(fn_frh_aero), data.(fn_rrh_aero), manufacturer, AERO_MAP_DIR, -2);
                 if ~isempty(aero2)
-                    data.CSa_Scy_VCH  = make_channel(aero2.CSa_Scy,  ref, '-', 'CSa_Scy_VCH');
-                    data.CSf_SCyF_VCH = make_channel(aero2.CSf_SCyF, ref, '-', 'CSf_SCyF_VCH');
-                    data.CSr_SCyR_VCH = make_channel(aero2.CSr_SCyR, ref, '-', 'CSr_SCyR_VCH');
+                    data.CSa_Scy_VCH  = make_channel(aero2.CSa_Scy,  ref, '-', 'CLy_MEAS');
+                    data.CSf_SCyF_VCH = make_channel(aero2.CSf_SCyF, ref, '-', 'CLzF_MEAS');
+                    data.CSr_SCyR_VCH = make_channel(aero2.CSr_SCyR, ref, '-', 'CLzR_MEAS');
                     fprintf('  [+] CSa_Scy_VCH  CSf_SCyF_VCH  CSr_SCyR_VCH  (%s map, roll=-2)\n', manufacturer);
                 end
             end
@@ -720,7 +728,6 @@ function data = smp_custom_channels(data, varargin)
 
             steerMask = abs(align_to(data.Steering_Angle, data.Ground_Speed)) < 0.5;
             carSpeed  = align_to(data.Ground_Speed, ref) / 3.6;   % m/s
-            carSpeed = data.Ground_Speed.data;
             % radius = carSpeed.^2 ./ (lat * gravity);
             % radius(steerMask) = NaN;
             % requiredSteer = wheelBase ./ radius + K .* lat;
@@ -734,7 +741,7 @@ function data = smp_custom_channels(data, varargin)
             radius(lowLatMask) = NaN;
 
             requiredSteer = wheelBase ./ radius + K .* lat;
-            requiredSteer(steerMask | lowLatMask) = 0;
+            requiredSteer(steerMask) = 0;
 
             % hard physical clamp as a last-resort safety net
             requiredSteer = max(min(requiredSteer, 1), -1);   % ~57° in rad, generous for a race car
@@ -764,6 +771,7 @@ function data = smp_custom_channels(data, varargin)
     %  Guard includes exist() checks to prevent scope leaks from the
     %  required-steer and gating blocks above.
     % ==================================================================
+    
     try
         if isfield(data, 'Ground_Speed') && isfield(data, 'Steering_Angle') && ...
                 isfield(data, 'AB_FRT_VCH') && isfield(data, 'CLa_SCz_VCH') && ...
@@ -797,46 +805,61 @@ function data = smp_custom_channels(data, varargin)
             fprintf('  [+] Aero_Rear_Force\n');
         end
     catch ME; fprintf('  [!] Required steer aero failed: %s\n', ME.message); end
-    
-    try %% Front wheel speed yaw formula
-        if isfield(data, 'Wheel_Speed_Front_Left') && isfield(data, 'Wheel_Speed_Front_Right') 
 
-            tempData = movmean((data.Wheel_Speed_Front_Right.data - data.Wheel_Speed_Front_Left.data)/10,20);
-            data.Wheel_Speed_Yaw_Rate = make_channel(tempData, ref, 'N', 'Wheel Speed Yaw Rate');
-            fprintf('  [+] Wheel_Speed_Yaw_Rate\n');
-
-        end
-    catch ME; fprintf('  [!]  Wheel Speed Yaw Failed: %s\n', ME.message); end
 
     try
-        if isfield(data, 'Acceleration_X_Filt') && isfield(data, 'Acceleration_Y_Filt') && ...
-                isfield(data, 'Acceleration_Z_Filt') && isfield
-            
-            data.requiredSteer_Aero = make_channel(RR, ref, 'N', 'nRear Right Accel Based');
-            fprintf('  [+] nRear Right Accel Based\n');
-       
+        if isfield(data, 'Ground_Speed') && isfield(data, 'Steering_Angle') && ...
+                isfield(data, 'AB_FRT_VCH_KIN') && isfield(data, 'CLa_SCz_VCH_KIN') && ...
+                ~isempty(manufacturer) && ...
+                exist('lat',       'var') && exist('radius',    'var') && ...
+                exist('steerMask', 'var') && exist('carSpeed',  'var')
+            mfr_key = lower(manufacturer);
+            corneringStiffnessFront = vehicle.(mfr_key).kinematics.front.tyreCorneringStiffness;
+            corneringStiffnessRear  = vehicle.(mfr_key).kinematics.rear.tyreCorneringStiffness;
+            wheelBase       = vehicle.(mfr_key).maximumWheelbase / 1000;
+            rho             = 1.225;
+            gravity         = 9.81;
+            weightFrontAxle = 729.8 * gravity;
+            weightRearAxle  = 617.7 * gravity;
+            CZ = data.CLa_SCz_VCH.data;
+            ABFRNT = data.AB_FRT_VCH.data;
+            frontAeroForce = 0.5 * carSpeed .* rho .* (ABFRNT/100        .* CZ);
+            rearAeroForce  = 0.5 * carSpeed .* rho .* ((1 - ABFRNT/100)  .* CZ);
+
+            K = (1 / wheelBase) * ( ...
+                ((weightFrontAxle + frontAeroForce) ./ corneringStiffnessFront) ./ gravity - ...
+                ((weightRearAxle  + rearAeroForce)  ./ corneringStiffnessRear)  ./ gravity);
+
+            requiredSteer_Aero = wheelBase ./ radius + K .* lat;
+            requiredSteer_Aero(steerMask) = 0;
+            data.requiredSteer_Aero_KIN = make_channel(requiredSteer_Aero, ref, 'rad', 'Required_Steer_Aero_VCH_KIN');
+            fprintf('  [+] Required_Steer_Aero_VCH\n');
+            data.Aero_Front_Force_KIN = make_channel(frontAeroForce, ref, 'N', 'Aero_Front_Force_KIN');
+            fprintf('  [+] Aero_Front_Force\n');
+            data.Aero_Rear_Force_KIN = make_channel(rearAeroForce, ref, 'N', 'Aero_Rear_Force_KIN');
+            fprintf('  [+] Aero_Rear_Force\n');
         end
-    catch ME; fprintf('  [!]  Accelerometer Correction Failed: %s\n', ME.message); end
-    
+    catch ME; fprintf('  [!] Required steer aero failed: %s\n', ME.message); end
+
     %% Tyre Squish calculation Deflection vs speed
     try
         if isfield(data, 'Front_Ride_Height_Corr') && isfield(data, 'Rear_Ride_Height_Corr')
            
-            tyreSquish = align_to(data.Kinematic_Ride_Height_Front, ref) - align_to(data.Front_Ride_Height_Corr, ref); 
-            tyreSquish(straightMask) = NaN;
+            tyreSquishFront = align_to(data.Kinematic_Ride_Height_Front, ref) - align_to(data.Front_Ride_Height_Corr, ref); 
+            tyreSquishFront(straightMask) = NaN;
 
-            
+            tyreSquishRear = align_to(data.Kinematic_Ride_Height_Rear, ref) - align_to(data.Rear_Ride_Height_Corr, ref); 
+            tyreSquishRear(straightMask) = NaN;
 
-
-            
-            data.Front_Tyre_Squish = make_channel(tyreSquish, ref, 'mm', 'Front Tyre Squish');
+        data.Front_Tyre_Squish = make_channel(tyreSquishFront, ref, 'mm', 'Front Tyre Squish');
             fprintf('  [+] Front Tyre Squish\n');
-       
+        data.Front_Tyre_Squish = make_channel(tyreSquishRear, ref, 'mm', 'Rear Tyre Squish');
+            fprintf('  [+] Rear Tyre Squish\n');
         end
-    catch ME; fprintf('  [!]  Accelerometer Correction Failed: %s\n', ME.message); end
+    catch ME; fprintf('  [!]  Tyre Squish Calcualtion Fail: %s\n', ME.message); end
 
 
-    %% Tyre Squish calulation Deflection vs speed
+    %% Tyre Squish calculation Deflection vs speed
     
     % GPS heading formula
     try
@@ -849,15 +872,9 @@ function data = smp_custom_channels(data, varargin)
             
         end
     catch ME; fprintf('  [!]  Heading Unwrapped Failed: %s\n', ME.message); end
-    try
-        if isfield(data, 'Ground_Speed') && isfield(data, 'CLa_SCz_VCH') && ...
-                isfield(data, 'Aero_Front_Force') && isfield(data, 'Aero_Rear_Force')
-% isfield(data, 'X_Acceleration_Corr') && isfield(data, 'Y_Acceleration_Corr') && ...
-            % Plan for channel determine the normal load at each wheel
-            % Once normal load is determined create channel for lateral
-            % tyre forces
-            % no Cog reduction with RH compression ! will need if math is
-            % determined to be worth while
+    try % Measured Aero Forces
+        if isfield(data, 'Ground_Speed') && isfield(data, 'CLa_SCz_VCH') 
+
             axleWeights = readtable('C:\SimEnv\dataAcquisition\Motec_MP\alias\E07_TSV\scrutineeringInformaition\T07_TSV_axleWeights.csv');
             axleWeights = axleWeights(axleWeights.Session == string("Q17"), :);
             axleWeights = axleWeights(axleWeights.CarNumber == 88, :);
@@ -876,7 +893,7 @@ function data = smp_custom_channels(data, varargin)
             X_Acceleration_Corr = data.Acceleration_X_Filt.data * 9.81;
             Y_Acceleration_Corr = data.Acceleration_Y_Filt.data * 9.81;
             ABFRNT = data.AB_FRT_VCH.data;
-
+            CZ = data.CLa_SCz_VCH.data;
             simplifiedWheelbase = 2.75675; %m
             simplifiedTrackWidth = 2.000; %m
             mfr_key = lower(manufacturer);
@@ -900,20 +917,18 @@ function data = smp_custom_channels(data, varargin)
             RL = (loadTransferRearAxleLong +  (rearAeroForce(1:10:end)) + loadTransferRearLat) + (rearAxleWeight/2) * 9.81;
             RR = (loadTransferRearAxleLong + (rearAeroForce(1:10:end)) - loadTransferRearLat) + (rearAxleWeight/2) * 9.81;
             % Lateral load transfer
-            data.nFront_Left_Accel_Based2 = make_channel(FL*-1, ref, 'N', 'nFront Left Accel Based2', 'overwrite', true);
-            fprintf('  [+] nFront Left Accel Based\n');
             data.nFront_Left_Accel_Based = make_channel(FL, ref, 'N', 'nFront Left Accel Based', 'overwrite', true);
-            fprintf('  [+] nFront Left Accel Based\n');
+            fprintf('  [+] nFront Left Accel Based KIN\n');
             data.nFront_Right_Accel_Based = make_channel(FR, ref, 'N', 'nFront Right Accel Based');
-            fprintf('  [+] nFront Right Accel Based\n');
+            fprintf('  [+] nFront Right Accel Based KIN\n');
             data.nRear_Left_Accel_Based = make_channel(RL, ref, 'N', 'nRear Left Accel Based');
-            fprintf('  [+] nRear Left Accel Based\n');
+            fprintf('  [+] nRear Left Accel Based KIN\n');
             data.nRear_Right_Accel_Based = make_channel(RR, ref, 'N', 'nRear Right Accel Based');
-            fprintf('  [+] nRear Right Accel Based\n');
+            fprintf('  [+] nRear Right Accel Based KIN\n');
             % Trouble Shoot
-            data.loadTransferFrontAxleLong2 = make_channel(loadTransferFrontAxleLong, ref, 'N', 'loadTransferFrontAxleLong2');
+            data.loadTransferLong = make_channel(loadTransferFrontAxleLong, ref, 'N', 'Load Transfer Long');
             fprintf('  [+] nFront Left Accel Based\n');
-            data.loadTransferFrontLat2 = make_channel(loadTransferFrontLat, ref, 'N', 'loadTransferFrontLat2');
+            data.loadTransferLat = make_channel(loadTransferFrontLat, ref, 'N', 'Load Transfer Lat');
             fprintf('  [+] nFront Right Accel Based\n');
 
        
@@ -921,6 +936,73 @@ function data = smp_custom_channels(data, varargin)
     catch ME;
         fprintf('  [!]  Accel Based Tyre Normal Force Failed [!]: %s\n', ME.message); 
     end
+    
+    try % Kinematic Aero Forces
+        if isfield(data, 'Ground_Speed') && isfield(data, 'CLa_SCz_VCH_KIN')
+
+            axleWeights = readtable('C:\SimEnv\dataAcquisition\Motec_MP\alias\E07_TSV\scrutineeringInformaition\T07_TSV_axleWeights.csv');
+            axleWeights = axleWeights(axleWeights.Session == string("Q17"), :);
+            axleWeights = axleWeights(axleWeights.CarNumber == 88, :);
+
+            if isempty(axleWeights)
+                frontAxleWeight = 730;
+                rearAxleWeight = 620;
+                CoG_Z = vehicle.(mfr_key).kinematics.body.CoG(3);
+            else
+                frontAxleWeight = axleWeights.FrontAxleWeight;
+                rearAxleWeight = axleWeights.RearAxleWeight;
+                CoG_Z = vehicle.(mfr_key).kinematics.body.CoG(3);
+            end 
+
+            %% Placeholder
+            X_Acceleration_Corr = data.Acceleration_X_Filt.data * 9.81;
+            Y_Acceleration_Corr = data.Acceleration_Y_Filt.data * 9.81;
+            ABFRNT = data.AB_FRT_VCH_KIN.data;
+            CZ = data.CLa_SCz_VCH_KIN.data;
+            simplifiedWheelbase = 2.75675; %m
+            simplifiedTrackWidth = 2.000; %m
+            mfr_key = lower(manufacturer);
+            corneringStiffnessFront = vehicle.(mfr_key).kinematics.front.tyreCorneringStiffness;
+            corneringStiffnessRear  = vehicle.(mfr_key).kinematics.rear.tyreCorneringStiffness;
+            wheelBase       = vehicle.(mfr_key).maximumWheelbase / 1000;
+            rho             = 1.225;
+            gravity         = 9.81;
+            % Load longitudinal transfer
+            
+            totalMass = frontAxleWeight + rearAxleWeight;
+            loadTransferFrontAxleLong =  (totalMass .* -1*X_Acceleration_Corr * 0.284 / simplifiedWheelbase);
+            loadTransferRearAxleLong  = (totalMass .*  -1*X_Acceleration_Corr * 0.284 / simplifiedWheelbase);
+            frontAeroForce = 0.5 * carSpeed .* rho .* (ABFRNT        .* CZ);
+            rearAeroForce  = 0.5 * carSpeed .* rho .* ((1 - ABFRNT)  .* CZ);
+            totalMass = frontAxleWeight + rearAxleWeight;
+
+            loadTransferFrontLat = totalMass .* Y_Acceleration_Corr * 0.284/ simplifiedTrackWidth;
+            loadTransferRearLat  = totalMass .* Y_Acceleration_Corr * 0.284/ simplifiedTrackWidth;
+            FR = (loadTransferFrontAxleLong - (frontAeroForce(1:10:end)) + loadTransferFrontLat) + (frontAxleWeight/2) * 9.81;
+            FL = (loadTransferFrontAxleLong - (frontAeroForce(1:10:end)) - loadTransferFrontLat) + (frontAxleWeight/2) * 9.81;
+            RL = (loadTransferRearAxleLong +  (rearAeroForce(1:10:end)) + loadTransferRearLat) + (rearAxleWeight/2) * 9.81;
+            RR = (loadTransferRearAxleLong + (rearAeroForce(1:10:end)) - loadTransferRearLat) + (rearAxleWeight/2) * 9.81;
+            % Lateral load transfer
+            data.nFront_Left_Accel_Based_kin = make_channel(FL, ref, 'N', 'nFront Left Accel Based KIN', 'overwrite', true);
+            fprintf('  [+] nFront Left Accel Based KIN\n');
+            data.nFront_Right_Accel_Based_kin = make_channel(FR, ref, 'N', 'nFront Right Accel Based KIN');
+            fprintf('  [+] nFront Right Accel Based KIN\n');
+            data.nRear_Left_Accel_Based_kin = make_channel(RL, ref, 'N', 'nRear Left Accel Based KIN');
+            fprintf('  [+] nRear Left Accel Based KIN\n');
+            data.nRear_Right_Accel_Based_kin = make_channel(RR, ref, 'N', 'nRear Right Accel Based KIN');
+            fprintf('  [+] nRear Right Accel Based KIN\n');
+            % Trouble Shoot
+            data.loadTransferLongKIN = make_channel(loadTransferFrontAxleLong, ref, 'N', 'Load Transfer Long KIN');
+            fprintf('  [+] nFront Left Accel Based KIN\n');
+            data.loadTransferLatKIN = make_channel(loadTransferFrontLat, ref, 'N', 'Load Transfer Lat KIN');
+            fprintf('  [+] nFront Right Accel Based KIN\n');
+
+
+        end
+    catch ME;
+        fprintf('  [!]  Accel Based Tyre Normal Force Failed [!]: %s\n', ME.message); 
+    end
+
 end
 
 function ch = make_channel(values, reference_ch, units, name, varargin)
@@ -940,7 +1022,7 @@ function ch = make_channel(values, reference_ch, units, name, varargin)
     addRequired(p, 'reference_ch');
     addRequired(p, 'units');
     addRequired(p, 'name');
-    addParameter(p, 'overwrite', false);
+    addParameter(p, 'overwrite', true);
     parse(p, values, reference_ch, units, name, varargin{:});
 
     n = numel(values);

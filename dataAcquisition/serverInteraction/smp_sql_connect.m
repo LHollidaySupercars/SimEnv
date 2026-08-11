@@ -23,8 +23,8 @@ function conn = smp_sql_connect(target)
 % =========================================================
 
     % ── JDBC driver paths ─────────────────────────────────────────────────
-    JDBC_DIR  = 'C:\SimEnv\dataAcquisition\serverInteraction\sqljdbc\enu\jars';
-    AUTH_DLL  = 'C:\SimEnv\dataAcquisition\serverInteraction\sqljdbc\enu\auth\x64';
+    JDBC_DIR  = fullfile(pwd,'dataAcquisition\serverInteraction\sqljdbc\enu\jars');
+    AUTH_DLL  = fullfile(pwd,'dataAcquisition\serverInteraction\sqljdbc\enu\auth\x64');
 
     JAR_MAIN  = fullfile(JDBC_DIR, 'mssql-jdbc-13.4.0.jre8.jar');
     JAR_MSAL  = fullfile(JDBC_DIR, 'msal4j-1.24.0.jar');
@@ -40,6 +40,7 @@ function conn = smp_sql_connect(target)
     LOCAL_DATABASE = 'motorsport_local';
 
     % ── Load JDBC drivers onto Java classpath ────────────────────────────
+
     % ── Verify JDBC driver is on classpath ───────────────────────────────
     static_cp = javaclasspath('-static');
     if ~any(contains(static_cp, 'mssql-jdbc'))
