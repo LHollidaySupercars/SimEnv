@@ -76,7 +76,7 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
     load_all_ch    = get_opt(opts, 'load_all_channels',  false);
     T_gated        = get_opt(opts, 'T_gated',            table());
     pre_groups     = get_opt(opts, 'groups',             []);
-
+    corner_cfg = get_opt(opts, 'corner_cfg', [])
     % ------------------------------------------------------------------
     %  Lap time limits from season overview
     % ------------------------------------------------------------------
@@ -90,7 +90,12 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
             fprintf('[WARN] No track specified — using default lap time limits (10s / 600s).\n');
         end
     end
+    if isempty(corner_cfg) && ~isempty(track)
+        corners_xlsx_path = get_opt(opts, 'corners_xlsx_path', 'corners.xlsx');
+        corner_cfg = smp_corner_config_load(corners_xlsx_path, track);
+    end
 
+    opts.corner_cfg = corner_cfg;   % stash back so it threads through to lap_stats
     % ------------------------------------------------------------------
     %  Worker shortcut: pre-built groups supplied — skip scan/diff/group
     %  (used by smp_compile_worker so process_stream is the single source
