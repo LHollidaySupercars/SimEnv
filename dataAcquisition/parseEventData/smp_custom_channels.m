@@ -21,6 +21,7 @@ function data = smp_custom_channels(data, varargin)
     addParameter(p, 'driver',         '');
     addParameter(p, 'patchRH', struct());
     addParameter(p, 'session', '');
+    addParameter(p, 'constants', struct());
     parse(p, data, varargin{:});
 
     startingValues = p.Results.startingValues;
@@ -30,6 +31,8 @@ function data = smp_custom_channels(data, varargin)
     driver       = p.Results.driver;
     patchRH      = p.Results.patchRH;
     session = p.Results.session;
+    constants = p.Results.constants;
+    StaticWheelRadius = 0.332633831;
     if isfield(data, 'info') && isstruct(data.info)
         if isempty(manufacturer) && isfield(data.info, 'manufacturer')
             manufacturer = data.info.manufacturer;
@@ -95,6 +98,39 @@ function data = smp_custom_channels(data, varargin)
 
             long        = align_to(data.Acceleration_X_Filt, ref);
             lat         = align_to(data.Acceleration_Y_Filt, ref);
+            absLat      = abs(lat);
+            throttle    = align_to(data.Throttle_Pedal,      ref);
+            groundSpeed = align_to(data.Ground_Speed,        ref);
+
+            % Gate definitions (tune thresholds as needed):
+            %   Braking    : decelerating hard, low lateral load
+            %   Entry      : still braking but lateral load building
+            %   Mid-Corner : peak lateral, minimal longitudinal
+            %   Exit       : accelerating, lateral load unwinding
+            brakingMask   = (long  < -0.05) & (movmean(absLat, 10) <  0.10);
+            entryMask     = (long  < -0.05) & (movmean(absLat, 10) >= 0.10) & (absLat < 0.75);
+            midCornerMask =                   (absLat >= 0.75);
+            exitMask      = (long  >  0.10) & (absLat <  0.75);
+            straightMask  = (throttle >= 99) & (absLat < 0.2);
+            ParityMask    = straightMask & (groundSpeed > 220) & (groundSpeed < 240);
+
+            data.brakingGateVCH   = make_channel(double(brakingMask),   ref, 'bool', 'braking_Gate_VCH');
+            data.entryGateVCH     = make_channel(double(entryMask),     ref, 'bool', 'entry_Gate_VCH');
+            data.midCrnGateVCH    = make_channel(double(midCornerMask), ref, 'bool', 'mid_Crn_Gate_VCH');
+            data.exitGateVCH      = make_channel(double(exitMask),      ref, 'bool', 'exit_Gate_VCH');
+            data.straightGateVCH  = make_channel(double(straightMask),  ref, 'bool', 'straight_Gate_VCH');
+            data.ParityMaskVCH    = make_channel(double(ParityMask),    ref, 'bool', 'parity_Gate_VCH');
+            fprintf('  [+] Gates: Braking | Entry | MidCorner | Exit | Straight | Parity\n');
+        end
+    catch ME; fprintf('  [!] Driving gates failed: %s\n', ME.message); end
+
+
+    try
+        if isfield(data, 'L180_ADR_Acceleration_X') && isfield(data, 'L180_ADR_Acceleration_Y') && ...
+                isfield(data, 'Throttle_Pedal') && isfield(data, 'Ground_Speed')
+
+            long        = align_to(data.L180_ADR_Acceleration_X, ref);
+            lat         = align_to(data.L180_ADR_Acceleration_Y, ref);
             absLat      = abs(lat);
             throttle    = align_to(data.Throttle_Pedal,      ref);
             groundSpeed = align_to(data.Ground_Speed,        ref);
@@ -206,6 +242,15 @@ function data = smp_custom_channels(data, varargin)
             rotResult = cumtrapz(data.Throttle_Pedal.time, rotMask);
             data.Rotation_Limited_Time = make_channel(rotResult, data.Throttle_Pedal, '-', 'Rotation_Limited_Time', 'overwrite', true);
             fprintf('  [+] Rotation_Limited_Time\n');
+            
+            liftMask = double(neither & state == 1 & carSpeed(:) > 50);
+            data.Lift_And_Coast_Gate_VCH = make_channel(liftMask, ref, 'bool', 'lift_Coast_Gate_VCH');
+
+            offPedalMask = double(neither & carSpeed(:) > 50);
+            data.Off_Pedal_Gate_VCH = make_channel(offPedalMask, ref, 'bool', 'off_Pedal_Gate_VCH');
+
+            fullThrottleMask = double(throttle >= 99);
+            data.Full_Throttle_Gate_VCH = make_channel(fullThrottleMask, ref, 'bool', 'full_Throttle_Gate_VCH');
         end
     catch ME; fprintf('  [!]  Off Pedal Rotation Time Failed: %s\n', ME.message); end
     % ==================================================================
@@ -340,6 +385,152 @@ function data = smp_custom_channels(data, varargin)
     catch ME; fprintf('  [!] Tyre radius failed: %s\n', ME.message); end
 
     % ==================================================================
+    % Wheel Speed (radians)
+    % ==================================================================
+    
+    try 
+        if isfield(data, 'Wheel_Speed_Front_Left')
+            data.Wheel_Speed_Front_Left_Omega = make_channel( data.Wheel_Speed_Front_Left.data./(3.6.*StaticWheelRadius), ...
+                data.Wheel_Speed_Front_Left, 'w', 'Wheel Speed Front Left Omega');
+            fprintf('  [+] Wheel Speed Front Left Omega\n');
+        end
+        if isfield(data, 'Wheel_Speed_Front_Right') 
+            data.Wheel_Speed_Front_Right_Omega = make_channel( data.Wheel_Speed_Front_Right.data./(3.6.*StaticWheelRadius), ...
+                data.Wheel_Speed_Front_Right, 'w', 'Wheel Speed Front Right Omega');
+            fprintf('  [+] Wheel Speed Front Right Omega\n');
+        end
+        if isfield(data, 'Wheel_Speed_Rear_Left') 
+            data.Wheel_Speed_Rear_Left_Omega = make_channel( data.Wheel_Speed_Rear_Left.data./(3.6.*StaticWheelRadius), ...
+                data.Wheel_Speed_Rear_Left, 'w', 'Wheel Speed Rear Left Omega');
+            fprintf('  [+] Wheel Speed Rear Left Omega\n');
+        end
+        if isfield(data, 'Wheel_Speed_Rear_Left') 
+            data.Wheel_Speed_Rear_Right_Omega = make_channel( data.Wheel_Speed_Rear_Left.data./(3.6.*StaticWheelRadius), ...
+                data.Wheel_Speed_Rear_Right, 'w', 'Wheel Speed Rear Right Omega');
+            fprintf('  [+] Wheel Speed Rear Left Omega\n');
+        end
+    catch ME; fprintf('  [!] Wheel Radians: %s\n', ME.message); end
+
+    % ==================================================================
+    % Constant Camber
+    % ==================================================================
+
+    try % encorporate pacejka formula
+        % ---- Default offset by manufacturer ----
+        if strcmp(manufacturer, 'Ford') || strcmp(manufacturer, 'Toyota') || strcmp(manufacturer, 'Chevrolet')
+            mask = strcmp(patchRH.MAN, manufacturer);
+            CamberFL_set = mean(patchRH.CamberFL(mask));
+            CamberFR_set = mean(patchRH.CamberFR(mask));
+            CamberRL_set = mean(patchRH.CamberRL(mask));
+            CamberRR_set = mean(patchRH.CamberRR(mask));
+        else
+            CamberFL_set = mean(patchRH.CamberFL);
+            CamberFR_set = mean(patchRH.CamberFR);
+            CamberRL_set = mean(patchRH.CamberRL);
+            CamberRR_set = mean(patchRH.CamberRR);
+        end
+        if isnan(CamberFL_set)
+            CamberFL_set = mean(patchRH.CamberFL(~isnan(patchRH.CamberFL)));
+        end
+        if isnan(CamberFR_set)
+            CamberFR_set = mean(patchRH.CamberFR(~isnan(patchRH.CamberFR)));
+        end
+        if isnan(CamberRL_set)
+            CamberRL_set = mean(patchRH.CamberRL(~isnan(patchRH.CamberRL)));
+        end
+        if isnan(CamberRR_set)
+            CamberRR_set = mean(patchRH.CamberRR(~isnan(patchRH.CamberRR)));
+        end
+        % ---- Override with driver+session specific patch, if present ----
+        driverMask = strcmp(patchRH.Driver, driver);
+        if any(driverMask)
+            driverPatch = patchRH(driverMask, :);
+            sessionMask = strcmp(driverPatch.Session, session);
+            if any(sessionMask)
+                driverSessionPatch   = driverPatch(sessionMask, :);
+                CamberFL_set  = driverSessionPatch.CamberFL(1);
+                CamberFR_set  = driverSessionPatch.CamberFR(1);
+                CamberRL_set  = driverSessionPatch.CamberRL(1);
+                CamberRR_set  = driverSessionPatch.CamberRR(1);
+            end
+        end
+
+        if isfield(data, 'Wheel_Speed_Front_Left')
+            data.Front_Left_Camber = make_channel( CamberFL_set + (data.Wheel_Speed_Front_Left.data .* 0), ...
+                data.Wheel_Speed_Front_Left, 'deg', 'Front Left Camber');
+            fprintf('  [+] Wheel Speed Front Left Omega\n');
+        end
+        if isfield(data, 'Wheel_Speed_Front_Right') 
+            data.Front_Right_Camber = make_channel( CamberFR_set + (data.Wheel_Speed_Front_Left.data .* 0), ...
+                data.Wheel_Speed_Front_Left, 'deg', 'Front Right Camber');
+            fprintf('  [+] Wheel Speed Front Left Omega\n');
+        end
+        if isfield(data, 'Wheel_Speed_Rear_Left') 
+            data.Rear_Left_Camber = make_channel( CamberRL_set + (data.Wheel_Speed_Rear_Left.data .* 0), ...
+                data.Wheel_Speed_Front_Left, 'deg', 'Rear Left Camber');
+            fprintf('  [+] Wheel Speed Front Left Omega\n');
+        end
+        if isfield(data, 'Wheel_Speed_Rear_Left') 
+            data.Rear_Right_Camber = make_channel( CamberRR_set + (data.Wheel_Speed_Rear_Left.data .* 0), ...
+                data.Wheel_Speed_Front_Left, 'deg', 'Rear Right Camber');
+            fprintf('  [+] Wheel Speed Front Left Omega\n');
+        end
+    catch ME; fprintf('  [!] Wheel Radians: %s\n', ME.message); end
+
+    % =====================================================================
+    % Constant Toe
+    % =====================================================================
+    try % encorporate pacejka formula
+        % ---- Default offset by manufacturer ----
+        if strcmp(manufacturer, 'Ford') || strcmp(manufacturer, 'Toyota') || strcmp(manufacturer, 'Chevrolet')
+            mask = strcmp(patchRH.MAN, manufacturer);
+            ToeFront_set = mean(patchRH.ToeFront(mask));
+            ToeRear_set = mean(patchRH.ToeRear(mask));
+        else
+            ToeFront_set = mean(patchRH.ToeFront);
+            ToeRear_set  = mean(patchRH.ToeRear);
+        end
+        if isnan(ToeFront_set)
+            ToeFront_set = mean(patchRH.ToeFront(~isnan(patchRH.ToeFront)));
+        end
+        if isnan(ToeRear_set)
+            ToeRear_set = mean(patchRH.ToeRear(~isnan(patchRH.ToeRear)));
+        end
+        % ---- Override with driver+session specific patch, if present ----
+        driverMask = strcmp(patchRH.Driver, driver);
+        if any(driverMask)
+            driverPatch = patchRH(driverMask, :);
+            sessionMask = strcmp(driverPatch.Session, session);
+            if any(sessionMask)
+                driverSessionPatch   = driverPatch(sessionMask, :);
+                ToeFront_set  = driverSessionPatch.ToeFront(1);
+                ToeRear_set  = driverSessionPatch.ToeRear(1);
+            end
+        end
+
+        if isfield(data, 'Wheel_Speed_Front_Left')
+            data.Front_Left_Toe = make_channel( ToeFront_set + (data.Wheel_Speed_Front_Left.data .* 0), ...
+                data.Wheel_Speed_Front_Left, 'deg', 'Front Left Toe');
+            fprintf('  [+] Wheel Speed Front Left Omega\n');
+        end
+        if isfield(data, 'Wheel_Speed_Front_Right') 
+            data.Front_Right_Toe = make_channel( ToeFront_set + (data.Wheel_Speed_Front_Left.data .* 0), ...
+                data.Wheel_Speed_Front_Left, 'deg', 'Front Right Toe');
+            fprintf('  [+] Wheel Speed Front Left Omega\n');
+        end
+        if isfield(data, 'Wheel_Speed_Rear_Left') 
+            data.Rear_Left_Toe = make_channel( ToeRear_set + (data.Wheel_Speed_Rear_Left.data .* 0), ...
+                data.Wheel_Speed_Front_Left, 'deg', 'Rear Left Toe');
+            fprintf('  [+] Wheel Speed Front Left Omega\n');
+        end
+        if isfield(data, 'Wheel_Speed_Rear_Left') 
+            data.Rear_Right_Toe = make_channel( ToeRear_set + (data.Wheel_Speed_Rear_Left.data .* 0), ...
+                data.Wheel_Speed_Front_Left, 'deg', 'Rear Right Toe');
+            fprintf('  [+] Wheel Speed Front Left Omega\n');
+        end
+    catch ME; fprintf('  [!] Wheel Radians: %s\n', ME.message); end
+
+    % ==================================================================
     %  Tyre Pressure / Temperature Averages
     % ==================================================================
 
@@ -401,6 +592,111 @@ function data = smp_custom_channels(data, varargin)
             fprintf('  [+] Fuel_Density_Corr_Cubic  Fuel_Density_Corr_Linear\n');
         end
     catch ME; fprintf('  [!] Fuel density failed: %s\n', ME.message); end
+    
+   try
+    if isfield(data, 'Refuel_Head') && isfield(data, 'Fuel_Density') ...
+            && isfield(data, 'Fuel_Flow_Used_Mass') && isfield(data, 'Fuel_Pot_Level_Mass')
+
+        if isempty(data.Fuel_Pot_Level_Mass.data)
+            error('Fuel_Pot_Level_Mass channel is empty — cannot determine finishing fuel.');
+        end
+
+        % ---- Finishing fuel comes directly from measured data ----
+        finishingFuel_Offset = min(data.Fuel_Pot_Level_Mass.data((end-6000):end));   % kg, trusted measurement
+
+        % ---- Default offset by manufacturer ----
+        if strcmp(manufacturer, 'Ford') || strcmp(manufacturer, 'Toyota') || strcmp(manufacturer, 'Chevrolet')
+            mask = strcmp(patchRH.MAN, manufacturer);
+            startingFuel_Offset  = mean(patchRH.StartingFuel(mask));
+            RefuelRate_Offset    = mean(patchRH.RefuelRate(mask));
+            FrontAxleMass_Offset = mean(patchRH.FrontAxleMass(mask));
+            RearAxleMass_Offset  = mean(patchRH.RearAxleMass(mask));
+        else
+            startingFuel_Offset  = mean(patchRH.StartingFuel);
+            RefuelRate_Offset    = mean(patchRH.RefuelRate);
+            FrontAxleMass_Offset = mean(patchRH.FrontAxleMass);
+            RearAxleMass_Offset  = mean(patchRH.RearAxleMass);
+        end
+
+        % ---- Override with driver+session specific patch, if present ----
+        driverMask = strcmp(patchRH.Driver, driver);
+        if any(driverMask)
+            driverPatch = patchRH(driverMask, :);
+            sessionMask = strcmp(driverPatch.Session, session);
+            if any(sessionMask)
+                driverSessionPatch   = driverPatch(sessionMask, :);
+                startingFuel_Offset  = driverSessionPatch.StartingFuel(1);
+                RefuelRate_Offset    = driverSessionPatch.RefuelRate(1);
+                FrontAxleMass_Offset = driverSessionPatch.FrontAxleMass(1);
+                RearAxleMass_Offset  = driverSessionPatch.RearAxleMass(1);
+            end
+        end
+
+        if isnan(startingFuel_Offset) || isnan(RefuelRate_Offset)
+            error('Resolved starting fuel / RefuelRate offset is NaN — check constants table for this manufacturer/driver/session.');
+        end
+        if isnan(finishingFuel_Offset)
+            error('finishingFuel_Offset (min of Fuel_Pot_Level_Mass) is NaN — check channel data.');
+        end
+
+        % ---- Reference channel for output metadata ----
+        if length(data.Refuel_Head.data) > length(data.Fuel_Density.data)
+            refFuel = data.Refuel_Head;
+        else
+            refFuel = data.Fuel_Density;
+        end
+
+        correctedFuelDensity = data.Fuel_Density.data / 1000;   % kg conversion
+
+        cumtrapzFuelUsed = cumtrapz(data.Fuel_Flow_Used_Mass.data) / 1000;                          % Units Kg, trusted
+        cumtrapzRefuel   = cumtrapz(data.Refuel_Head.data) .* correctedFuelDensity .* RefuelRate_Offset;  % Units Kg, best guess
+
+        FuelMass = startingFuel_Offset - cumtrapzFuelUsed + cumtrapzRefuel;
+
+        % ---- Final-stint correction: anchor to measured finishing fuel ----
+        % Trigger = last time Refuel_Head is active (>= threshold) after the
+        % final pit stop. Everything after that is pure consumption with no
+        % further refuel interference, so it's reconstructed exactly from
+        % the trusted flow signal, anchored to the measured pot minimum.
+        refuelActiveThreshold = 1;   % adjust to your Refuel_Head active-flag/level convention
+        activeIdx = find(data.Refuel_Head.data >= refuelActiveThreshold);
+
+        if ~isempty(activeIdx)
+            lastRefuelEndIdx = activeIdx(end);
+            finalStintIdx = (lastRefuelEndIdx + 1):length(FuelMass);
+
+            if ~isempty(finalStintIdx)
+                flowSinceLastRefuel = cumtrapzFuelUsed(finalStintIdx) - cumtrapzFuelUsed(lastRefuelEndIdx);
+                totalFlowFinalStint = cumtrapzFuelUsed(end) - cumtrapzFuelUsed(lastRefuelEndIdx);
+
+                FuelMass(finalStintIdx) = finishingFuel_Offset + (totalFlowFinalStint - flowSinceLastRefuel);
+
+                fprintf('  [+] Final stint corrected from index %d to %d (anchored to min(Fuel_Pot_Level_Mass) = %.2f kg)\n', ...
+                    lastRefuelEndIdx + 1, length(FuelMass), finishingFuel_Offset);
+            end
+        else
+            fprintf('  [!] No refuel activity detected — final-stint correction skipped\n');
+        end
+
+        if length(FuelMass) ~= length(refFuel.data)
+            error('FuelMass length (%d) does not match reference channel length (%d).', ...
+                length(FuelMass), length(refFuel.data));
+        end
+
+        data.Fuel_In_Car = make_channel(FuelMass, refFuel, 'kg', 'Fuel In Car', 'overwrite', true);
+        fprintf('  [+] Fuel In Car\n');
+
+        % =============================================================
+        % instantaneous car mass calculation
+        CarMass = FuelMass + sum([FrontAxleMass_Offset, RearAxleMass_Offset]);
+        data.Car_Mass_wFuel = make_channel(CarMass, refFuel, 'kg', 'Car Mass wFuel', 'overwrite', true);
+        fprintf('  [+] Car Mass with Fuel\n');
+    end
+catch ME
+    fprintf('  [!] Fuel In Car failed: %s\n', ME.message);
+end
+
+
 
     % ==================================================================
     %  Pitch / Roll from IMU
@@ -464,13 +760,16 @@ function data = smp_custom_channels(data, varargin)
         % ---- Default offset by manufacturer ----
         if strcmp(manufacturer, 'Ford') || strcmp(manufacturer, 'Toyota') || strcmp(manufacturer, 'Chevrolet')
             mask = strcmp(patchRH.MAN, manufacturer);  % NOTE: needs a MAN column, see below
-            FRH_Offset = mean(patchRH.FrontRH(mask));
-            RRH_Offset = mean(patchRH.RearRH(mask));
+            FRH_Offset = mean(patchRH.FrontRH(mask), "omitnan");
+            RRH_Offset = mean(patchRH.RearRH(mask), "omitnan");
         else
-            FRH_Offset = mean(patchRH.FrontRH);
-            RRH_Offset = mean(patchRH.RearRH);
+            FRH_Offset = mean(patchRH.FrontRH, "omitnan");
+            RRH_Offset = mean(patchRH.RearRH, "omitnan");
         end
-
+        if isnan(FRH_Offset)
+            FRH_Offset = mean(patchRH.FrontRH(~isnan(patchRH.FrontRH)));
+            RRH_Offset = mean(patchRH.RearRH(~isnan(patchRH.RearRH)));
+        end
         % ---- Override with driver+session specific patch, if present ----
         driverMask = strcmp(patchRH.Driver, driver);
         if any(driverMask)
@@ -519,7 +818,7 @@ function data = smp_custom_channels(data, varargin)
                 newBalance = aero.CLf_SCzF ./ (aero.CLf_SCzF + aero.CLr_SCzR);
                 data.AB_FRT_VCH_KIN  = make_channel(newBalance,  ref, '%', 'AB_FRT_VCH_KIN', 'overwrite', true);
                 data.CDa_SCx_VCH_KIN = make_channel(aero.CDa_SCx, ref, '-', 'CDa_SCx_VCH_KIN', 'overwrite', true);
-                newEfficiency = aero.CLa_SCz ./ CDa_SCx;
+                newEfficiency = aero.CLa_SCz ./ aero.CDa_SCx;
                 data.EFF_VCH_KIN     = make_channel(newEfficiency,     ref, '-', 'EFF_VCH_KIN');
                 fprintf('  [+] CLa_SCz_VCH  AB_FRT_VCH  CDa_SCx_VCH  EFF_VCH  (%s map, roll=0)\n', manufacturer);
 
@@ -666,11 +965,6 @@ function data = smp_custom_channels(data, varargin)
     % ==================================================================
 
 
-
-
-
-
-
     try
         fn_frh_aero = find_field(data, 'Front_Ride_Height_Corr');
         fn_rrh_aero = find_field(data, 'Rear_Ride_Height_Corr');
@@ -678,19 +972,19 @@ function data = smp_custom_channels(data, varargin)
         if ~isempty(fn_frh_aero) && ~isempty(fn_rrh_aero) && ~isempty(manufacturer)
             aero = aeroMapChannels(data.(fn_frh_aero), data.(fn_rrh_aero), manufacturer, AERO_MAP_DIR);
             if ~isempty(aero)
-                data.CLa_SCz_VCH = make_channel(aero.CLa_SCz, ref, '-', 'CLz_MEAS');
+                data.CLz_MEAS = make_channel(aero.CLa_SCz, ref, '-', 'CLz_MEAS');
                 newBalance = aero.CLf_SCzF ./ (aero.CLf_SCzF + aero.CLr_SCzR);
-                data.AB_FRT_VCH  = make_channel(newBalance,  ref, '%', 'ABf_MEAS');
-                data.CDa_SCx_VCH = make_channel(aero.CDa_SCx, ref, '-', 'CDx_MEAS');
-                newEfficiency = aero.CLa_SCz ./ CDa_SCx;
-                data.EFF_VCH     = make_channel(newEfficiency,     ref, '-', 'EFF_MEAS');
-                fprintf('  [+] CLa_SCz_VCH  AB_FRT_VCH  CDa_SCx_VCH  EFF_VCH  (%s map, roll=0)\n', manufacturer);
+                data.ABf_MEAS  = make_channel(newBalance,  ref, '%', 'ABf_MEAS');
+                data.CDx_MEAS = make_channel(aero.CDa_SCx, ref, '-', 'CDx_MEAS');
+                newEfficiency = aero.CLa_SCz ./ aero.CDa_SCx;
+                data.EFF_MEAS     = make_channel(newEfficiency,     ref, '-', 'EFF_MEAS');
+                fprintf('  [+] CLa_SCz  AB_FRT_VCH  CDa_SCx_VCH  EFF_VCH  (%s map, roll=0)\n', manufacturer);
 
                 aero2 = aeroMapChannels(data.(fn_frh_aero), data.(fn_rrh_aero), manufacturer, AERO_MAP_DIR, -2);
                 if ~isempty(aero2)
-                    data.CSa_Scy_VCH  = make_channel(aero2.CSa_Scy,  ref, '-', 'CLy_MEAS');
-                    data.CSf_SCyF_VCH = make_channel(aero2.CSf_SCyF, ref, '-', 'CLzF_MEAS');
-                    data.CSr_SCyR_VCH = make_channel(aero2.CSr_SCyR, ref, '-', 'CLzR_MEAS');
+                    data.CLy_MEAS  = make_channel(aero2.CSa_Scy,  ref, '-', 'CLy_MEAS');
+                    data.CLzF_MEAS = make_channel(aero2.CSf_SCyF, ref, '-', 'CLzF_MEAS');
+                    data.CLzR_MEAS = make_channel(aero2.CSr_SCyR, ref, '-', 'CLzR_MEAS');
                     fprintf('  [+] CSa_Scy_VCH  CSf_SCyF_VCH  CSr_SCyR_VCH  (%s map, roll=-2)\n', manufacturer);
                 end
             end
@@ -774,7 +1068,7 @@ function data = smp_custom_channels(data, varargin)
     
     try
         if isfield(data, 'Ground_Speed') && isfield(data, 'Steering_Angle') && ...
-                isfield(data, 'AB_FRT_VCH') && isfield(data, 'CLa_SCz_VCH') && ...
+                isfield(data, 'ABf_MEAS') && isfield(data, 'CLz_MEAS') && ...
                 ~isempty(manufacturer) && ...
                 exist('lat',       'var') && exist('radius',    'var') && ...
                 exist('steerMask', 'var') && exist('carSpeed',  'var')
@@ -786,7 +1080,7 @@ function data = smp_custom_channels(data, varargin)
             gravity         = 9.81;
             weightFrontAxle = 729.8 * gravity;
             weightRearAxle  = 617.7 * gravity;
-            CZ = data.CLa_SCz_VCH.data;
+            CZ = data.CLa_SCz.data;
             ABFRNT = data.AB_FRT_VCH.data;
             frontAeroForce = 0.5 * carSpeed .* rho .* (ABFRNT/100        .* CZ);
             rearAeroForce  = 0.5 * carSpeed .* rho .* ((1 - ABFRNT/100)  .* CZ);
@@ -809,7 +1103,7 @@ function data = smp_custom_channels(data, varargin)
 
     try
         if isfield(data, 'Ground_Speed') && isfield(data, 'Steering_Angle') && ...
-                isfield(data, 'AB_FRT_VCH_KIN') && isfield(data, 'CLa_SCz_VCH_KIN') && ...
+                isfield(data, 'AB_FRT_VCH_KIN') && isfield(data, 'CLa_SCz_KIN') && ...
                 ~isempty(manufacturer) && ...
                 exist('lat',       'var') && exist('radius',    'var') && ...
                 exist('steerMask', 'var') && exist('carSpeed',  'var')
@@ -821,7 +1115,7 @@ function data = smp_custom_channels(data, varargin)
             gravity         = 9.81;
             weightFrontAxle = 729.8 * gravity;
             weightRearAxle  = 617.7 * gravity;
-            CZ = data.CLa_SCz_VCH.data;
+            CZ = data.CLz_MEAS.data;
             ABFRNT = data.AB_FRT_VCH.data;
             frontAeroForce = 0.5 * carSpeed .* rho .* (ABFRNT/100        .* CZ);
             rearAeroForce  = 0.5 * carSpeed .* rho .* ((1 - ABFRNT/100)  .* CZ);
@@ -872,28 +1166,51 @@ function data = smp_custom_channels(data, varargin)
             
         end
     catch ME; fprintf('  [!]  Heading Unwrapped Failed: %s\n', ME.message); end
-    try % Measured Aero Forces
-        if isfield(data, 'Ground_Speed') && isfield(data, 'CLa_SCz_VCH') 
 
-            axleWeights = readtable('C:\SimEnv\dataAcquisition\Motec_MP\alias\E07_TSV\scrutineeringInformaition\T07_TSV_axleWeights.csv');
-            axleWeights = axleWeights(axleWeights.Session == string("Q17"), :);
-            axleWeights = axleWeights(axleWeights.CarNumber == 88, :);
+    try % Measured Aero Forces
+        if isfield(data, 'Ground_Speed') && isfield(data, 'CLz_MEAS') 
+            if strcmp(manufacturer, 'Ford') || strcmp(manufacturer, 'Toyota') || strcmp(manufacturer, 'Chevrolet')
+                mask = strcmp(patchRH.MAN, manufacturer);
+                frontAxleWeight = mean(patchRH.FrontAxleMass(mask));
+                rearAxleWeight = mean(patchRH.RearAxleMass(mask));
+            else
+                frontAxleWeight = mean(patchRH.FrontAxleMass);
+                rearAxleWeight = mean(patchRH.FrontAxleMass);
+
+            end
+            if isnan(frontAxleWeight)
+                frontAxleWeight = mean(patchRH.FrontAxleMass(~isnan(patchRH.FrontAxleMass)));
+            end
+            if isnan(rearAxleWeight)
+                rearAxleWeight = mean(patchRH.RearAxleMass(~isnan(patchRH.RearAxleMass)));
+            end
+
+            % ---- Override with driver+session specific patch, if present ----
+            driverMask = strcmp(patchRH.Driver, driver);
+            if any(driverMask)
+                driverPatch = patchRH(driverMask, :);
+                sessionMask = strcmp(driverPatch.Session, session);
+                if any(sessionMask)
+                    driverSessionPatch   = driverPatch(sessionMask, :);
+                    frontAxleWeight  = driverSessionPatch.FrontAxleMass(1);
+                    CamberFRrearAxleWeight_set  = driverSessionPatch.RearAxleMass(1);
+                end
+            end
 
             if isempty(axleWeights)
-                frontAxleWeight = 730;
-                rearAxleWeight = 620;
-                CoG_Z = vehicle.(mfr_key).kinematics.body.CoG(3);
+                try
+                    CoG_Z = vehicle.(mfr_key).kinematics.body.CoG(3);
+                catch
+                    'hi'
+                end
             else
-                frontAxleWeight = axleWeights.FrontAxleWeight;
-                rearAxleWeight = axleWeights.RearAxleWeight;
-                CoG_Z = vehicle.(mfr_key).kinematics.body.CoG(3);
-            end 
-            
+                CoG_z =  [-29, 10.49, 284] ./1000;
+            end
             %% Placeholder
             X_Acceleration_Corr = data.Acceleration_X_Filt.data * 9.81;
             Y_Acceleration_Corr = data.Acceleration_Y_Filt.data * 9.81;
             ABFRNT = data.AB_FRT_VCH.data;
-            CZ = data.CLa_SCz_VCH.data;
+            CZ = data.CLz_MEAS.data;
             simplifiedWheelbase = 2.75675; %m
             simplifiedTrackWidth = 2.000; %m
             mfr_key = lower(manufacturer);
@@ -918,13 +1235,13 @@ function data = smp_custom_channels(data, varargin)
             RR = (loadTransferRearAxleLong + (rearAeroForce(1:10:end)) - loadTransferRearLat) + (rearAxleWeight/2) * 9.81;
             % Lateral load transfer
             data.nFront_Left_Accel_Based = make_channel(FL, ref, 'N', 'nFront Left Accel Based', 'overwrite', true);
-            fprintf('  [+] nFront Left Accel Based KIN\n');
+            fprintf('  [+] nFront Left Accel Based\n');
             data.nFront_Right_Accel_Based = make_channel(FR, ref, 'N', 'nFront Right Accel Based');
-            fprintf('  [+] nFront Right Accel Based KIN\n');
+            fprintf('  [+] nFront Right Accel Based\n');
             data.nRear_Left_Accel_Based = make_channel(RL, ref, 'N', 'nRear Left Accel Based');
-            fprintf('  [+] nRear Left Accel Based KIN\n');
+            fprintf('  [+] nRear Left Accel Based\n');
             data.nRear_Right_Accel_Based = make_channel(RR, ref, 'N', 'nRear Right Accel Based');
-            fprintf('  [+] nRear Right Accel Based KIN\n');
+            fprintf('  [+] nRear Right Accel Based\n');
             % Trouble Shoot
             data.loadTransferLong = make_channel(loadTransferFrontAxleLong, ref, 'N', 'Load Transfer Long');
             fprintf('  [+] nFront Left Accel Based\n');
@@ -940,63 +1257,124 @@ function data = smp_custom_channels(data, varargin)
     try % Kinematic Aero Forces
         if isfield(data, 'Ground_Speed') && isfield(data, 'CLa_SCz_VCH_KIN')
 
-            axleWeights = readtable('C:\SimEnv\dataAcquisition\Motec_MP\alias\E07_TSV\scrutineeringInformaition\T07_TSV_axleWeights.csv');
-            axleWeights = axleWeights(axleWeights.Session == string("Q17"), :);
-            axleWeights = axleWeights(axleWeights.CarNumber == 88, :);
-
-            if isempty(axleWeights)
-                frontAxleWeight = 730;
-                rearAxleWeight = 620;
-                CoG_Z = vehicle.(mfr_key).kinematics.body.CoG(3);
+            if strcmp(manufacturer, 'Ford') || strcmp(manufacturer, 'Toyota') || strcmp(manufacturer, 'Chevrolet')
+                mask = strcmp(patchRH.MAN, manufacturer);
+                frontAxleWeight = mean(patchRH.FrontAxleMass(mask));
+                rearAxleWeight = mean(patchRH.RearAxleMass(mask));
             else
-                frontAxleWeight = axleWeights.FrontAxleWeight;
-                rearAxleWeight = axleWeights.RearAxleWeight;
+                frontAxleWeight = mean(patchRH.FrontAxleMass);
+                rearAxleWeight = mean(patchRH.FrontAxleMass);
+
+            end
+            if isnan(frontAxleWeight)
+                frontAxleWeight = mean(patchRH.FrontAxleMass(~isnan(patchRH.FrontAxleMass)));
+            end
+            if isnan(rearAxleWeight)
+                rearAxleWeight = mean(patchRH.RearAxleMass(~isnan(patchRH.RearAxleMass)));
+            end
+
+            % ---- Override with driver+session specific patch, if present ----
+            driverMask = strcmp(patchRH.Driver, driver);
+            if any(driverMask)
+                driverPatch = patchRH(driverMask, :);
+                sessionMask = strcmp(driverPatch.Session, session);
+                if any(sessionMask)
+                    driverSessionPatch   = driverPatch(sessionMask, :);
+                    frontAxleWeight  = driverSessionPatch.FrontAxleMass(1);
+                    CamberFRrearAxleWeight_set  = driverSessionPatch.RearAxleMass(1);
+                end
+            end
+
+            try
                 CoG_Z = vehicle.(mfr_key).kinematics.body.CoG(3);
-            end 
+                simplifiedWheelbase       = vehicle.(mfr_key).maximumWheelbase;
+                simplifiedTrackWidth      = vehicle.(mfr_key).kinematics.body.trackWidth;
+            catch
+                CoG_z =  [-29, 10.49, 284] ./1000;
+                simplifiedWheelbase =2.75675
+                simplifiedTrackWidth = 2.000;
+            end
+            channel_names = {'Acceleration_X_Filt',...
+                             'Acceleration_Y_Filt',...
+                             'AB_FRT_VCH_KIN',...
+                             'CLa_SCz_VCH_KIN',...
+                             'Ground_Speed',...
+                             'AB_FRT_VCH_KIN'}
+            [~, longestIdx] = max([length(data.Acceleration_X_Filt.data), ...
+                                   length(data.Acceleration_Y_Filt.data),...
+                                   length(data.AB_FRT_VCH_KIN.data),...
+                                   length(data.CLa_SCz_VCH_KIN.data),...
+                                   length(data.Ground_Speed.data),...
+                                   length(data.AB_FRT_VCH_KIN.data)]);
+            THE_CHANNEL = data.(channel_names{longestIdx});
+
+            IMU_X = align_to(data.Acceleration_X_Filt,     THE_CHANNEL);
+            IMU_Y = align_to(data.Acceleration_Y_Filt,     THE_CHANNEL);
+            IMU_Z = align_to(data.Acceleration_Z_Filt,     THE_CHANNEL);
+            AB_KIN =      align_to(data.AB_FRT_VCH_KIN,    THE_CHANNEL);
+            CLz_KIN =     align_to(data.CLa_SCz_VCH_KIN,   THE_CHANNEL);
+            Car_Speed =        align_to(data.Ground_Speed, THE_CHANNEL)/3.6;
 
             %% Placeholder
-            X_Acceleration_Corr = data.Acceleration_X_Filt.data * 9.81;
-            Y_Acceleration_Corr = data.Acceleration_Y_Filt.data * 9.81;
-            ABFRNT = data.AB_FRT_VCH_KIN.data;
-            CZ = data.CLa_SCz_VCH_KIN.data;
-            simplifiedWheelbase = 2.75675; %m
-            simplifiedTrackWidth = 2.000; %m
-            mfr_key = lower(manufacturer);
-            corneringStiffnessFront = vehicle.(mfr_key).kinematics.front.tyreCorneringStiffness;
-            corneringStiffnessRear  = vehicle.(mfr_key).kinematics.rear.tyreCorneringStiffness;
-            wheelBase       = vehicle.(mfr_key).maximumWheelbase / 1000;
-            rho             = 1.225;
+            IMU_Z = IMU_Z - mean(IMU_Z); % normalize about 0
             gravity         = 9.81;
-            % Load longitudinal transfer
+            X_Acceleration_Corr = IMU_X * gravity;
+            Y_Acceleration_Corr = IMU_Y * gravity;
+            ABFRNT = AB_KIN;
+            CZ              = CLz_KIN;
+            rho             = 1.225;
             
-            totalMass = frontAxleWeight + rearAxleWeight;
-            loadTransferFrontAxleLong =  (totalMass .* -1*X_Acceleration_Corr * 0.284 / simplifiedWheelbase);
-            loadTransferRearAxleLong  = (totalMass .*  -1*X_Acceleration_Corr * 0.284 / simplifiedWheelbase);
-            frontAeroForce = 0.5 * carSpeed .* rho .* (ABFRNT        .* CZ);
-            rearAeroForce  = 0.5 * carSpeed .* rho .* ((1 - ABFRNT)  .* CZ);
-            totalMass = frontAxleWeight + rearAxleWeight;
+            % Load longitudinal transfer
 
-            loadTransferFrontLat = totalMass .* Y_Acceleration_Corr * 0.284/ simplifiedTrackWidth;
-            loadTransferRearLat  = totalMass .* Y_Acceleration_Corr * 0.284/ simplifiedTrackWidth;
-            FR = (loadTransferFrontAxleLong - (frontAeroForce(1:10:end)) + loadTransferFrontLat) + (frontAxleWeight/2) * 9.81;
-            FL = (loadTransferFrontAxleLong - (frontAeroForce(1:10:end)) - loadTransferFrontLat) + (frontAxleWeight/2) * 9.81;
-            RL = (loadTransferRearAxleLong +  (rearAeroForce(1:10:end)) + loadTransferRearLat) + (rearAxleWeight/2) * 9.81;
-            RR = (loadTransferRearAxleLong + (rearAeroForce(1:10:end)) - loadTransferRearLat) + (rearAxleWeight/2) * 9.81;
+            totalMass = (frontAxleWeight + rearAxleWeight) .* (1 + IMU_Z);
+            loadTransferFrontAxleLong =  (totalMass .* -1.*X_Acceleration_Corr .* 0.284 ./ simplifiedWheelbase);
+            loadTransferRearAxleLong  = (totalMass .*  1.*X_Acceleration_Corr .* 0.284 / simplifiedWheelbase);
+            frontAeroForce = 0.5 .* Car_Speed.^2 .* rho .* (ABFRNT        .* CZ);
+            rearAeroForce  = 0.5 .* Car_Speed.^2 .* rho .* (min(1 - ABFRNT, 1)  .* CZ);
+            
+            % Align data sets
+
+            loadTransferFrontLat = totalMass .* -1.*Y_Acceleration_Corr .* 0.284./ simplifiedTrackWidth;
+            loadTransferRearLat  = totalMass .* -1.*Y_Acceleration_Corr .* 0.284./ simplifiedTrackWidth;
+                % Load Transfer Long(t)          aero(t)             Lateral load(t)      static
+
+            FL = (loadTransferFrontAxleLong/2 - (frontAeroForce/2) - loadTransferFrontLat/2) + (frontAxleWeight/2) * gravity;
+            FR = (loadTransferFrontAxleLong/2 - (frontAeroForce/2) + loadTransferFrontLat/2) + (frontAxleWeight/2) * gravity;
+            RL = (loadTransferRearAxleLong /2 - (rearAeroForce/2) -  loadTransferRearLat/2) +  (rearAxleWeight/2)  * gravity;
+            RR = (loadTransferRearAxleLong /2 - (rearAeroForce/2) +  loadTransferRearLat/2) +  (rearAxleWeight/2)  * gravity;
+
             % Lateral load transfer
-            data.nFront_Left_Accel_Based_kin = make_channel(FL, ref, 'N', 'nFront Left Accel Based KIN', 'overwrite', true);
+            data.nFront_Left_Accel_Based_KIN = make_channel(FL,  ref,  'N', 'nFront Left Accel Based KIN', 'overwrite', true);
             fprintf('  [+] nFront Left Accel Based KIN\n');
-            data.nFront_Right_Accel_Based_kin = make_channel(FR, ref, 'N', 'nFront Right Accel Based KIN');
+            data.nFront_Right_Accel_Based_KIN = make_channel(FR, ref,   'N', 'nFront Right Accel Based KIN', 'overwrite', true);
             fprintf('  [+] nFront Right Accel Based KIN\n');
-            data.nRear_Left_Accel_Based_kin = make_channel(RL, ref, 'N', 'nRear Left Accel Based KIN');
+            data.nRear_Left_Accel_Based_KIN = make_channel(RL,   ref,   'N', 'nRear Left Accel Based KIN', 'overwrite', true);
             fprintf('  [+] nRear Left Accel Based KIN\n');
-            data.nRear_Right_Accel_Based_kin = make_channel(RR, ref, 'N', 'nRear Right Accel Based KIN');
+            data.nRear_Right_Accel_Based_KIN = make_channel(RR,  ref,  'N', 'nRear Right Accel Based KIN', 'overwrite', true);
             fprintf('  [+] nRear Right Accel Based KIN\n');
             % Trouble Shoot
-            data.loadTransferLongKIN = make_channel(loadTransferFrontAxleLong, ref, 'N', 'Load Transfer Long KIN');
-            fprintf('  [+] nFront Left Accel Based KIN\n');
-            data.loadTransferLatKIN = make_channel(loadTransferFrontLat, ref, 'N', 'Load Transfer Lat KIN');
-            fprintf('  [+] nFront Right Accel Based KIN\n');
+            data.loadTransferLongKIN = make_channel(loadTransferFrontAxleLong, ref, 'N', 'Load Transfer Long KIN', 'overwrite', true);
+            fprintf('  [+] Load Transfer Long KIN\n');
+            data.loadTransferLatKIN = make_channel(loadTransferFrontLat, ref, 'N', 'Load Transfer Lat KIN', 'overwrite', true);
+            fprintf('  [+] Load Transfer Lat KIN\n');
 
+            % Virtual Damper Forces
+            Damper_FL = FL ./ 0.788;
+            Damper_FR = FR ./ 0.788;
+            Damper_RL = RL ./ 0.788;
+            Damper_RR = RR ./ 0.788;
+
+            data.FL_Damper_Accel_Based_KIN = make_channel(Damper_FL, data.Engine_Speed,  'N', 'FL Damper Accel Based KIN', 'overwrite', true);
+            fprintf('  [+] FL Damper Accel Based KIN\n');
+            data.FR_Damper_Accel_Based_KIN = make_channel(Damper_FR, data.Engine_Speed,  'N', 'FR Damper Accel Based KIN', 'overwrite', true);
+            fprintf('  [+] FR Damper Accel Based KIN\n');
+            data.RL_Damper_Accel_Based_KIN = make_channel(Damper_RL, data.Engine_Speed,  'N', 'RL Damper Accel Based KIN', 'overwrite', true);
+            fprintf('  [+] RL Damper Accel Based KIN\n');
+            data.RR_Damper_Accel_Based_KIN = make_channel(Damper_RR, data.Engine_Speed,  'N', 'RR Damper Accel Based KIN', 'overwrite', true);
+            fprintf('  [+] RR Damper Accel Based KIN\n');
+
+
+            % Trouble Shoot
 
         end
     catch ME;
@@ -1005,48 +1383,143 @@ function data = smp_custom_channels(data, varargin)
 
 end
 
+% function ch = make_channel(values, reference_ch, units, name, varargin)
+% % MAKE_CHANNEL  Build a channel struct matching motec_ld_reader output format.
+% %
+% % reference_ch supplies the time vector and sample rate.
+% % dec_places is auto-selected: highest precision that fits int32 range.
+% % Override dec_places after the call: data.myVCH.dec_places = 1;
+% %
+% % Usage
+% % -----
+% %   ch = make_channel(values, reference_ch, 'kPa', 'Brake Pressure Calc');
+% %   ch = make_channel(values, reference_ch, '%',   'Brake Balance VCH', 'overwrite', true);
+% 
+%     p = inputParser();
+%     addRequired(p, 'values');
+%     addRequired(p, 'reference_ch');
+%     addRequired(p, 'units');
+%     addRequired(p, 'name');
+%     addParameter(p, 'overwrite', true);
+%     parse(p, values, reference_ch, units, name, varargin{:});
+% 
+%     n = numel(values);
+% 
+%     ch.data        = values(:);
+%     ch.units       = units;
+%     ch.raw_name    = name;
+%     ch.write_to_ld = true;
+%     ch.overwrite   = p.Results.overwrite;
+%     ch.dec_places  = auto_dec_places(values);
+% 
+%     if n == numel(reference_ch.time)
+%         % Same length — use reference time and rate directly.
+%         ch.time        = reference_ch.time;
+%         ch.sample_rate = reference_ch.sample_rate;
+%     else
+%         % Different length — span same duration, infer actual sample rate.
+%         t_start        = reference_ch.time(1);
+%         t_end          = reference_ch.time(end);
+%         ch.time        = linspace(t_start, t_end, n)';
+%         ch.sample_rate = round(n / (t_end - t_start));
+%     end
+% end
 function ch = make_channel(values, reference_ch, units, name, varargin)
 % MAKE_CHANNEL  Build a channel struct matching motec_ld_reader output format.
 %
 % reference_ch supplies the time vector and sample rate.
 % dec_places is auto-selected: highest precision that fits int32 range.
-% Override dec_places after the call: data.myVCH.dec_places = 1;
+% mul/scale default to 1; offset defaults to floor(min(values))-1 if
+% values go negative, else 0 — matching the prior inline behaviour in
+% augment_com_files_serial.
+%
+% Override any of these directly, or copy them from an existing working
+% channel via 'templateChannel' (a struct from motec_ld_reader with
+% mul/scale/offset/dec_places fields) — explicit params still win over
+% the template.
 %
 % Usage
 % -----
 %   ch = make_channel(values, reference_ch, 'kPa', 'Brake Pressure Calc');
 %   ch = make_channel(values, reference_ch, '%',   'Brake Balance VCH', 'overwrite', true);
+%   ch = make_channel(values, reference_ch, 'N',   'Force VCH', 'templateChannel', data.SomeForceChannel);
+%   ch = make_channel(values, reference_ch, 'N',   'Force VCH', 'mul', 2, 'scale', 10, 'offset', 0);
 
-    p = inputParser();
-    addRequired(p, 'values');
-    addRequired(p, 'reference_ch');
-    addRequired(p, 'units');
-    addRequired(p, 'name');
-    addParameter(p, 'overwrite', true);
-    parse(p, values, reference_ch, units, name, varargin{:});
+p = inputParser();
+addRequired(p, 'values');
+addRequired(p, 'reference_ch');
+addRequired(p, 'units');
+addRequired(p, 'name');
+addParameter(p, 'overwrite', true);
+addParameter(p, 'templateChannel', []);
+addParameter(p, 'mul', []);
+addParameter(p, 'scale', []);
+addParameter(p, 'offset', []);
+addParameter(p, 'dec_places', []);
+parse(p, values, reference_ch, units, name, varargin{:});
 
-    n = numel(values);
+tmpl = p.Results.templateChannel;
 
-    ch.data        = values(:);
-    ch.units       = units;
-    ch.raw_name    = name;
-    ch.write_to_ld = true;
-    ch.overwrite   = p.Results.overwrite;
-    ch.dec_places  = auto_dec_places(values);
+n = numel(values);
+ch.data        = values(:);
+ch.units       = units;
+ch.raw_name    = name;
+ch.write_to_ld = true;
+ch.overwrite   = p.Results.overwrite;
 
-    if n == numel(reference_ch.time)
-        % Same length — use reference time and rate directly.
-        ch.time        = reference_ch.time;
-        ch.sample_rate = reference_ch.sample_rate;
+% --- dec_places: explicit > template > auto ---
+if ~isempty(p.Results.dec_places)
+    ch.dec_places = p.Results.dec_places;
+elseif ~isempty(tmpl) && isfield(tmpl, 'dec_places')
+    ch.dec_places = tmpl.dec_places;
+else
+    ch.dec_places = auto_dec_places(values);
+end
+
+% --- mul: explicit > template > default (1) ---
+if ~isempty(p.Results.mul)
+    ch.mul = p.Results.mul;
+elseif ~isempty(tmpl) && isfield(tmpl, 'mul')
+    ch.mul = tmpl.mul;
+else
+    ch.mul = 1;
+end
+
+% --- scale: explicit > template > default (1) ---
+if ~isempty(p.Results.scale)
+    ch.scale = p.Results.scale;
+elseif ~isempty(tmpl) && isfield(tmpl, 'scale')
+    ch.scale = tmpl.scale;
+else
+    ch.scale = 1;
+end
+
+% --- offset: explicit > template > auto (min-based) ---
+if ~isempty(p.Results.offset)
+    ch.offset = p.Results.offset;
+elseif ~isempty(tmpl) && isfield(tmpl, 'offset')
+    ch.offset = tmpl.offset;
+else
+    vals = values(isfinite(values));
+    if ~isempty(vals) && min(vals) < 0
+        ch.offset = floor(min(vals)) - 1;
     else
-        % Different length — span same duration, infer actual sample rate.
-        t_start        = reference_ch.time(1);
-        t_end          = reference_ch.time(end);
-        ch.time        = linspace(t_start, t_end, n)';
-        ch.sample_rate = round(n / (t_end - t_start));
+        ch.offset = 0;
     end
 end
 
+if n == numel(reference_ch.time)
+    % Same length — use reference time and rate directly.
+    ch.time        = reference_ch.time;
+    ch.sample_rate = reference_ch.sample_rate;
+else
+    % Different length — span same duration, infer actual sample rate.
+    t_start        = reference_ch.time(1);
+    t_end          = reference_ch.time(end);
+    ch.time        = linspace(t_start, t_end, n)';
+    ch.sample_rate = round(n / (t_end - t_start));
+end
+end
 function dec = auto_dec_places(values)
 % Choose highest dec in {4,3,2,1,0} where data_range * 10^dec <= 32767.
 % i2 Pro reads raw bytes as uint16; MATLAB reads as int16. Both agree only
