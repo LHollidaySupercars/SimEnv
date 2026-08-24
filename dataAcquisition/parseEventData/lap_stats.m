@@ -40,6 +40,15 @@ function stats = lap_stats(laps, channels, opts)
 %   opts.percentiles  Extra percentile values to compute, e.g. [10 90].
 %                     Default: [] (none)
 %
+%   opts.corner_cfg        Struct array from smp_corner_config_load.m
+%                         (corner_num / start_dist / end_dist). If empty,
+%                         corner-phase stats are skipped entirely.
+%   opts.dist_channel_field  Distance channel field name used for corner
+%                         boundary matching. Default: 'Odometer'.
+%   opts.phase_channels   Struct mapping phase name -> gate channel name.
+%                         Default: Braking/Entry/MidCrn/Exit ->
+%                         brakingGateVCH/entryGateVCH/midCrnGateVCH/exitGateVCH
+%
 % Returns:
 %   stats   Struct with one sub-struct per channel name.
 %
@@ -71,6 +80,17 @@ function stats = lap_stats(laps, channels, opts)
 %
 %   If percentiles are requested, additional fields are added:
 %   stats.Speed.p10, stats.Speed.p90, etc.
+%
+%   If opts.corner_cfg is supplied, additional fields are added, one set
+%   per corner_num x phase in phase_channels:
+%
+%   stats.Corner1_Braking_TimeVCH.time           (1 x N_laps)  [s]
+%   stats.Corner1_Braking_TimeVCH.lap_numbers     (1 x N_laps)
+%   stats.Corner1_Braking_TimeVCH.lap_times       (1 x N_laps)
+%   stats.Corner1_Braking_LapTimeCorrVCH.scalar   corr(corner time, lap time)
+%   stats.Corner1_Braking_TimeVarianceVCH.scalar  std(corner time)
+%
+%   These are computed ONCE per lap_stats call (not per requested channel).
 
     % ------------------------------------------------------------------
     %  Defaults
@@ -86,14 +106,15 @@ function stats = lap_stats(laps, channels, opts)
     operations  = get_opt(opts, 'operations',      default_ops);
     percentiles = get_opt(opts, 'percentiles',     []);
     per_ch_ops  = get_opt(opts, 'per_channel_ops', []);   % containers.Map or []
-    
+
     % ---- Corner-phase config (optional) ----
     corner_cfg     = get_opt(opts, 'corner_cfg',        []);
     dist_ch_field  = get_opt(opts, 'dist_channel_field', 'Odometer');
     phase_channels = get_opt(opts, 'phase_channels', struct( ...
-        'Braking', 'brakingGateVCH', 'Entry', 'entryGateVCH', ...
-        'MidCrn',  'midCrnGateVCH',  'Exit',  'exitGateVCH'));
-    
+    'Braking', 'braking_Gate_VCH', 'Entry', 'entry_Gate_VCH', ...
+    'MidCrn',  'mid_Crn_Gate_VCH',  'Exit',  'exit_Gate_VCH', ...
+    'LiftCoast', 'lift_Coast_Gate_VCH', 'OffPedal', 'off_Pedal_Gate_VCH'));
+
     n_laps = numel(laps);
     stats  = struct();
 
@@ -210,9 +231,11 @@ function stats = lap_stats(laps, channels, opts)
         end
 
         stats.(out_field) = res;
-        
-        % ------------------------------------------------------------------
+    end
+
+    % ------------------------------------------------------------------
     %  Corner-phase time + sensitivity (optional, needs corner_cfg)
+    %  Runs ONCE per lap_stats call — NOT nested in the per-channel loop.
     % ------------------------------------------------------------------
     if ~isempty(corner_cfg)
         lap_times_all = zeros(1, n_laps);
@@ -220,51 +243,66 @@ function stats = lap_stats(laps, channels, opts)
         phases = fieldnames(phase_channels);
 
         for c = 1:numel(corner_cfg)
-            cn = corner_cfg(c).corner_num;
-            for ph = 1:numel(phases)
-                ph_name    = phases{ph};
-                gate_field = phase_channels.(ph_name);
-                out_field  = sanitise_fieldname(sprintf('Corner%d_%s_TimeVCH', cn, ph_name));
-
-                res = struct('lap_numbers', zeros(1,n_laps), 'lap_times', lap_times_all, ...
-                    'time', NaN(1,n_laps), 'units','s', ...
-                    'raw_name', sprintf('Corner%d_%s_TimeVCH', cn, ph_name));
-
-                for k = 1:n_laps
-                    res.lap_numbers(k) = laps(k).lap_number;
-                    if ~isfield(laps(k).channels, gate_field) || ...
-                       ~isfield(laps(k).channels, dist_ch_field)
-                        continue;
-                    end
-                    dist = laps(k).channels.(dist_ch_field).data;
-                    gate = laps(k).channels.(gate_field).data;
-                    dt   = 1 / laps(k).channels.(gate_field).sample_rate;
-
-                    mask = (dist >= corner_cfg(c).start_dist) & ...
-                           (dist < corner_cfg(c).end_dist) & logical(gate);
-
-                    if nnz(mask) < 3, continue; end
-                    res.time(k) = sum(mask) * dt;
-                end
-                stats.(out_field) = res;
-
-                % ---- Sensitivity scalars ----
-                ok = isfinite(res.time) & isfinite(lap_times_all);
-                sres = struct('raw_name', sprintf('Corner%d_%s_LapTimeCorrVCH', cn, ph_name), ...
-                               'units','corr', 'scalar', NaN);
-                vres = struct('raw_name', sprintf('Corner%d_%s_TimeVarianceVCH', cn, ph_name), ...
-                               'units','s', 'scalar', NaN);
-                if nnz(ok) >= 3
-                    cc = corrcoef(res.time(ok), lap_times_all(ok));
-                    sres.scalar = cc(1,2);
-                    vres.scalar = std(res.time(ok));
-                end
-                stats.(sanitise_fieldname(sres.raw_name)) = sres;
-                stats.(sanitise_fieldname(vres.raw_name)) = vres;
-            end
+                    cn = corner_cfg(c).corner_num;
+        for ph = 1:numel(phases)
+                        ph_name    = phases{ph};
+                        gate_field = phase_channels.(ph_name);
+                        out_field  = sanitise_fieldname(sanitise_fieldname(sprintf('Corner%s_%s_TimeVCH', cn{1}, ph_name)));
+                        res = struct('lap_numbers', zeros(1,n_laps), 'lap_times', lap_times_all, ...
+        'time', NaN(1,n_laps), 'units','s', ...
+        'raw_name', sprintf('Corner%s_%s_TimeVCH', cn{1}, ph_name));
+        for k = 1:n_laps
+                            res.lap_numbers(k) = laps(k).lap_number;
+        if ~isfield(laps(k).channels, gate_field) || ...
+                               ~isfield(laps(k).channels, dist_ch_field)
+        continue;
         end
-    end
+                            dist = laps(k).channels.(gate_field).dist;   % same channel's own distance array
+                            gate = laps(k).channels.(gate_field).data;
+                            dt   = 1 / laps(k).channels.(gate_field).sample_rate;
+                            mask = (dist >= corner_cfg(c).start_dist) & (dist < corner_cfg(c).end_dist) & logical(gate);
+                            nnz(mask)
+                            find(mask)
+        if nnz(mask) < 3, continue; end
+                            res.time(k) = sum(mask) * dt;
+        end
+                        stats.(out_field) = res;
+        % ---- Sensitivity scalars ----
+                        ok = isfinite(res.time) & isfinite(lap_times_all);
+                        sres = struct('raw_name', sprintf('Corner%s_%s_TimeVCH_corr', cn{1}, ph_name), ...
+        'units','corr', 'scalar', NaN);
+                        vres = struct('raw_name', sprintf('Corner%s_%s_TimeVCH_var', cn{1}, ph_name), ...
+        'units','s', 'scalar', NaN);
+        if nnz(ok) >= 3
+                            cc = corrcoef(res.time(ok), lap_times_all(ok));
+                            sres.scalar = cc(1,2);
+                            vres.scalar = std(res.time(ok));
+        end
+                        stats.(sanitise_fieldname(sres.raw_name)) = sres;
+                        stats.(sanitise_fieldname(vres.raw_name)) = vres;
+        end                                          % <-- closes "for ph"
         
+            % ---- NEW: Throttle-drop-to-full-throttle window total (denominator) ----
+            out_field2 = sanitise_fieldname(sprintf('Corner%s_ThrottleWindowTimeVCH', cn{1}));
+            res2 = struct('lap_numbers', zeros(1,n_laps), 'lap_times', lap_times_all, ...
+                'time', NaN(1,n_laps), 'units','s', ...
+                'raw_name', sprintf('Corner%s_ThrottleWindowTimeVCH', cn{1}));
+            for k = 1:n_laps
+                res2.lap_numbers(k) = laps(k).lap_number;
+                if ~isfield(laps(k).channels, 'full_Throttle_Gate_VCH') || ...
+                   ~isfield(laps(k).channels, dist_ch_field)
+                    continue;
+                end
+                dist2 = laps(k).channels.full_Throttle_Gate_VCH.dist;
+                gate2 = laps(k).channels.full_Throttle_Gate_VCH.data;
+                dt2   = 1 / laps(k).channels.full_Throttle_Gate_VCH.sample_rate;
+                mask2 = (dist2 >= corner_cfg(c).start_dist) & (dist2 < corner_cfg(c).end_dist) & ~logical(gate2);
+                if nnz(mask2) < 3, continue; end
+                res2.time(k) = sum(mask2) * dt2;
+            end
+            stats.(out_field2) = res2;
+        
+        end                                          % <-- closes "for c"
     end
 
     % ------------------------------------------------------------------
@@ -275,7 +313,9 @@ function stats = lap_stats(laps, channels, opts)
         numel(out_fields), n_laps);
     for i = 1:numel(out_fields)
         f = out_fields{i};
-        fprintf('  %s  [%s]\n', stats.(f).raw_name, stats.(f).units);
+        if isfield(stats.(f), 'units')
+            fprintf('  %s  [%s]\n', stats.(f).raw_name, stats.(f).units);
+        end
     end
 end
 
