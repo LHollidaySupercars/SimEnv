@@ -15,7 +15,9 @@ function smp_compile_event_upload(top_level_dir, channels_to_extract, ...
 %   - Buffer is checked after every group; once it reaches
 %     opts.flush_rows, that slice is handed off to a DETACHED, 
 %     non-blocking MATLAB worker process for the actual SQL push, and
-%     the buffer is cleared. This function never blocks on a DB call.
+%     the buffer is cleared. This function never blocks on a DB call —
+%     it may briefly pause before launching a new worker if
+%     opts.max_workers concurrent workers are already in-flight.
 %   - Maintains its own lightweight manifest-only cache
 %     (smp_cache_upload_manifest.mat) purely so repeat runs skip
 %     unchanged files. No stats/traces are persisted in this cache.
@@ -37,6 +39,11 @@ function smp_compile_event_upload(top_level_dir, channels_to_extract, ...
 %                         this is a blunt fallback only)
 %     .worker_dir         handoff/queue dir (default <top_level_dir>\_upload_queue)
 %     .keep_worker_open   true = cmd /k, leave window open (default false)
+%     .max_workers        max concurrent detached upload workers (default 4).
+%                         Before launching a new worker, flush_buffer polls
+%                         worker_dir and waits until the number of in-flight
+%                         jobs (.mat present, .done not yet written) drops
+%                         below this cap.
 %     .dist_channel       (default 'Odometer')
 %     .verbose            (default true)
 
@@ -50,6 +57,7 @@ function smp_compile_event_upload(top_level_dir, channels_to_extract, ...
     overwrite        = get_opt(opts, 'overwrite',          false);
     worker_dir       = get_opt(opts, 'worker_dir',         fullfile(top_level_dir, '_upload_queue'));
     keep_worker_open = get_opt(opts, 'keep_worker_open',   false);
+    max_workers      = get_opt(opts, 'max_workers',        4);
     dist_ch          = get_opt(opts, 'dist_channel',       'Odometer');
     verbose          = get_opt(opts, 'verbose',            true);
 
@@ -201,7 +209,7 @@ function smp_compile_event_upload(top_level_dir, channels_to_extract, ...
         if height(buffer) >= flush_rows
             flush_count = flush_count + 1;
             flush_buffer(buffer, worker_dir, target, batch_size, overwrite, ...
-                          keep_worker_open, flush_count, top_level_dir);
+                          keep_worker_open, flush_count, top_level_dir, max_workers);
             buffer = table();
         end
     end
@@ -210,7 +218,7 @@ function smp_compile_event_upload(top_level_dir, channels_to_extract, ...
     if height(buffer) > 0
         flush_count = flush_count + 1;
         flush_buffer(buffer, worker_dir, target, batch_size, overwrite, ...
-                      keep_worker_open, flush_count, top_level_dir);
+                      keep_worker_open, flush_count, top_level_dir, max_workers);
     end
 
     % ---- Save manifest-only cache for next run's diff ----
@@ -223,7 +231,9 @@ end
 % ======================================================================= %
 %  FLUSH — write buffer to disk, launch DETACHED non-blocking worker
 % ======================================================================= %
-function flush_buffer(T, worker_dir, target, batch_size, overwrite, keep_open, flush_id, top_level_dir)
+function flush_buffer(T, worker_dir, target, batch_size, overwrite, keep_open, flush_id, top_level_dir, max_workers)
+    wait_for_worker_slot(worker_dir, max_workers, flush_id);
+
     ts        = datestr(now, 'yyyymmdd_HHMMSS');
     data_file = fullfile(worker_dir, sprintf('upload_%s_%03d.mat', ts, flush_id));
     flag_file = fullfile(worker_dir, sprintf('upload_%s_%03d.done', ts, flush_id));
@@ -257,6 +267,43 @@ function flush_buffer(T, worker_dir, target, batch_size, overwrite, keep_open, f
 
     fprintf('  [FLUSH %d] %d row(s) -> detached worker (%s)\n', flush_id, height(T), target);
     system([cmd ' &']);   % '&' keeps this MATLAB session non-blocking on Windows shell
+end
+
+
+% ======================================================================= %
+%  WORKER THROTTLE — block until fewer than max_workers jobs are in-flight
+%  An "in-flight" job is one whose .mat handoff file exists in worker_dir
+%  but whose .done flag has not yet been written by smp_upload_worker.
+% ======================================================================= %
+function wait_for_worker_slot(worker_dir, max_workers, flush_id)
+    if isempty(max_workers) || ~isfinite(max_workers) || max_workers <= 0
+        return; % unlimited
+    end
+
+    poll_s   = 2;
+    warned   = false;
+    while true
+        data_files = dir(fullfile(worker_dir, 'upload_*.mat'));
+        n_inflight = 0;
+        for k = 1:numel(data_files)
+            [~, name] = fileparts(data_files(k).name);
+            done_file = fullfile(worker_dir, [name '.done']);
+            if ~isfile(done_file)
+                n_inflight = n_inflight + 1;
+            end
+        end
+
+        if n_inflight < max_workers
+            return;
+        end
+
+        if ~warned
+            fprintf('  [FLUSH %d] %d worker(s) already in-flight (max %d) — waiting for a slot...\n', ...
+                flush_id, n_inflight, max_workers);
+            warned = true;
+        end
+        pause(poll_s);
+    end
 end
 
 
