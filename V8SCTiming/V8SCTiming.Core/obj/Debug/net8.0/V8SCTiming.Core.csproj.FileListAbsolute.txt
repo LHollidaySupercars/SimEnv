@@ -1,0 +1,12 @@
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\bin\Debug\net8.0\V8SCTiming.Core.deps.json
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\bin\Debug\net8.0\V8SCTiming.Core.dll
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\bin\Debug\net8.0\V8SCTiming.Core.pdb
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\obj\Debug\net8.0\V8SCTiming.Core.csproj.AssemblyReference.cache
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\obj\Debug\net8.0\V8SCTiming.Core.GeneratedMSBuildEditorConfig.editorconfig
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\obj\Debug\net8.0\V8SCTiming.Core.AssemblyInfoInputs.cache
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\obj\Debug\net8.0\V8SCTiming.Core.AssemblyInfo.cs
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\obj\Debug\net8.0\V8SCTiming.Core.csproj.CoreCompileInputs.cache
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\obj\Debug\net8.0\V8SCTiming.Core.dll
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\obj\Debug\net8.0\refint\V8SCTiming.Core.dll
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\obj\Debug\net8.0\V8SCTiming.Core.pdb
+D:\SimEnv.worktrees\windows-port-and-data-logging\V8SCTiming\V8SCTiming.Core\obj\Debug\net8.0\ref\V8SCTiming.Core.dll

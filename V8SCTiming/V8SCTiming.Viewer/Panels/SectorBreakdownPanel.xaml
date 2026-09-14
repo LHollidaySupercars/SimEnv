@@ -1,0 +1,12 @@
+<UserControl x:Class="V8SCTiming.Viewer.Panels.SectorBreakdownPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sp="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6">
+            <TextBlock Text="Car:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+            <ComboBox x:Name="CarCombo" Width="100" SelectionChanged="Refresh"/>
+        </StackPanel>
+        <sp:WpfPlot x:Name="Plot"/>
+    </DockPanel>
+</UserControl>

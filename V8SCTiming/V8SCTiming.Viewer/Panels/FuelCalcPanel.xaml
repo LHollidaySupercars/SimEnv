@@ -1,0 +1,17 @@
+<UserControl x:Class="V8SCTiming.Viewer.Panels.FuelCalcPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel Margin="16" MaxWidth="420" HorizontalAlignment="Left">
+        <TextBlock Text="Fuel Sensitivity Calculator" FontSize="16" FontWeight="Bold" Margin="0,0,0,12"/>
+        <TextBlock Text="Car" Margin="0,0,0,4"/>
+        <ComboBox x:Name="CarCombo" Margin="0,0,0,8" SelectionChanged="Recalculate"/>
+        <TextBlock Text="Lap A" Margin="0,0,0,4"/>
+        <ComboBox x:Name="LapACombo" Margin="0,0,0,8" SelectionChanged="Recalculate"/>
+        <TextBlock Text="Lap B" Margin="0,0,0,4"/>
+        <ComboBox x:Name="LapBCombo" Margin="0,0,0,8" SelectionChanged="Recalculate"/>
+        <TextBlock Text="Fuel used between A and B (kg)" Margin="0,0,0,4"/>
+        <TextBox x:Name="FuelInput" Margin="0,0,0,12" TextChanged="Recalculate"/>
+        <TextBlock Text="Result" FontWeight="Bold" Margin="0,8,0,4"/>
+        <TextBlock x:Name="ResultText" FontSize="20" Foreground="{DynamicResource AccentBrush}"/>
+    </StackPanel>
+</UserControl>

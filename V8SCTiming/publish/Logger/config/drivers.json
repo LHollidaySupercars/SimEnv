@@ -1,0 +1,70 @@
+{
+  "_comment": "Driver and team configuration. Colours and line styles are always read from this file — never hardcoded in UI views.",
+  "teams": [
+    {
+      "id": "team-ford",
+      "name": "Ford Mustang GT",
+      "class": "Supercars",
+      "colour": "#0057B8",
+      "cars": [
+        {
+          "number": "17",
+          "driver": "Mostert, C.",
+          "shortName": "MOS",
+          "lineStyle": "solid",
+          "colour": "#0057B8"
+        },
+        {
+          "number": "25",
+          "driver": "Soward, J.",
+          "shortName": "SOW",
+          "lineStyle": "dashed",
+          "colour": "#0057B8"
+        },
+        {
+          "number": "5",
+          "driver": "Heimgartner, A.",
+          "shortName": "HEI",
+          "lineStyle": "dotted",
+          "colour": "#0057B8"
+        }
+      ]
+    },
+    {
+      "id": "team-chev",
+      "name": "Chevrolet Camaro ZL1",
+      "class": "Supercars",
+      "colour": "#F5C400",
+      "cars": [
+        {
+          "number": "97",
+          "driver": "van Gisbergen, S.",
+          "shortName": "VGS",
+          "lineStyle": "solid",
+          "colour": "#F5C400"
+        },
+        {
+          "number": "88",
+          "driver": "Whincup, J.",
+          "shortName": "WHI",
+          "lineStyle": "dashed",
+          "colour": "#F5C400"
+        },
+        {
+          "number": "14",
+          "driver": "Davison, W.",
+          "shortName": "DAV",
+          "lineStyle": "dotted",
+          "colour": "#F5C400"
+        }
+      ]
+    }
+  ],
+  "lineStyles": {
+    "_comment": "CSS class names and SVG stroke-dasharray values for each style token.",
+    "solid":   { "cssClass": "line-solid",   "dashArray": "none" },
+    "dashed":  { "cssClass": "line-dashed",  "dashArray": "8 4" },
+    "dotted":  { "cssClass": "line-dotted",  "dashArray": "2 4" },
+    "dashdot": { "cssClass": "line-dashdot", "dashArray": "8 4 2 4" }
+  }
+}

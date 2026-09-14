@@ -1,0 +1,18 @@
+<UserControl x:Class="V8SCTiming.Viewer.Panels.PitStopSummaryPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <DataGrid x:Name="Grid" AutoGenerateColumns="False" IsReadOnly="True"
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Car" Binding="{Binding CarNumber}" Width="60"/>
+                <DataGridTextColumn Header="Stop #" Binding="{Binding StopNumber}" Width="70"/>
+                <DataGridTextColumn Header="Pit Lap" Binding="{Binding PitLap}" Width="80"/>
+                <DataGridTextColumn Header="Stint" Binding="{Binding Outing}" Width="70"/>
+                <DataGridTextColumn Header="Pit Time" Binding="{Binding PitDuration, StringFormat={}{0:0.0}}" Width="90"/>
+                <DataGridTextColumn Header="Compound" Binding="{Binding Tyre}" Width="90"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,50 @@
+{
+  "id": "f1-generic",
+  "name": "Formula 1 Circuit",
+  "shortName": "F1",
+  "country": "",
+  "lapDistanceKm": 5.3,
+  "sectors": {
+    "count": 3,
+    "labels": [
+      "S1",
+      "S2",
+      "S3"
+    ],
+    "splitDistancesKm": [
+      1.8,
+      3.6,
+      5.3
+    ],
+    "loopDistancesKm": [1.325, 1.325, 1.325, 1.325],
+    "loopLabels": ["Loop 1", "Loop 2", "Loop 3", "SF"]
+  },
+  "pit": {
+    "laneExitDistanceKm": 0.05,
+    "laneEntryDistanceKm": 4.75,
+    "speedLimitKph": 80,
+    "minPitTimeSeconds": 2,
+    "pitLaneTransitSeconds": 22,
+    "pitEntryToExitOnTrackSeconds": 18,
+    "pitWindowOpenLap": 10,
+    "pitWindowCloseLap": null,
+    "blockingWindowSeconds": 2,
+    "tyreChange2TSec": 6,
+    "tyreChange4TSec": 12,
+    "unsafeReleaseGapSeconds": 2
+  },
+  "raceFormat": {
+    "type": "laps",
+    "value": 70,
+    "_comment": "Generic F1 race length — overrides not meaningful for OpenF1 live data."
+  },
+  "analysis": {
+    "fuelSensitivitySKg": 0.034,
+    "_comment": "Typical F1 fuel effect ~0.034 s/kg (varies by circuit).",
+    "startFuelKg": 110
+  },
+  "trackMap": {
+    "gpsFile": "",
+    "imageFile": ""
+  }
+}

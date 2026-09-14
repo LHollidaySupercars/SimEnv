@@ -1,0 +1,18 @@
+<UserControl x:Class="V8SCTiming.Viewer.Panels.OvertakesPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <DataGrid x:Name="Grid" AutoGenerateColumns="False" IsReadOnly="True"
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Lap" Binding="{Binding Lap}" Width="60"/>
+                <DataGridTextColumn Header="Car (Overtaker)" Binding="{Binding CarA}" Width="120"/>
+                <DataGridTextColumn Header="Car (Overtaken)" Binding="{Binding CarB}" Width="120"/>
+                <DataGridTextColumn Header="Pos A→" Binding="{Binding PosAfterA}" Width="80"/>
+                <DataGridTextColumn Header="Pos B→" Binding="{Binding PosAfterB}" Width="80"/>
+                <DataGridTextColumn Header="Pit-assisted" Binding="{Binding PitAssisted}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

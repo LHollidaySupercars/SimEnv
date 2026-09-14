@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V8SCTiming.Core", "V8SCTiming.Core\V8SCTiming.Core.csproj", "{948A9342-C8DE-458D-85C1-2A9A0D77660F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V8SCTiming.Logger", "V8SCTiming.Logger\V8SCTiming.Logger.csproj", "{DF6AA0EF-E0D7-4152-A434-974B44896D44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V8SCTiming.Viewer", "V8SCTiming.Viewer\V8SCTiming.Viewer.csproj", "{A1CC8695-B49C-41F2-A71E-C6E1FC212662}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{948A9342-C8DE-458D-85C1-2A9A0D77660F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{948A9342-C8DE-458D-85C1-2A9A0D77660F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{948A9342-C8DE-458D-85C1-2A9A0D77660F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{948A9342-C8DE-458D-85C1-2A9A0D77660F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF6AA0EF-E0D7-4152-A434-974B44896D44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF6AA0EF-E0D7-4152-A434-974B44896D44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF6AA0EF-E0D7-4152-A434-974B44896D44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF6AA0EF-E0D7-4152-A434-974B44896D44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1CC8695-B49C-41F2-A71E-C6E1FC212662}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1CC8695-B49C-41F2-A71E-C6E1FC212662}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1CC8695-B49C-41F2-A71E-C6E1FC212662}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1CC8695-B49C-41F2-A71E-C6E1FC212662}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

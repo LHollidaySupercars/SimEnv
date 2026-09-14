@@ -1,0 +1,46 @@
+[
+  {
+    "id": "openf1-live",
+    "name": "F1 Live (OpenF1)",
+    "type": "openf1",
+    "description": "Polls the public OpenF1 REST API for live session lap data.",
+    "settings": {
+      "baseUrl": "https://api.openf1.org",
+      "pollIntervalMs": 4000,
+      "sessionKey": "latest"
+    }
+  },
+  {
+    "id": "tcp-generic",
+    "name": "TCP Generic Feed",
+    "type": "tcp",
+    "description": "Connects to a raw TCP socket and reads line-delimited timing data. Format parsing is a stub — see adapter_tcp.js TODO.",
+    "settings": {
+      "host": "127.0.0.1",
+      "port": 9000,
+      "encoding": "utf8",
+      "reconnectDelayMs": 5000
+    }
+  },
+  {
+    "id": "supercars-live",
+    "name": "Supercars Live Feed",
+    "type": "supercars",
+    "description": "Connects to the official Supercars Championship TCP timing stream (binary-framed XML protocol). Driver colours are saved to config/drivers_v8sc.json.",
+    "settings": {
+      "host": "127.0.0.1",
+      "port": 5000
+    }
+  },
+  {
+    "id": "replay",
+    "name": "Replay (local file)",
+    "type": "replay",
+    "description": "Replays a previously saved session JSON file at configurable speed.",
+    "settings": {
+      "filePath": "D:\\v8sc-timing-main\\replays\\2026-06-19-23-24-16_Formula_1_Circuit.json",
+      "speedMultiplier": 200,
+      "loopOnEnd": false
+    }
+  }
+]

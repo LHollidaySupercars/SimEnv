@@ -1,0 +1,23 @@
+[
+  {
+    "id": "supercars-2026",
+    "name": "Supercars Championship 2026",
+    "series": "Supercars Championship",
+    "events": [
+      { "id": "Sydney",       "round": 1,  "name": "Sydney-500",            "venue": "Sydney Motorsport Park",          "trackId": "Sydney",        "dateRange": "20-22 Feb 2026" },
+      { "id": "Melbourne",    "round": 2,  "name": "Melbourne Supersprint", "venue": "Albert Park Circuit",             "trackId": "Melbourne",     "dateRange": "6-8 Mar 2026" },
+      { "id": "Taupo",        "round": 3,  "name": "Taupo Super 440",       "venue": "Taupo Motorsport Park",           "trackId": "Taupo",         "dateRange": "10-12 Apr 2026"  },
+      { "id": "Christchurch", "round": 4,  "name": "Christchurch Super 440","venue": "Christchurch Raceway",            "trackId": "Christchurch",  "dateRange": "17-19 Apr 2026"  },
+      { "id": "Tasmania",     "round": 5,  "name": "Tasmania Super 440",    "venue": "Winton Motor Raceway",            "trackId": "Tasmania",      "dateRange": "22-24 May 2026"},
+      { "id": "Darwin",       "round": 6,  "name": "Darwin Triple Crown",   "venue": "Hidden Valley Raceway",           "trackId": "Darwin",        "dateRange": "19-21 Jun 2026"},
+      { "id": "Townsville",   "round": 7,  "name": "Townsville 500",        "venue": "Reid Park Street Circuit",        "trackId": "townsville",    "dateRange": "10-12 Jul 2026"  },
+      { "id": "Perth",        "round": 8,  "name": "Perth Super 440",       "venue": "The Bend Motorsport Park",        "trackId": "Perth",         "dateRange": "31-2 Jul - Aug 2026"},
+      { "id": "Ipswich",      "round": 9,  "name": "Ipswich Super 440",     "venue": "Queensland Raceway",              "trackId": "Ipswich",       "dateRange": "21-23 Aug 2026"  },
+      { "id": "Tailem",       "round": 10, "name": "The Bend 500",          "venue": "Tailem Bend Raceway",             "trackId": "Tailem",        "dateRange": "11-13 Sep 2026" },
+      { "id": "Bathurst",     "round": 11, "name": "Repco Bathurst 1000",   "venue": "Mount Panorama Circuit",          "trackId": "Bathurst",      "dateRange": "8-11 Oct 2026"},
+      { "id": "Gold-Coast",   "round": 12, "name": "Gold Coast 500",        "venue": "Surfers Paradise Street Circuit", "trackId": "Gold Coast",    "dateRange": "23-25 Oct 2026"  },
+      { "id": "Sandown",      "round": 13, "name": "Sandown 500",           "venue": "Newcastle Street Circuit",        "trackId": "Sandown",       "dateRange": "13-15 Nov 2026"  },
+      { "id": "Adelaide",     "round": 14, "name": "Adelaide Grand Final",  "venue": "Newcastle Street Circuit",        "trackId": "Adelaide",      "dateRange": "2-6 Dec 2026"  }
+    ]
+  }
+]

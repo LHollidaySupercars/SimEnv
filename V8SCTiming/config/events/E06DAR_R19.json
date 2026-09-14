@@ -1,0 +1,35 @@
+{
+  "eventCode": "E06DAR_R19",
+  "fuelModel": {
+    "tankCapacityKg": 100,
+    "startFuelKg": 100,
+    "maxRefuelKg": 18,
+    "fuelSensitivityPer10kg": 0.3,
+    "fuelFlowRateKgPerSec": 4,
+    "mandatoryStops": 2
+  },
+  "fuelFormula": {
+    "mode": "linear",
+    "coefficients": [
+      0,
+      0,
+      2
+    ]
+  },
+  "pitModel": {
+    "stopGoSec": 5,
+    "plugInSec": 3,
+    "tyre1StopSec": 8,
+    "tyre2StopSec": 14,
+    "tyre4StopSec": 25
+  },
+  "tyreModel": {
+    "warmUpLaps": 0,
+    "cornerContribution": {
+      "FL": 25,
+      "FR": 25,
+      "RL": 25,
+      "RR": 25
+    }
+  }
+}

@@ -1,0 +1,23 @@
+<UserControl x:Class="V8SCTiming.Viewer.Panels.ScoreboardPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <DataGrid x:Name="Grid" AutoGenerateColumns="False" IsReadOnly="True"
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Car" Binding="{Binding CarNumber}" Width="60"/>
+                <DataGridTextColumn Header="Driver" Binding="{Binding Driver}" Width="140"/>
+                <DataGridTextColumn Header="Best S1" Binding="{Binding BestS1, StringFormat={}{0:0.000}}" Width="90"/>
+                <DataGridTextColumn Header="Best S2" Binding="{Binding BestS2, StringFormat={}{0:0.000}}" Width="90"/>
+                <DataGridTextColumn Header="Best S3" Binding="{Binding BestS3, StringFormat={}{0:0.000}}" Width="90"/>
+                <DataGridTextColumn Header="Theo Best" Binding="{Binding TheoBest, StringFormat={}{0:0.000}}" Width="100"/>
+                <DataGridTextColumn Header="Last Lap" Binding="{Binding LastLap, StringFormat={}{0:0.000}}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

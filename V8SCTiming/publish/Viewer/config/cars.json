@@ -1,0 +1,500 @@
+{
+  "1": {
+    "shortName": "C.MOS",
+    "name": "Chaz Mostert",
+    "colour": "#3671C6",
+    "lineStyle": "solid"
+  },
+  "2": {
+    "shortName": "R.WOO",
+    "name": "Ryan Wood",
+    "colour": "#44BBFF",
+    "lineStyle": "dotted"
+  },
+  "3": {
+    "shortName": "A.CAM",
+    "name": "Aaron Cameron",
+    "colour": "#4781D7",
+    "lineStyle": "dashed"
+  },
+  "4": {
+    "shortName": "J.LE",
+    "name": "Jack Le Brocq",
+    "colour": "#FF8000",
+    "lineStyle": "solid"
+  },
+  "5": {
+    "shortName": "R.GOO",
+    "name": "Reuben Goodall",
+    "colour": "#52E252",
+    "lineStyle": "solid"
+  },
+  "6": {
+    "shortName": "C.WAT",
+    "name": "Cameron Waters",
+    "colour": "#6692FF",
+    "lineStyle": "solid"
+  },
+  "7": {
+    "shortName": "J.GOL",
+    "name": "James Golding",
+    "colour": "#0093CC",
+    "lineStyle": "solid"
+  },
+  "8": {
+    "shortName": "A.HEI",
+    "name": "Andre Heimgartner",
+    "colour": "#44FF88",
+    "lineStyle": "solid"
+  },
+  "9": {
+    "shortName": "J.STE",
+    "name": "Jobe Stewart",
+    "colour": "#FFB344",
+    "lineStyle": "solid"
+  },
+  "10": {
+    "shortName": "Z.BAT",
+    "name": "Zach Bates",
+    "colour": "#0093CC",
+    "lineStyle": "solid"
+  },
+  "11": {
+    "shortName": "J.WAL",
+    "name": "Jackson Walls",
+    "colour": "#909090",
+    "lineStyle": "dashed"
+  },
+  "12": {
+    "shortName": "H.JON",
+    "name": "Harri Jones",
+    "colour": "#27F4D2",
+    "lineStyle": "solid"
+  },
+  "14": {
+    "shortName": "C.HIL",
+    "name": "Cameron Hill",
+    "colour": "#229971",
+    "lineStyle": "solid"
+  },
+  "15": {
+    "shortName": "C.OSB",
+    "name": "Clay Osborne",
+    "colour": "#AA44FF",
+    "lineStyle": "solid"
+  },
+  "16": {
+    "shortName": "T.SMI",
+    "name": "Tommy Smith",
+    "colour": "#E80020",
+    "lineStyle": "solid"
+  },
+  "17": {
+    "shortName": "T.HAZ",
+    "name": "Todd Hazelwood",
+    "colour": "#44FF88",
+    "lineStyle": "dotted"
+  },
+  "18": {
+    "shortName": "A.DE",
+    "name": "Anton De Pasquale",
+    "colour": "#229971",
+    "lineStyle": "solid"
+  },
+  "19": {
+    "shortName": "M.PAY",
+    "name": "Matthew Payne",
+    "colour": "#BB44FF",
+    "lineStyle": "solid"
+  },
+  "20": {
+    "shortName": "D.REY",
+    "name": "David Reynolds",
+    "colour": "#FF44BB",
+    "lineStyle": "solid"
+  },
+  "21": {
+    "shortName": "A.VOL",
+    "name": "Aleeanz Voltz",
+    "colour": "#FF4444",
+    "lineStyle": "dashed"
+  },
+  "22": {
+    "shortName": "D.COO",
+    "name": "Dean Cook",
+    "colour": "#3671C6",
+    "lineStyle": "solid"
+  },
+  "23": {
+    "shortName": "L.BLO",
+    "name": "Lachlan Bloxsom",
+    "colour": "#64C4FF",
+    "lineStyle": "solid"
+  },
+  "24": {
+    "shortName": "D.QUI",
+    "name": "Daniel Quimby",
+    "colour": "#44BBFF",
+    "lineStyle": "dashed"
+  },
+  "26": {
+    "shortName": "K.ALL",
+    "name": "Kai Allen",
+    "colour": "#44FFFF",
+    "lineStyle": "solid"
+  },
+  "27": {
+    "shortName": "R.HOL",
+    "name": "Robert Holloway",
+    "colour": "#52E252",
+    "lineStyle": "dashed"
+  },
+  "28": {
+    "shortName": "A.HOD",
+    "name": "Ayrton Hodson",
+    "colour": "#FFB344",
+    "lineStyle": "dotted"
+  },
+  "29": {
+    "shortName": "A.SHA",
+    "name": "Amar Sharma",
+    "colour": "#44FFFF",
+    "lineStyle": "dotted"
+  },
+  "30": {
+    "shortName": "LAW",
+    "name": "Liam LAWSON",
+    "colour": "#6692FF",
+    "lineStyle": "dashed"
+  },
+  "31": {
+    "shortName": "J.OJE",
+    "name": "Jayden Ojeda",
+    "colour": "#B6BABD",
+    "lineStyle": "dashed"
+  },
+  "32": {
+    "shortName": "I.ROO",
+    "name": "Ian Roots",
+    "colour": "#44FF88",
+    "lineStyle": "dashed"
+  },
+  "33": {
+    "shortName": "B.SWE",
+    "name": "Bailey Sweeny",
+    "colour": "#BB44FF",
+    "lineStyle": "dotted"
+  },
+  "34": {
+    "shortName": "J.MOF",
+    "name": "James Moffat",
+    "colour": "#BB44FF",
+    "lineStyle": "solid"
+  },
+  "35": {
+    "shortName": "S.SMI",
+    "name": "Shane Smith",
+    "colour": "#FFB344",
+    "lineStyle": "dashed"
+  },
+  "36": {
+    "shortName": "C.BUR",
+    "name": "Cody Burcher",
+    "colour": "#FF44BB",
+    "lineStyle": "dotted"
+  },
+  "37": {
+    "shortName": "C.COV",
+    "name": "Charlotte Cove",
+    "colour": "#BB44FF",
+    "lineStyle": "dashed"
+  },
+  "38": {
+    "shortName": "R.GRA",
+    "name": "Rylan Gray",
+    "colour": "#44FFFF",
+    "lineStyle": "dotted"
+  },
+  "41": {
+    "shortName": "LIN",
+    "name": "Arvid LINDBLAD",
+    "colour": "#6C98FF",
+    "lineStyle": "dashed"
+  },
+  "42": {
+    "shortName": "T.DAV",
+    "name": "Tom Davies",
+    "colour": "#FF44BB",
+    "lineStyle": "solid"
+  },
+  "43": {
+    "shortName": "L.DAL",
+    "name": "Lochie Dalton",
+    "colour": "#0093CC",
+    "lineStyle": "dashed"
+  },
+  "44": {
+    "shortName": "R.SAL",
+    "name": "Ross Salmon",
+    "colour": "#E80020",
+    "lineStyle": "dashed"
+  },
+  "45": {
+    "shortName": "J.FRE",
+    "name": "Jordan Freestone",
+    "colour": "#FF44BB",
+    "lineStyle": "dashed"
+  },
+  "47": {
+    "shortName": "N.GRO",
+    "name": "Noah Grosser",
+    "colour": "#44FFFF",
+    "lineStyle": "dashed"
+  },
+  "48": {
+    "shortName": "M.KRO",
+    "name": "Mitchell Kroonstuive",
+    "colour": "#FF8844",
+    "lineStyle": "dashed"
+  },
+  "50": {
+    "shortName": "A.BUC",
+    "name": "Alice Buckley",
+    "colour": "#FF8844",
+    "lineStyle": "dotted"
+  },
+  "51": {
+    "shortName": "S.JOH",
+    "name": "Steve Johnstone",
+    "colour": "#FFFF44",
+    "lineStyle": "dashed"
+  },
+  "53": {
+    "shortName": "M.GEO",
+    "name": "Max Geoghegan",
+    "colour": "#FF8844",
+    "lineStyle": "dotted"
+  },
+  "54": {
+    "shortName": "B.HAL",
+    "name": "Bayley Hall",
+    "colour": "#FFFF44",
+    "lineStyle": "dotted"
+  },
+  "55": {
+    "shortName": "M.WIN",
+    "name": "Mark Winterbottom",
+    "colour": "#64C4FF",
+    "lineStyle": "dashed"
+  },
+  "56": {
+    "shortName": "C.LOG",
+    "name": "Campbell Logan",
+    "colour": "#FF4488",
+    "lineStyle": "dotted"
+  },
+  "60": {
+    "shortName": "H.SEL",
+    "name": "Harrison Sellars",
+    "colour": "#44FFFF",
+    "lineStyle": "solid"
+  },
+  "63": {
+    "shortName": "D.COL",
+    "name": "Des Collier",
+    "colour": "#27F4D2",
+    "lineStyle": "dashed"
+  },
+  "65": {
+    "shortName": "C.KRO",
+    "name": "Connor Kroonstuiver",
+    "colour": "#FF4488",
+    "lineStyle": "dashed"
+  },
+  "66": {
+    "shortName": "M.GIL",
+    "name": "Marco Giltrap",
+    "colour": "#FFFF44",
+    "lineStyle": "dotted"
+  },
+  "69": {
+    "shortName": "B.DEL",
+    "name": "Benjamin Delphin",
+    "colour": "#88BBFF",
+    "lineStyle": "dashed"
+  },
+  "71": {
+    "shortName": "D.RAM",
+    "name": "Domain Ramsay",
+    "colour": "#FF8844",
+    "lineStyle": "solid"
+  },
+  "72": {
+    "shortName": "P.AND",
+    "name": "Peter Anderson",
+    "colour": "#AA44FF",
+    "lineStyle": "dashed"
+  },
+  "73": {
+    "shortName": "Z.RHO",
+    "name": "Zane Rhodes",
+    "colour": "#FF4444",
+    "lineStyle": "dotted"
+  },
+  "75": {
+    "shortName": "E.BAR",
+    "name": "Elliot Barbour",
+    "colour": "#FFFF44",
+    "lineStyle": "solid"
+  },
+  "76": {
+    "shortName": "A.WHI",
+    "name": "Anthony Whitehair",
+    "colour": "#44BBFF",
+    "lineStyle": "dotted"
+  },
+  "77": {
+    "shortName": "R.JAN",
+    "name": "Rodney Jane",
+    "colour": "#909090",
+    "lineStyle": "dotted"
+  },
+  "78": {
+    "shortName": "Z.BES",
+    "name": "Zak Best",
+    "colour": "#88BBFF",
+    "lineStyle": "dotted"
+  },
+  "79": {
+    "shortName": "R.CAS",
+    "name": "Ryan Casha",
+    "colour": "#FF4488",
+    "lineStyle": "dotted"
+  },
+  "80": {
+    "shortName": "B.VAU",
+    "name": "Brad Vaughan",
+    "colour": "#AA44FF",
+    "lineStyle": "dotted"
+  },
+  "81": {
+    "shortName": "J.SIN",
+    "name": "Jordyn Sinni",
+    "colour": "#FF8000",
+    "lineStyle": "dashed"
+  },
+  "83": {
+    "shortName": "R.CUL",
+    "name": "Renee Cullen",
+    "colour": "#44FF88",
+    "lineStyle": "dotted"
+  },
+  "85": {
+    "shortName": "M.SLA",
+    "name": "Matt Slavin",
+    "colour": "#88BBFF",
+    "lineStyle": "dotted"
+  },
+  "87": {
+    "shortName": "BEA",
+    "name": "Oliver BEARMAN",
+    "colour": "#B6BABD",
+    "lineStyle": "dashed"
+  },
+  "88": {
+    "shortName": "B.FEE",
+    "name": "Broc Feeney",
+    "colour": "#FF4444",
+    "lineStyle": "solid"
+  },
+  "89": {
+    "shortName": "T.BEW",
+    "name": "Tom Bewley",
+    "colour": "#AA44FF",
+    "lineStyle": "dotted"
+  },
+  "91": {
+    "shortName": "J.SAN",
+    "name": "Jake Santalucia",
+    "colour": "#FF4444",
+    "lineStyle": "solid"
+  },
+  "96": {
+    "shortName": "M.JON",
+    "name": "Macauley Jones",
+    "colour": "#FF8844",
+    "lineStyle": "solid"
+  },
+  "97": {
+    "shortName": "B.BAR",
+    "name": "Ben Bargwanna",
+    "colour": "#FF4488",
+    "lineStyle": "solid"
+  },
+  "99": {
+    "shortName": "C.MUR",
+    "name": "Cooper Murray",
+    "colour": "#FFFF44",
+    "lineStyle": "solid"
+  },
+  "111": {
+    "shortName": "L.TAL",
+    "name": "Liam Talbot",
+    "colour": "#FFB344",
+    "lineStyle": "dotted"
+  },
+  "118": {
+    "shortName": "J.HUG",
+    "name": "Jarrod Hughes",
+    "colour": "#88BBFF",
+    "lineStyle": "solid"
+  },
+  "121": {
+    "shortName": "L.SMI",
+    "name": "Lee Smith",
+    "colour": "#BB44FF",
+    "lineStyle": "dotted"
+  },
+  "222": {
+    "shortName": "S.TAY",
+    "name": "Scott Taylor",
+    "colour": "#44BBFF",
+    "lineStyle": "solid"
+  },
+  "261": {
+    "shortName": "D.SAI",
+    "name": "Dilan Saitz",
+    "colour": "#FF44BB",
+    "lineStyle": "dotted"
+  },
+  "333": {
+    "shortName": "R.JOH",
+    "name": "Rossi Johnson",
+    "colour": "#44BBFF",
+    "lineStyle": "solid"
+  },
+  "777": {
+    "shortName": "D.FRA",
+    "name": "Declan Fraser",
+    "colour": "#FF4488",
+    "lineStyle": "solid"
+  },
+  "888": {
+    "shortName": "W.BRO",
+    "name": "William Brown",
+    "colour": "#88BBFF",
+    "lineStyle": "solid"
+  },
+  "911": {
+    "shortName": "G.WOO",
+    "name": "Glen Wood",
+    "colour": "#44FF88",
+    "lineStyle": "solid"
+  },
+  "999": {
+    "shortName": "A.MOU",
+    "name": "Angelo Mouzouris",
+    "colour": "#FFB344",
+    "lineStyle": "solid"
+  }
+}

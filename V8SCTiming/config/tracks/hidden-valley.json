@@ -1,0 +1,41 @@
+{
+  "id": "hidden-valley",
+  "name": "Hidden Valley Raceway",
+  "shortName": "Darwin",
+  "country": "Australia",
+  "lapDistanceKm": 2.870,
+  "sectors": {
+    "count": 3,
+    "labels": ["S1", "S2", "S3"],
+    "splitDistancesKm": [1.126, 1.959, 2.870],
+    "loopDistancesKm": [0.243, 0.512, 0.371, 0.184, 0.273, 0.376, 0.301, 0.212, 0.398],
+    "loopLabels": ["Pos1", "Pos2", "S1", "Pos3", "Pos4", "S2", "Pos5", "Pos6", "SF"],
+    "loopPassTypes": [71, 72, 5, 73, 74, 6, 75, 76]
+  },
+  "pit": {
+    "laneEntryDistanceKm": 2.601,
+    "laneExitDistanceKm": 0.025,
+    "speedLimitKph": 30,
+    "minPitTimeSeconds": 5,
+    "pitLaneTransitSeconds": 35,
+    "pitEntryToExitOnTrackSeconds": 8,
+    "pitWindowOpenLap": 8,
+    "pitWindowCloseLap": null,
+    "blockingWindowSeconds": 2,
+    "tyreChange2TSec": 6,
+    "tyreChange4TSec": 12,
+    "unsafeReleaseGapSeconds": 2
+  },
+  "raceFormat": {
+    "type": "laps",
+    "value": 70
+  },
+  "analysis": {
+    "fuelSensitivitySKg": null,
+    "startFuelKg": 80
+  },
+  "trackMap": {
+    "gpsFile": "",
+    "imageFile": ""
+  }
+}

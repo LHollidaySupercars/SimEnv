@@ -1,0 +1,62 @@
+{
+  "id": "bathurst",
+  "name": "Mount Panorama Circuit",
+  "shortName": "Bathurst",
+  "country": "Australia",
+  "lapDistanceKm": 6.213,
+  "sectors": {
+    "count": 3,
+    "labels": [
+      "S1",
+      "S2",
+      "S3"
+    ],
+    "_comment": "Nominal sector split distances in km from start/finish line.",
+    "splitDistancesKm": [
+      1.95,
+      4.1,
+      6.213
+    ]
+  },
+  "pit": {
+    "_comment": "All pit-lane timing constants for Bathurst. Values sourced from published supplementary regulations. Adjust per-event as needed.",
+    "laneEntryDistanceKm": 5.8,
+    "laneExitDistanceKm": 0.12,
+    "speedLimitKph": 40,
+    "minPitTimeSeconds": 5,
+    "_comment_minPit": "Minimum stationary time enforced by regulations (not total pit lane transit).",
+    "pitLaneTransitSeconds": 52,
+    "_comment_transit": "Typical full pit-lane transit time at 40 km/h speed limit (entry to exit). This is how long a car is off the track — it does NOT drive the blocking window calculation.",
+    "pitEntryToExitOnTrackSeconds": 12,
+    "_comment_ontrack": "On-track travel time (seconds) from the pit lane entry ramp to the pit exit merge point, measured along the racing circuit (not through the pit lane). At Bathurst: ~0.533 km at ~160 km/h ≈ 12 s. This is the reference point for blocking: a rival running within blockingWindowSeconds of this gap will arrive at the pit exit merge point at the same moment the pitting car emerges.",
+    "pitWindowOpenLap": 14,
+    "pitWindowCloseLap": null,
+    "_comment_window": "null closeLap means window stays open to the end of the race. Override per-event.",
+    "blockingWindowSeconds": 3,
+    "tyreChange2TSec": 6,
+    "tyreChange4TSec": 12,
+    "_comment_blocking": "Tolerance either side of pitEntryToExitOnTrackSeconds (seconds). Any car whose on-track gap falls in [onTrack - tolerance, onTrack + tolerance] is in the blocking window. Green = clear, orange = marginal (within one tolerance band of the boundary), red = inside the window.",
+    "unsafeReleaseGapSeconds": 3,
+    "_comment_unsafe": "Minimum gap (seconds) at pit exit to avoid an unsafe release penalty."
+  },
+  "raceFormat": {
+    "type": "laps",
+    "value": 161,
+    "_comment": "type: 'laps' | 'time_minutes'. value: number (lap count or minutes). Override per-event."
+  },
+  "analysis": {
+    "fuelSensitivitySKg": null,
+    "_comment": "Fuel effect constant in s/kg. Set via Fuel Sensitivity panel. Used to fuel-correct lap times for tyre degradation analysis.",
+    "startFuelKg": 120,
+    "_comment_fuel": "Starting fuel load in kg. Used with fuelSensitivitySKg to compute per-lap fuel correction. Default 120 kg for Supercars Bathurst 1000."
+  },
+  "trackMap": {
+    "gpsFile": "tracks/bathurst_gps.csv",
+    "_comment": "CSV with columns: lat,lon,distance_km. File path relative to config/. Leave empty or omit if no GPS data.",
+    "svgViewBox": "0 0 800 600",
+    "startFinishFraction": 0,
+    "_comment_fraction": "Position of start/finish line as a fraction of total lap distance (0.0 = start of CSV data).",
+    "imageFile": "",
+    "_comment_image": "Optional: absolute path to a PNG/JPG/SVG track map image. Displayed when no GPS data is available. E.g. /Users/you/tracks/bathurst.png"
+  }
+}

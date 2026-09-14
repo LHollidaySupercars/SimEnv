@@ -1,0 +1,15 @@
+<UserControl x:Class="V8SCTiming.Viewer.Panels.UndercutPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <DataGrid x:Name="Grid" AutoGenerateColumns="False" IsReadOnly="True"
+                  CanUserAddRows="False" CanUserDeleteRows="False"
+                  GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Car" Binding="{Binding CarNumber}" Width="60"/>
+                <DataGridTextColumn Header="Last 5 Avg" Binding="{Binding Last5Avg, StringFormat={}{0:0.000}}" Width="100"/>
+                <DataGridTextColumn Header="Best Recent" Binding="{Binding BestRecent, StringFormat={}{0:0.000}}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
