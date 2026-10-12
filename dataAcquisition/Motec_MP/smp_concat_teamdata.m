@@ -205,7 +205,34 @@
 %     [merged_sess, fp_report] = concat_sessions(all_sess, concat_opts);
 %     exclude_mask = false(grp.n_files, 1);
 %     if cfg.show_report
-%         exclude_mask = smp_show_concat_report(fp_report, grp.key, grp.files, all_sess, merged_sess, date_flags);
+%         % ---- Lap-count cross-check (official timing vs telemetry) ----
+%         % Purely additive/optional — smp_show_concat_report degrades
+%         % gracefully (skips the line) if event_code/session/tla can't all
+%         % be resolved, or if no official lap data exists yet.
+%         lap_check_cfg = struct();
+%         event_code_raw = cfg_get_local(cfg, 'event_code', cfg_get_local(cfg, 'hol_venue', ''));
+%         % Defensive normalisation: some callers in this pipeline pass the
+%         % FULL event folder name (e.g. 'E09_QLR') as cfg.hol_venue rather
+%         % than the short track code (see e.g. E09_R28_QLR_CombineDatasets.m,
+%         % which deliberately sets concat_cfg.hol_venue = cfg.hol_event for
+%         % its own header-patching purposes — not something this file
+%         % should change). The short code is always the LAST '_'-separated
+%         % token either way ('E09_QLR' -> 'QLR', or 'QLR' -> 'QLR' unchanged),
+%         % and that short code is what the pasted/live/pdf lap-times CSVs
+%         % store in their 'event' column — so normalise here rather than
+%         % rely on the raw field value.
+%         event_code_tok = strsplit(event_code_raw, '_');
+%         lap_check_cfg.event_code = event_code_tok{end};
+%         lap_check_cfg.session    = grp.session;
+%         lap_check_cfg.tla        = lookup_driver_tla(driver_map, grp.driver);
+%         if ~isempty(cfg_get_local(cfg, 'laptimes_csv', ''))
+%             lap_check_cfg.laptimes_csv = cfg.laptimes_csv;
+%         end
+%         if ~isempty(cfg_get_local(cfg, 'driver_alias_file', ''))
+%             lap_check_cfg.driver_alias_file = cfg.driver_alias_file;
+%         end
+% 
+%         exclude_mask = smp_show_concat_report(fp_report, grp.key, grp.files, all_sess, merged_sess, date_flags, lap_check_cfg);
 %     elseif use_date_filter
 %         % No report shown — still prompt for any date-suspect files
 %         for fi = 1 : grp.n_files
@@ -409,6 +436,10 @@
 % %  LOCAL FUNCTIONS
 % % =========================================================================
 % 
+% function v = cfg_get_local(s, f, def)
+%     if isfield(s, f) && ~isempty(s.(f)), v = s.(f); else, v = def; end
+% end
+% 
 % function tla = lookup_driver_tla(driver_map, driver_name)
 %     tla = '';
 %     if ~isempty(driver_map) && ~isempty(driver_name)
@@ -433,6 +464,13 @@
 % % =========================================================================
 % function patch_ld_header_td(filepath, session_str, venue_str, event_str)
 % % Patch session (0x5E4/32b), venue (0x15E/64b), event (0x624/32b) in-place.
+% %
+% % Also patches the secondary "correction" block (session + venue), when
+% % present, so both copies agree. That block is located by signature
+% % search (uint32 x4 = [100 56 4 1]) rather than a fixed offset, since its
+% % exact position drifts by a byte or two between files depending on
+% % earlier variable-length header content. See ld_set_session_all.m for
+% % the standalone version of this logic.
 %     FIELDS = {hex2dec('5E4'), session_str, 32; ...
 %               hex2dec('15E'), venue_str,   64; ...
 %               hex2dec('624'), event_str,   32};
@@ -453,6 +491,62 @@
 %         fseek(fid, offset, 'bof');
 %         fwrite(fid, bytes, 'uint8');
 %     end
+%     clear c;  % onCleanup already closes fid here — no explicit fclose needed
+% 
+%     % ---- Secondary correction block (session + venue) ---------------------
+%     patch_ld_correction_block(filepath, session_str, venue_str);
+% end
+% 
+% % =========================================================================
+% function patch_ld_correction_block(filepath, session_str, venue_str)
+% % Locate the secondary venue/session block via signature search and
+% % overwrite its session (and venue, if supplied) fields to match the
+% % primary header. No-op if no block is found — not every file has one.
+%     SIG            = uint8(typecast(uint32([100 56 4 1]), 'uint8'));
+%     VENUE_REL      = 48;
+%     SESSION_REL    = 112;
+%     CORR_FIELD_LEN = 64;
+%     SCAN_CAP       = 4 * 1024 * 1024;
+% 
+%     d = dir(filepath);
+%     if isempty(d), return; end
+%     scan_len = min(d.bytes, SCAN_CAP);
+% 
+%     fid = fopen(filepath, 'rb');
+%     if fid == -1, return; end
+%     raw = fread(fid, scan_len, 'uint8=>uint8')';
+%     fclose(fid);
+% 
+%     hit = strfind(raw, SIG);
+%     if isempty(hit), return; end   % no correction block in this file — nothing to do
+%     sig_off = hit(1) - 1;          % 0-based
+% 
+%     fid = fopen(filepath, 'r+b');
+%     if fid == -1
+%         fprintf('  [WARN] patch_ld_correction_block: cannot open %s\n', filepath);
+%         return;
+%     end
+%     c = onCleanup(@() fclose(fid)); %#ok<NASGU>
+% 
+%     if ~isempty(session_str)
+%         write_corr_field(fid, sig_off + SESSION_REL, CORR_FIELD_LEN, session_str, filepath);
+%     end
+%     if ~isempty(venue_str)
+%         write_corr_field(fid, sig_off + VENUE_REL, CORR_FIELD_LEN, venue_str, filepath);
+%     end
+% end
+% 
+% function write_corr_field(fid, offset, field_len, str, filepath)
+%     if numel(str) > field_len - 1
+%         fprintf('  [WARN] patch_ld_correction_block: "%s" exceeds %d chars, truncating (%s)\n', ...
+%             str, field_len - 1, filepath);
+%         str = str(1:field_len - 1);
+%     end
+%     bytes = zeros(1, field_len, 'uint8');
+%     n     = numel(str);
+%     bytes(1:n) = uint8(str);
+%     fseek(fid, offset, 'bof');
+%     fwrite(fid, bytes, 'uint8');
 % end
 % 
 % function found_path = smp_find_existing_hol(root_dir, target_filename)
@@ -673,7 +767,34 @@ for g = 1 : numel(groups)
     [merged_sess, fp_report] = concat_sessions(all_sess, concat_opts);
     exclude_mask = false(grp.n_files, 1);
     if cfg.show_report
-        exclude_mask = smp_show_concat_report(fp_report, grp.key, grp.files, all_sess, merged_sess, date_flags);
+        % ---- Lap-count cross-check (official timing vs telemetry) ----
+        % Purely additive/optional — smp_show_concat_report degrades
+        % gracefully (skips the line) if event_code/session/tla can't all
+        % be resolved, or if no official lap data exists yet.
+        lap_check_cfg = struct();
+        event_code_raw = cfg_get_local(cfg, 'event_code', cfg_get_local(cfg, 'hol_venue', ''));
+        % Defensive normalisation: some callers in this pipeline pass the
+        % FULL event folder name (e.g. 'E09_QLR') as cfg.hol_venue rather
+        % than the short track code (see e.g. E09_R28_QLR_CombineDatasets.m,
+        % which deliberately sets concat_cfg.hol_venue = cfg.hol_event for
+        % its own header-patching purposes — not something this file
+        % should change). The short code is always the LAST '_'-separated
+        % token either way ('E09_QLR' -> 'QLR', or 'QLR' -> 'QLR' unchanged),
+        % and that short code is what the pasted/live/pdf lap-times CSVs
+        % store in their 'event' column — so normalise here rather than
+        % rely on the raw field value.
+        event_code_tok = strsplit(event_code_raw, '_');
+        lap_check_cfg.event_code = event_code_tok{end};
+        lap_check_cfg.session    = grp.session;
+        lap_check_cfg.tla        = lookup_driver_tla(driver_map, grp.driver);
+        if ~isempty(cfg_get_local(cfg, 'laptimes_csv', ''))
+            lap_check_cfg.laptimes_csv = cfg.laptimes_csv;
+        end
+        if ~isempty(cfg_get_local(cfg, 'driver_alias_file', ''))
+            lap_check_cfg.driver_alias_file = cfg.driver_alias_file;
+        end
+
+        exclude_mask = smp_show_concat_report(fp_report, grp.key, grp.files, all_sess, merged_sess, date_flags, lap_check_cfg);
     elseif use_date_filter
         % No report shown — still prompt for any date-suspect files
         for fi = 1 : grp.n_files
@@ -877,13 +998,26 @@ end  % function smp_concat_teamdata
 %  LOCAL FUNCTIONS
 % =========================================================================
 
+function v = cfg_get_local(s, f, def)
+    if isfield(s, f) && ~isempty(s.(f)), v = s.(f); else, v = def; end
+end
+
+function n = normalise_driver_name(x)
+    if isstring(x), x = char(x); end
+    if ~ischar(x), n = ''; return; end
+    n = strtrim(regexprep(lower(x), '[_\s]+', ' '));
+end
+
 function tla = lookup_driver_tla(driver_map, driver_name)
     tla = '';
     if ~isempty(driver_map) && ~isempty(driver_name)
-        name_lower = lower(strtrim(driver_name));
+        % Names can arrive as 'Lochie_Dalton' (header/filename) while the alias
+        % file holds 'lochie dalton' — compare with '_'/whitespace normalised.
+        name_lower = normalise_driver_name(driver_name);
         keys = fieldnames(driver_map);
         for k = 1 : numel(keys)
-            if any(strcmp(name_lower, driver_map.(keys{k}).aliases))
+            al_norm = cellfun(@normalise_driver_name, driver_map.(keys{k}).aliases, 'UniformOutput', false);
+            if any(strcmp(name_lower, al_norm))
                 tla = driver_map.(keys{k}).tla;
                 break;
             end

@@ -101,7 +101,8 @@ function C = colours()
         % Try manufacturer → driver → fallback
         key = lower(strtrim(label));
         key_clean = regexprep(key, '\s+(gen|generation|v8).*$', '');
-        if isfield(MFG, key_clean) || isfield(MFG, strsplit(key_clean){1})
+        first_tok = strsplit(key_clean);
+        if isfield(MFG, key_clean) || isfield(MFG, first_tok{1})
             rgb = manufacturer_colour(label);
         elseif isfield(DRV, regexprep(key,'[^a-z]',''))
             rgb = driver_colour(label);

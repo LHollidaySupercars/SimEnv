@@ -720,6 +720,7 @@ if WRITE_VCH_LD
                 ld_ch.mul         = 1;
                 ld_ch.scale       = 1;
                 ld_ch.offset      = 0;
+                if isfield(fch, 'datatype') && ismember(fch.datatype, [5 6]), ld_ch.datatype = fch.datatype; end   % float keeps NaN
                 ch_list{end+1}    = ld_ch; %#ok<AGROW>
             end
 
@@ -743,6 +744,7 @@ if WRITE_VCH_LD
                 ld_ch.mul    = 1;
                 ld_ch.scale  = 1;
                 ld_ch.offset = 0;
+                if isfield(gch, 'datatype') && ismember(gch.datatype, [5 6]), ld_ch.datatype = gch.datatype; end   % float keeps NaN
                 ch_list{end+1} = ld_ch; %#ok<AGROW>
             end
 

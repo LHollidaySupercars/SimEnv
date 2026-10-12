@@ -82,20 +82,48 @@ Handles all data egress from MATLAB and runs the web-facing real-time Pit Wall d
 
 **Current production flow:**
 ```
-smp_launch.m → smp_cache_load → smp_flatten_stats → smp_push_to_sql
-    → Azure SQL (dbo.lap_stats)
-    → Azure Function (function_getLapStats)
+smp_compile_event_upload.m → smp_flatten_stats → smp_melt_lap_stats
+    → smp_push_to_sql (via smp_resolve_ids for Channels/Sessions/Drivers)
+    → Azure SQL (dbo.Channels / dbo.Sessions / dbo.Drivers / dbo.LapStats)
+    → Azure Function (function_getLapStats, reads dbo.vw_LapStats, pivots back to wide JSON)
     → dashboard/smp_data.js
     → dashboard/smp_charts.js
 ```
 
+**Narrow/long schema (current):** storage moved from a wide one-column-
+per-channel-stat table (`dbo.lap_stats` — hit SQL Server's 1024-column /
+8060-byte row limits and needed constant `ALTER TABLE` churn as new
+channels appeared) to a narrow/long schema: `dbo.Channels` / `dbo.Sessions`
+/ `dbo.Drivers` are lookup tables (natural key → surrogate int ID,
+resolved lookup-or-insert), `dbo.LapStats` stores one row per
+(session, driver, lap, channel, stat) instead of one row per lap with
+hundreds/thousands of columns, and `dbo.Laps` stores one row per
+(session, driver, lap) with a `LapType` classification (`flying` |
+`outlap` | `inlap` | `pitlap` | `pit_truncated` | `fcy`, computed by
+`lap_slicer.m` and carried through `smp_extract_lap_types.m`; `lap_time`
+itself stays in `LapStats` as the existing `LapTime` pseudo-channel row —
+not duplicated into `Laps`). `dbo.vw_LapStats` / `dbo.vw_Laps` are flat
+views joining everything back to human-readable names for ad-hoc
+querying. See `serverInteraction/sql/create_narrow_schema.sql` for the
+DDL (idempotent — safe to re-run) and `smp_migrate_lap_stats_to_narrow.m`
+for the one-time backfill from the old wide table. The old `dbo.lap_stats`
+table still exists (untouched, unused) until manually dropped.
+
 **Key files:**
-- `smp_launch.m` — Unified launcher: connects to PocketBase (local), or Azure SQL (local/Entra ID MFA).
-- `smp_flatten_stats.m` — Converts the compiled cache struct to a flat MATLAB table for DB insert.
-- `smp_push_to_sql.m` — Batched JDBC `PreparedStatement` inserts to Azure SQL.
+- `smp_compile_event_upload.m` — Event-wide streaming compile → melt → buffer → flush → upload pipeline. Opens ONE SQL connection per run (reused across every flush) to avoid repeated Entra ID/MFA prompts; falls back to per-flush detached workers only when `opts.despatcher = true`.
+- `smp_flatten_stats.m` — Converts the compiled cache struct to a flat (wide, one row per lap) MATLAB table.
+- `smp_melt_lap_stats.m` — Unpivots the wide per-lap table into narrow rows (one row per lap+channel+stat) ready for the narrow schema. Called per-file during buffering (so files with differing channel coverage can never cause a `vertcat` column-mismatch), and again defensively inside `smp_push_to_sql.m` for any caller that still hands it a wide table.
+- `smp_extract_lap_types.m` — Pulls one row per lap (not per channel/stat) out of the wide per-lap table for the `dbo.Laps` classification table; collapses `lap_slicer.m`'s `'slow'`/`'long'` fallback labels to `'flying'`.
+- `smp_push_laps_to_sql.m` — Mirrors `smp_push_to_sql.m`'s resolve-IDs / version-aware overwrite / single-transaction pattern, scoped to the small `dbo.Laps` table.
+- `smp_resolve_ids.m` — Cache-backed lookup-or-insert helper: resolves natural keys (channel name; event/venue/session/year; driver/team) to their surrogate `ChannelID`/`SessionID`/`DriverID`, inserting new lookup rows as needed.
+- `smp_push_to_sql.m` — Batched JDBC `PreparedStatement` inserts to Azure SQL `dbo.LapStats`. Version-aware overwrite: a session+driver already stored at the same `MathVersion` is skipped as a no-op; a different `MathVersion` triggers delete+replace. Delete and insert share ONE transaction (both roll back together on any failure).
+- `smp_migrate_lap_stats_to_narrow.m` — One-time backfill: reads the old wide `dbo.lap_stats`, melts it, and re-pushes into the narrow schema.
+- `smp_upload_worker.m` — Standalone/detached one-shot upload entry point (used by the detached `despatcher=true` path and for manual testing); accepts an optional pre-opened connection to avoid re-authenticating.
 - `smp_sql_connect.m` — JDBC connection factory (Azure SQL / local SQL Express).
 - `smp_data_filter.m` — Sets out-of-range / sentinel samples to NaN before upload.
 - `smp_generate_config.m` — Reads `V8SC_PitWall_plot_organizer.xlsx` and auto-generates `dashboard/smp_config.js`.
+- `smp_launch.m` — Legacy unified launcher (PocketBase / Azure SQL); largely superseded by `smp_compile_event_upload.m` for event-wide uploads.
+- `sql/create_narrow_schema.sql` — Idempotent DDL for the narrow schema + `dbo.vw_LapStats`. Safe to re-run.
 
 **Pit Wall web dashboard (`dashboard/`):**
 - `index.html` — Single-page app shell.
@@ -105,12 +133,12 @@ smp_launch.m → smp_cache_load → smp_flatten_stats → smp_push_to_sql
 - `smp_config.js` — Auto-generated app and plot configuration (do not hand-edit; regenerate via `smp_generate_config.m`).
 
 **Azure Function (`function_getLapStats/`):**
-- Node.js HTTP-triggered Azure Function that queries `dbo.lap_stats` and returns JSON.
+- Node.js HTTP-triggered Azure Function that queries `dbo.vw_LapStats` (the narrow-schema view) and pivots the narrow rows back into the legacy wide, one-row-per-lap JSON shape (`ground_speed_max`, `lap_time`, etc.) so the dashboard needed no changes despite the underlying storage redesign.
 - Triggered at `GET /api/getLapStats`.
 - Dependencies: `mssql` npm package.
 
 **SQL project (`SQL_server/V8_SC_Pitwall/`):**
-- SQL Server Database Project (`.sqlproj`) defining the `dbo.lap_stats` table schema and related objects.
+- SQL Server Database Project (`.sqlproj`) — predates the narrow-schema migration; see `serverInteraction/sql/create_narrow_schema.sql` for the current schema DDL.
 
 **Infrastructure:**
 - `sqljdbc/enu/` — Microsoft JDBC driver JARs and MSAL auth DLL (for MATLAB→Azure SQL connection).
@@ -122,5 +150,5 @@ smp_launch.m → smp_cache_load → smp_flatten_stats → smp_push_to_sql
 1. **Session data arrives** — `.ld` files dropped into team folders (`NN_TEAMNAME/`).
 2. **Compile** — Run `execute_main_report.m`. Scans folders → loads channels → slices laps → computes stats → saves to cache.
 3. **Plot** — Generates Excel-configured PPTX reports via `Motec_MP/plot/`.
-4. **Upload** — `smp_launch.m` flattens the cache and pushes lap stats rows to Azure SQL.
+4. **Upload** — `smp_compile_event_upload.m` scans the event, melts each file's per-lap stats to narrow rows, and pushes them to Azure SQL's narrow schema (`dbo.Channels`/`Sessions`/`Drivers`/`LapStats`) via `smp_push_to_sql.m`.
 5. **Pit Wall** — Engineers open `dashboard/index.html`; the SPA authenticates via Entra ID, calls the Azure Function, and renders live charts.

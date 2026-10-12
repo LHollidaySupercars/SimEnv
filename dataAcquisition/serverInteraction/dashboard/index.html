@@ -192,6 +192,7 @@ main::-webkit-scrollbar{width:5px;}.main::-webkit-scrollbar-thumb{background:var
       <div class="filter-box"><span class="filter-box-label">Event</span><div class="filter-list" id="f-event"></div></div>
       <div class="filter-box"><span class="filter-box-label">Session</span><div class="filter-list" id="f-session"></div></div>
       <div class="filter-box"><span class="filter-box-label">Team</span><div class="filter-list" id="f-team"></div></div>
+      <div class="filter-box"><span class="filter-box-label">Year</span><div class="filter-list" id="f-year"></div></div>
     </div>
     <div class="load-event-wrap">
       <div class="load-event-label">Load Event</div>
@@ -569,6 +570,7 @@ function buildFilterLists(){
   buildFilterList('f-event',SMP_DATA.getAllUniqueEvents());
   buildFilterList('f-session',SMP_DATA.getAllUnique('session'));
   buildFilterList('f-team',SMP_DATA.getAllUnique('team'));
+  buildFilterList('f-year',SMP_DATA.getAllUnique('year'));
 }
 function buildFilterList(id,vals){
   document.getElementById(id).innerHTML=vals.map(v=>`<div class="filter-item" data-val="${v}" onclick="togFilter(this,'${id}')">${v}</div>`).join('');
@@ -597,7 +599,8 @@ function applyFilters(){
   const events=[...document.querySelectorAll('#f-event .filter-item.on')].map(e=>e.dataset.val);
   const sessions=[...document.querySelectorAll('#f-session .filter-item.on')].map(e=>e.dataset.val);
   const teams=[...document.querySelectorAll('#f-team .filter-item.on')].map(e=>e.dataset.val);
-  SMP_DATA.applyFilters(events,sessions,teams,getActiveMfrs());refreshAll();
+  const years=[...document.querySelectorAll('#f-year .filter-item.on')].map(e=>e.dataset.val);
+  SMP_DATA.applyFilters(events,sessions,teams,years,getActiveMfrs());refreshAll();
 }
 function resetFilters(){
   document.querySelectorAll('.filter-item').forEach(e=>e.classList.remove('on','hi'));

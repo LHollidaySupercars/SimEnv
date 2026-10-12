@@ -70,6 +70,16 @@ xcorr_cfg.max_offset_s = MAX_OFFSET_S;
 xcorr_cfg.rpm_min      = RPM_MIN;
 xcorr_cfg.b_ecu_format = false;
 
+% ---- Lap-count cross-check config (Trim Tool GUI panel) ----
+% Compares telemetry lap slicing (via lap_slicer.m, the pipeline's
+% authoritative lap-indexing logic — see smp_count_telemetry_laps.m) against
+% official session timing (see smp_get_official_laps.m, degrades gracefully
+% to "not found" until a pdf / live / pasted source file exists).
+xcorr_cfg.event_code        = cfg_get(cfg, 'event_code', cfg_get(cfg, 'hol_venue', ''));
+xcorr_cfg.laptimes_csv      = cfg_get(cfg, 'laptimes_csv', '');
+xcorr_cfg.driver_alias_file = cfg_get(cfg, 'driver_alias_file', '');
+xcorr_cfg.lap_opts          = cfg_get(cfg, 'lap_opts', struct());
+
 % =========================================================================
 %  PHASE 1 — SCAN FOLDERS
 % =========================================================================
@@ -190,6 +200,8 @@ for i = 1 : size(candidates, 1)
 
     % --- xcorr ---
     xcorr_cfg.b_ecu_format = ECU_FORMAT;
+    xcorr_cfg.tla          = tla;
+    xcorr_cfg.session      = SESSION;
     [q, off, err_msg, seg_offsets] = xcorr_quality(dash_file, ecu_file, ...
         DASH_RPM, ECU_RPM, xcorr_cfg);
 
@@ -898,8 +910,10 @@ function [quality, offset_s, err_msg, seg_offsets] = xcorr_quality(file_a, file_
         fprintf('[TRIM] Orphan ECU data detected: %.0fs before dash start — launching trim UI\n', ...
             orphan_duration_s);
 
+        lap_info = build_lap_info(file_a, cfg);
+
         trim_before_s = xcorr_quality_trim_ui(t_a_full, v_a_full, t_b_full, v_b_full, ...
-            offset_s, RPM_MIN, file_a, file_b);
+            offset_s, RPM_MIN, file_a, file_b, lap_info);
 
         if ~isempty(trim_before_s)
             trim_native = trim_before_s - offset_s;
@@ -961,6 +975,55 @@ function [quality, offset_s, err_msg, seg_offsets] = xcorr_quality(file_a, file_
         waitfor(gcf);
     end
 
+end
+% =========================================================================
+%  build_lap_info — telemetry vs official lap-count cross-check
+% =========================================================================
+function lap_info = build_lap_info(dash_file, cfg)
+% Compute the telemetry-vs-official lap comparison shown in the Trim Tool
+% GUI. Non-fatal on any failure — always returns a usable struct so the GUI
+% can render a "not available" state instead of erroring.
+    lap_info = struct( ...
+        'telemetry_found', false, 'telemetry_laps', NaN, 'telemetry_laps_raw', NaN, ...
+        'telemetry_boundary_times', [], 'telemetry_lap_numbers', [], 'telemetry_lap_types', {{}}, ...
+        'telemetry_formation_lap_excluded', false, ...
+        'official_found',  false, 'official_laps',  NaN, 'official_lap_times', [], 'official_lap_numbers', []);
+
+    try
+        a_ecu = isfield(cfg, 'a_ecu_format') && isscalar(cfg.a_ecu_format) && logical(cfg.a_ecu_format);
+        telemetry = smp_count_telemetry_laps(dash_file, a_ecu, cfg_get(cfg, 'lap_opts', struct()));
+        lap_info.telemetry_found                    = telemetry.found;
+        lap_info.telemetry_laps                     = telemetry.laps;
+        lap_info.telemetry_laps_raw                  = telemetry.laps_raw;
+        lap_info.telemetry_boundary_times            = telemetry.boundary_times;
+        lap_info.telemetry_lap_numbers               = telemetry.lap_numbers;
+        lap_info.telemetry_lap_types                 = telemetry.lap_types;
+        lap_info.telemetry_formation_lap_excluded    = telemetry.formation_lap_excluded;
+    catch ME
+        fprintf('[WARN] build_lap_info: telemetry lap count failed: %s\n', ME.message);
+    end
+
+    try
+        event_code = cfg_get(cfg, 'event_code', '');
+        tla        = cfg_get(cfg, 'tla', '');
+        session    = cfg_get(cfg, 'session', '');
+        if ~isempty(event_code) && ~isempty(tla) && ~isempty(session)
+            opts = struct();
+            if ~isempty(cfg_get(cfg, 'laptimes_csv', ''))
+                opts.csv_path = cfg.laptimes_csv;
+            end
+            if ~isempty(cfg_get(cfg, 'driver_alias_file', ''))
+                opts.driver_alias_file = cfg.driver_alias_file;
+            end
+            official = smp_get_official_laps(event_code, session, tla, opts);
+            lap_info.official_found        = official.found;
+            lap_info.official_laps         = official.laps;
+            lap_info.official_lap_times    = official.lap_times;
+            lap_info.official_lap_numbers  = official.lap_numbers;
+        end
+    catch ME
+        fprintf('[WARN] build_lap_info: official lap lookup failed: %s\n', ME.message);
+    end
 end
 % =========================================================================
 %  xcorr_quality_debug_plot
@@ -1057,9 +1120,18 @@ end
 %  xcorr_quality_trim_ui
 % =========================================================================
 function trim_before_s = xcorr_quality_trim_ui(t_a_full, v_a_full, t_b_full, v_b_full, ...
-    offset_s, RPM_MIN, file_a, file_b)
+    offset_s, RPM_MIN, file_a, file_b, lap_info)
 
     trim_before_s = [];
+
+    if nargin < 9 || isempty(lap_info)
+        lap_info = struct('telemetry_found', false, 'telemetry_laps', NaN, ...
+            'telemetry_laps_raw', NaN, 'telemetry_boundary_times', [], ...
+            'telemetry_lap_numbers', [], 'telemetry_lap_types', {{}}, ...
+            'telemetry_formation_lap_excluded', false, ...
+            'official_found', false, 'official_laps', NaN, ...
+            'official_lap_times', [], 'official_lap_numbers', []);
+    end
 
     [~, name_a] = fileparts(file_a);
     [~, name_b] = fileparts(file_b);
@@ -1080,6 +1152,11 @@ function trim_before_s = xcorr_quality_trim_ui(t_a_full, v_a_full, t_b_full, v_b
     uilabel(fig, 'Position', [30 120 500 22], ...
         'Text', sprintf('Orphan ECU data detected: ~%.0fs before dash start.', orphan_duration), ...
         'FontColor', [0.8 0.2 0.2], 'FontWeight', 'bold');
+
+    % ---- Lap-count cross-check readout (telemetry vs official timing) ----
+    uilabel(fig, 'Position', [30 100 900 20], ...
+        'Text', lap_info_summary_text(lap_info), ...
+        'FontColor', [0.15 0.3 0.6], 'FontWeight', 'bold', 'FontSize', 11);
 
     uilabel(fig, 'Position', [30 85 200 22], 'Text', 'Trim ECU before aligned time (s):');
     trim_field = uieditfield(fig, 'numeric', ...
@@ -1130,6 +1207,7 @@ function trim_before_s = xcorr_quality_trim_ui(t_a_full, v_a_full, t_b_full, v_b
                 'DisplayName', ['ECU: ' name_b]);
         end
         yline(ax, RPM_MIN, 'k--', 'LineWidth', 0.8, 'Label', sprintf('RPM\\_MIN=%d', RPM_MIN));
+        draw_lap_boundaries(ax, lap_info);
         legend(ax, 'Location', 'northeast', 'FontSize', 7);
         xlabel(ax, 'Aligned time (s)'); ylabel(ax, 'Engine RPM');
         title(ax, sprintf('ECU Trim Preview — offset=%.3fs', offset_s));
@@ -1148,6 +1226,85 @@ function trim_before_s = xcorr_quality_trim_ui(t_a_full, v_a_full, t_b_full, v_b
     function do_skip()
         trim_before_s = [];
         close(fig);
+    end
+end
+
+% =========================================================================
+%  lap_info_summary_text / draw_lap_boundaries — lap cross-check display
+% =========================================================================
+function txt = lap_info_summary_text(lap_info)
+    if ~lap_info.telemetry_found && ~lap_info.official_found
+        txt = 'Lap check: no telemetry lap channel and no official lap data available.';
+        return;
+    end
+    if lap_info.telemetry_found
+        tel_str = sprintf('%d', lap_info.telemetry_laps);
+        if ~isnan(lap_info.telemetry_laps_raw) && lap_info.telemetry_laps_raw ~= lap_info.telemetry_laps
+            % Pit-lane / formation-lap correction was applied (see
+            % smp_count_telemetry_laps.m) — show both so a discrepancy is
+            % traceable, not mysterious.
+            corr_note = 'pit-lane';
+            if lap_info.telemetry_formation_lap_excluded
+                corr_note = [corr_note ' + formation-lap'];
+            end
+            tel_str = sprintf('%s (raw %d, %s corrected)', tel_str, lap_info.telemetry_laps_raw, corr_note);
+        end
+    else
+        tel_str = 'n/a';
+    end
+    if lap_info.official_found
+        off_str = sprintf('%d', lap_info.official_laps);
+    else
+        off_str = 'no official lap data available';
+    end
+    if lap_info.telemetry_found && lap_info.official_found
+        delta = lap_info.telemetry_laps - lap_info.official_laps;
+        txt = sprintf('Lap check — Telemetry laps: %s   |   Official laps: %s   |   \x0394: %+d', ...
+            tel_str, off_str, delta);
+    else
+        txt = sprintf('Lap check — Telemetry laps: %s   |   Official laps: %s', tel_str, off_str);
+    end
+end
+
+function draw_lap_boundaries(ax, lap_info)
+% Overlay telemetry lap boundaries on the speed trace, annotated with the
+% matching official lap time where available, so a lap-count mismatch or
+% lap-time outlier is visually obvious against the trace. Boundaries and
+% lap numbers come directly from lap_slicer's own output (via
+% smp_count_telemetry_laps.m) — not from an assumed sequential index — so
+% they line up correctly even when laps don't start at 1 or aren't
+% contiguous (e.g. a partial/trimmed session).
+    if ~lap_info.telemetry_found || isempty(lap_info.telemetry_boundary_times)
+        return;
+    end
+    boundaries  = lap_info.telemetry_boundary_times;
+    lap_numbers = lap_info.telemetry_lap_numbers;
+    n_b         = numel(boundaries);
+    yl          = ylim(ax);
+    label_every = max(1, ceil(n_b / 15));   % avoid label clutter on long sessions
+
+    for k = 1:n_b
+        xline(ax, boundaries(k), 'Color', [0.3 0.3 0.3], 'LineStyle', ':', ...
+            'LineWidth', 0.5, 'HandleVisibility', 'off');
+        if mod(k, label_every) ~= 0 && k ~= n_b
+            continue;
+        end
+        lap_num  = lap_numbers(k);
+        lap_time = NaN;
+        if lap_info.official_found
+            match_idx = find(lap_info.official_lap_numbers == lap_num, 1);
+            if ~isempty(match_idx)
+                lap_time = lap_info.official_lap_times(match_idx);
+            end
+        end
+        if isnan(lap_time)
+            lbl = sprintf('L%d', lap_num);
+        else
+            lbl = sprintf('L%d (%.1fs)', lap_num, lap_time);
+        end
+        text(ax, boundaries(k), yl(2) * 0.95, lbl, 'FontSize', 6, ...
+            'Color', [0.3 0.3 0.3], 'Rotation', 90, 'VerticalAlignment', 'top', ...
+            'HorizontalAlignment', 'right');
     end
 end
 

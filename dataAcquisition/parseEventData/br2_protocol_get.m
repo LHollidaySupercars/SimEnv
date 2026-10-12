@@ -56,7 +56,16 @@ function proto = br2_protocol_get(name)
             proto.pitin    = 999;
             proto.pitout   = 900;   % pit-out = return to idle
 
+        case {'bth', 'pulse'}   % 'pulse' is the generic name; 'BTH' kept for existing scripts
+            proto.name       = 'pulse';
+            proto.variant    = 'excursion';
+            proto.idle       = 997;
+            proto.neg_thresh = -100;   % below this starts an S/F pulse (-1 is a MoTeC placeholder)
+            proto.sf_pulse   = NaN;
+            proto.pitin      = NaN;
+            proto.pitout     = NaN;
+
         otherwise
-            error('br2_protocol_get: unknown protocol ''%s''. Known: standard, TAS2025.', name);
+            error('br2_protocol_get: unknown protocol ''%s''. Known: standard, TAS2025, pulse (alias BTH).', name);
     end
 end

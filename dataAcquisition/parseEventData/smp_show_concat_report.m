@@ -1,4 +1,4 @@
-function exclude_mask = smp_show_concat_report(report, label, file_names, sessions, merged, date_flags)
+function exclude_mask = smp_show_concat_report(report, label, file_names, sessions, merged, date_flags, lap_check_cfg)
 % SMP_SHOW_CONCAT_REPORT  Blocking pop-up summarising concat_sessions decisions.
 %
 % Called automatically by load_and_concat when compile_opts.showConcatReport=true.
@@ -18,6 +18,18 @@ function exclude_mask = smp_show_concat_report(report, label, file_names, sessio
 %                   .event_date  'yyyy-mm-dd' string
 %                 Suspect files are shown as DATE? in the table (yellow row).
 %                 After the window closes a questdlg fires per suspect file.
+%   lap_check_cfg - optional struct enabling an official-vs-telemetry lap
+%                 count cross-check line, shown right under the summary:
+%                   .event_code        - event code, e.g. 'QLR'
+%                   .session           - session alias, e.g. 'R28'
+%                   .tla               - driver TLA, e.g. 'MOS'
+%                   .laptimes_csv      - (optional) override master CSV path
+%                   .driver_alias_file - (optional) override driverAlias.xlsx path
+%                 Telemetry side uses smp_lap_count_from_session.m directly
+%                 on the already-loaded `merged` session (no file re-read).
+%                 Official side uses smp_get_official_laps.m (degrades
+%                 gracefully to "no official data" if not found/not
+%                 supplied — this is purely additive, safe to omit).
 %
 % OUTPUT
 %   exclude_mask - logical vector (length = numel(report)) — true where the
@@ -28,6 +40,7 @@ function exclude_mask = smp_show_concat_report(report, label, file_names, sessio
     if nargin < 4,                        sessions   = {}; end
     if nargin < 5,                        merged     = []; end
     if nargin < 6,                        date_flags = []; end
+    if nargin < 7,                        lap_check_cfg = []; end
 
     exclude_mask = false(numel(report), 1);
 
@@ -45,13 +58,49 @@ function exclude_mask = smp_show_concat_report(report, label, file_names, sessio
     has_traces = ~isempty(sessions) && numel(sessions) == n;
     has_merged = ~isempty(merged) && isstruct(merged);
 
-    HDR_H    = 80;
-    HINT_H   = 20;   % hint text below summary
-    TBL_H    = n * 24 + 32;
-    TRC_H    = 260;
-    MERGED_H = 220;
-    ALIGN_H  = 220;
-    PAD      = 12;
+    % ---- Official-vs-telemetry lap-count cross-check (non-fatal) ----
+    % Computed here (before layout) so its display height can be budgeted
+    % correctly. Telemetry side reuses the already-loaded `merged` session
+    % struct directly via smp_lap_count_from_session — no extra file I/O.
+    % `official` is resolved ONCE and cached (via lap_check_official below)
+    % so the "Recalculate" button can recompute just the telemetry side
+    % on click without re-querying smp_get_official_laps every time.
+    lap_check_text     = '';
+    lap_check_official = struct('found', false, 'laps', NaN);
+    has_lap_check       = ~isempty(lap_check_cfg) && isstruct(lap_check_cfg) ...
+        && ~isempty(cfg_get_local(lap_check_cfg, 'event_code', '')) ...
+        && ~isempty(cfg_get_local(lap_check_cfg, 'session', '')) ...
+        && ~isempty(cfg_get_local(lap_check_cfg, 'tla', ''));
+    if has_lap_check
+        lap_check_official = resolve_official_laps(lap_check_cfg);
+        if has_merged
+            telemetry_init = safe_lap_count_from_session(merged);
+        else
+            telemetry_init = struct('found', false, 'laps', NaN, 'laps_raw', NaN, ...
+                'formation_lap_excluded', false);
+        end
+        lap_check_text = format_lap_check_line(telemetry_init, lap_check_official);
+    end
+    has_lap_check = ~isempty(lap_check_text);
+    % ---- Skip the pop-up when the lap delta is within tolerance ----
+    AUTO_ACCEPT_DELTA = 2;
+    if has_lap_check && has_merged && telemetry_init.found && lap_check_official.found
+        lap_delta = telemetry_init.laps - lap_check_official.laps;
+        if abs(lap_delta) <= AUTO_ACCEPT_DELTA
+            fprintf('  [AUTO-ACCEPT] %s: telemetry %d / official %d (\x0394%+d) - pop-up skipped\n', ...
+                label, telemetry_init.laps, lap_check_official.laps, lap_delta);
+            exclude_mask = strcmp({report.status}, 'dropped')';   % same as closing the pop-up with default ticks
+            return;
+        end
+    end
+    HDR_H     = 80;
+    HINT_H    = 20;   % hint text below summary
+    LAPCHK_H  = 22;   % lap-count cross-check line, shown under the hint
+    TBL_H     = n * 24 + 32;
+    TRC_H     = 260;
+    MERGED_H  = 220;
+    ALIGN_H   = 220;
+    PAD       = 12;
 
     % Count dropped stints that have a valid match with session data available
     n_aligned = 0;
@@ -65,6 +114,7 @@ function exclude_mask = smp_show_concat_report(report, label, file_names, sessio
     end
 
     fig_h = HDR_H + HINT_H + PAD + TBL_H + PAD;
+    if has_lap_check, fig_h = fig_h + LAPCHK_H; end
     if has_traces, fig_h = fig_h + TRC_H + PAD; end
     if has_merged, fig_h = fig_h + MERGED_H + PAD; end
     if n_aligned > 0, fig_h = fig_h + n_aligned * (ALIGN_H + PAD); end
@@ -130,6 +180,26 @@ function exclude_mask = smp_show_concat_report(report, label, file_names, sessio
         'BackgroundColor', [0.10 0.10 0.10], ...
         'HorizontalAlignment', 'center');
 
+    % ---- Lap-count cross-check (official timing vs telemetry, if supplied) ----
+    lap_check_text_h = [];
+    lap_check_btn_h  = [];
+    if has_lap_check
+        y = y - LAPCHK_H;
+        lap_check_text_h = uicontrol('Parent', inner_pan, 'Style', 'text', ...
+            'String', lap_check_text, ...
+            'Units', 'pixels', 'Position', [5 y 860 20], ...
+            'FontSize', 10, 'FontWeight', 'bold', ...
+            'ForegroundColor', [0.45 0.70 1.00], ...
+            'BackgroundColor', [0.10 0.10 0.10], ...
+            'HorizontalAlignment', 'center');
+        % Button itself created here (visually, next to the text); its
+        % Callback is wired further below once tbl_h exists.
+        lap_check_btn_h = uicontrol('Parent', inner_pan, 'Style', 'pushbutton', ...
+            'String', 'Recalculate Lap Check', ...
+            'Units', 'pixels', 'Position', [870 y 180 20], ...
+            'FontSize', 8);
+    end
+
     y = y - PAD;
 
     % ---- Session table ----
@@ -178,6 +248,13 @@ function exclude_mask = smp_show_concat_report(report, label, file_names, sessio
         'FontSize', 10, ...
         'BackgroundColor', tbl_row_colors, ...
         'ForegroundColor', [0.95 0.95 0.95]);
+
+    % Wire the "Recalculate Lap Check" button now that tbl_h exists (it
+    % needs to read tbl_h's live Exclude? column on each click).
+    if has_lap_check && ishandle(lap_check_btn_h)
+        set(lap_check_btn_h, 'Callback', ...
+            @(~,~) on_recalculate_lap_check(tbl_h, sessions, lap_check_official, lap_check_text_h));
+    end
 
     y = y - PAD;
 
@@ -441,6 +518,131 @@ function exclude_mask = smp_show_concat_report(report, label, file_names, sessio
         exclude_mask = logical(cell2mat(final_data(:, 6)));
     end
     if ishandle(fig), delete(fig); end
+end
+
+% -------------------------------------------------------------------------
+function official = resolve_official_laps(lap_check_cfg)
+% Resolve the official lap count ONCE (cached by the caller) — non-fatal
+% on any failure, returns a "not found" struct so the caller degrades
+% gracefully rather than erroring the whole report.
+    official = struct('found', false, 'laps', NaN);
+    try
+        event_code = cfg_get_local(lap_check_cfg, 'event_code', '');
+        session    = cfg_get_local(lap_check_cfg, 'session',    '');
+        tla        = cfg_get_local(lap_check_cfg, 'tla',        '');
+        if isempty(event_code) || isempty(session) || isempty(tla)
+            return;
+        end
+        opts = struct();
+        if ~isempty(cfg_get_local(lap_check_cfg, 'laptimes_csv', ''))
+            opts.csv_path = lap_check_cfg.laptimes_csv;
+        end
+        if ~isempty(cfg_get_local(lap_check_cfg, 'driver_alias_file', ''))
+            opts.driver_alias_file = lap_check_cfg.driver_alias_file;
+        end
+        fprintf('[DBG] lap check: event="%s" session="%s" tla="%s" csv="%s"\n', ...
+            event_code, session, tla, cfg_get_local(lap_check_cfg, 'laptimes_csv', ''));
+        official = smp_get_official_laps(event_code, session, tla, opts);
+    catch ME
+        fprintf('[WARN] smp_show_concat_report: official lap lookup failed: %s\n', ME.message);
+        official = struct('found', false, 'laps', NaN);
+    end
+end
+
+% -------------------------------------------------------------------------
+function telemetry = safe_lap_count_from_session(session)
+% Non-fatal wrapper around smp_lap_count_from_session — returns a
+% "not found" struct on any failure instead of propagating an error.
+    telemetry = struct('found', false, 'laps', NaN, 'laps_raw', NaN, ...
+        'formation_lap_excluded', false);
+    try
+        telemetry = smp_lap_count_from_session(session);
+    catch ME
+        fprintf('[WARN] smp_show_concat_report: telemetry lap count failed: %s\n', ME.message);
+    end
+end
+
+% -------------------------------------------------------------------------
+function txt = format_lap_check_line(telemetry, official)
+% Pure formatting — no I/O — shared by the initial report render and the
+% "Recalculate" button's on-click recompute.
+    if telemetry.found
+        tel_str = sprintf('%d', telemetry.laps);
+        if isfield(telemetry, 'laps_raw') && ~isnan(telemetry.laps_raw) && telemetry.laps_raw ~= telemetry.laps
+            corr_note = 'pit-lane';
+            if isfield(telemetry, 'formation_lap_excluded') && telemetry.formation_lap_excluded
+                corr_note = [corr_note ' + formation-lap'];
+            end
+            tel_str = sprintf('%s (raw %d, %s corrected)', tel_str, telemetry.laps_raw, corr_note);
+        end
+    else
+        tel_str = 'n/a';
+    end
+
+    if official.found
+        off_str = sprintf('%d', official.laps);
+    else
+        off_str = 'no official lap data available';
+    end
+
+    if telemetry.found && official.found
+        delta = telemetry.laps - official.laps;
+        txt = sprintf('Lap check — Telemetry laps: %s   |   Official laps: %s   |   \x0394: %+d', ...
+            tel_str, off_str, delta);
+    else
+        txt = sprintf('Lap check — Telemetry laps: %s   |   Official laps: %s', tel_str, off_str);
+    end
+end
+
+% -------------------------------------------------------------------------
+function on_recalculate_lap_check(tbl_h, sessions, official, lap_check_text_h)
+% "Recalculate Lap Check" button callback — sums telemetry lap counts
+% across whichever raw sessions are currently NOT ticked "Exclude?" in the
+% table, and updates the displayed lap-check line in place. Does not
+% re-run the full concat/duplicate-detection/merge pipeline (this GUI
+% doesn't have concat_opts to do so) — summing per-session corrected lap
+% counts is accurate for genuinely separate back-to-back stints, which is
+% the common case this button is meant to help with.
+    if ~ishandle(tbl_h) || ~ishandle(lap_check_text_h)
+        return;
+    end
+    try
+        tbl_data = get(tbl_h, 'Data');
+        excluded = logical(cell2mat(tbl_data(:, 6)));
+        keep_idx = find(~excluded);
+
+        laps_total     = 0;
+        laps_raw_total = 0;
+        any_found      = false;
+        any_formation  = false;
+        for i = 1:numel(keep_idx)
+            si = keep_idx(i);
+            if si > numel(sessions) || isempty(sessions{si}), continue; end
+            t = safe_lap_count_from_session(sessions{si});
+            if t.found
+                any_found      = true;
+                laps_total     = laps_total + t.laps;
+                laps_raw_total = laps_raw_total + t.laps_raw;
+                any_formation  = any_formation || (isfield(t, 'formation_lap_excluded') && t.formation_lap_excluded);
+            end
+        end
+
+        telemetry = struct('found', any_found, 'laps', laps_total, ...
+            'laps_raw', laps_raw_total, 'formation_lap_excluded', any_formation);
+        if ~any_found
+            telemetry.laps     = NaN;
+            telemetry.laps_raw = NaN;
+        end
+
+        txt = format_lap_check_line(telemetry, official);
+        set(lap_check_text_h, 'String', txt);
+    catch ME
+        fprintf('[WARN] smp_show_concat_report: recalculate lap check failed: %s\n', ME.message);
+    end
+end
+
+function v = cfg_get_local(s, f, def)
+    if isfield(s, f) && ~isempty(s.(f)), v = s.(f); else, v = def; end
 end
 
 % -------------------------------------------------------------------------

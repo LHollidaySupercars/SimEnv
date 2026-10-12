@@ -1,10 +1,19 @@
-function augment_com_files_serial(com_dir, channels_file, cfg, driver_map)
-% AUGMENT_COM_FILES_SERIAL  Serial Phase 6 — augment every .ld in com_dir.
-%   Recursively scans com_dir, applies driver alias + session filters,
-%   then runs smp_custom_channels + smp_gated_channels on each file.
+function augment_com_files_serial(com_dir, channels_file, cfg, driver_map, varargin)
+
+
+    p = inputParser;
+    addParameter(p, 'specificFiles', []);
+    parse(p, varargin{:});
+    specificFiles = p.Results.specificFiles;
+
+    
+
+    % AUGMENT_COM_FILES_SERIAL  Serial Phase 6 — augment every .ld in com_dir.
+    %   Recursively scans com_dir, applies driver alias + session filters,
+    %   then runs smp_custom_channels + smp_gated_channels on each file.
     if nargin < 3, cfg = struct(); end
     if nargin < 4, driver_map = []; end
-
+    
     try
         T_gated_vcs = readtable(channels_file, 'Sheet', 'gatedChannels', 'TextType', 'char');
     catch
@@ -25,7 +34,9 @@ function augment_com_files_serial(com_dir, channels_file, cfg, driver_map)
         fprintf('  [WARN] No files remain after driver/session filter.\n');
         return;
     end
-
+    if ~isempty(specificFiles)
+        all_paths = specificFiles;
+    end
     n_aug_ok   = 0;
     n_aug_fail = 0;
 
@@ -66,11 +77,17 @@ function augment_com_files_serial(com_dir, channels_file, cfg, driver_map)
             ch_list = {};
             for ci = 1:numel(all_fields)
                 fn = all_fields{ci};
+                % if strcmp(fn,'Engine_Speed')
+                %     4
+                % end
                 ch = aug_data.(fn);
                 if ~isstruct(ch) || ~isfield(ch, 'write_to_ld') || ~ch.write_to_ld
                     continue;
                 end
                 ld_ch.name        = ch.raw_name;
+                % if strcmp(ch.raw_name, 'nFront Left Accel Based KIN')
+                %     4
+                % end
                 ld_ch.units       = ch.units;
                 ld_ch.sample_rate = ch.sample_rate;
                 ld_ch.value       = ch.data(:);
@@ -84,14 +101,40 @@ function augment_com_files_serial(com_dir, channels_file, cfg, driver_map)
                 else
                     ld_ch.overwrite = false;
                 end
-
-                ld_ch.mul         = 1;
-                ld_ch.scale       = 1;
+                % float32 (5) / float16 (6) only; other datatype requests stay ignored as before
+                if isfield(ch, 'datatype') && ismember(ch.datatype, [5 6])
+                    ld_ch.datatype = ch.datatype;
+                elseif isfield(ld_ch, 'datatype')
+                    ld_ch = rmfield(ld_ch, 'datatype');
+                end
+                if isfield(ch, 'mul')
+                    ld_ch.mul = ch.mul;
+                end
+                if isfield(ch, 'scale')
+                    ld_ch.scale = ch.scale;
+                end
                 vals = ld_ch.value(isfinite(ld_ch.value));
-                if ~isempty(vals) && min(vals) < 0
-                    ld_ch.offset = floor(min(vals)) - 1;
+                % if ~isempty(vals) && min(vals) < 0
+                %     ld_ch.offset = floor(min(vals)) - 1;
+                % else
+                %     ld_ch.offset = 0;
+                % end
+                if isfield(ch, 'offset')
+                    ld_ch.offset = ch.offset;
                 else
-                    ld_ch.offset = 0;
+                    vals = ld_ch.value(isfinite(ld_ch.value));
+                    if ~isempty(vals) && min(vals) < 0
+                        ld_ch.offset = floor(min(vals)) - 1;
+                    else
+                        ld_ch.offset = 0;
+                    end
+                end
+                % int16 raw = (phys - offset) * 10^dec must fit 32767; float channels are unaffected
+                if ~isfield(ld_ch, 'datatype')
+                    vals = ld_ch.value(isfinite(ld_ch.value));
+                    while ~isempty(vals) && ld_ch.dec_places > 0 && (max(vals) - ld_ch.offset) * 10^ld_ch.dec_places > 32767
+                        ld_ch.dec_places = ld_ch.dec_places - 1;
+                    end
                 end
                 ch_list{end+1} = ld_ch; %#ok<SAGROW>
             end

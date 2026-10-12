@@ -76,7 +76,7 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
     load_all_ch    = get_opt(opts, 'load_all_channels',  false);
     T_gated        = get_opt(opts, 'T_gated',            table());
     pre_groups     = get_opt(opts, 'groups',             []);
-    corner_cfg = get_opt(opts, 'corner_cfg', [])
+    corner_cfg     = get_opt(opts, 'corner_cfg', [])
     % ------------------------------------------------------------------
     %  Lap time limits from season overview
     % ------------------------------------------------------------------
@@ -91,7 +91,7 @@ function cache = smp_compile_event(top_level_dir, team_filter, ...
         end
     end
     if isempty(corner_cfg) && ~isempty(track)
-        corners_xlsx_path = get_opt(opts, 'corners_xlsx_path', 'corners.xlsx');
+        corners_xlsx_path = get_opt(opts, 'corners_xlsx_path', 'V8SC_corners.xlsx');
         corner_cfg = smp_corner_config_load(corners_xlsx_path, track);
     end
 
@@ -240,7 +240,7 @@ end
             detect_pitlane, fcy_channel, ...
             br2_channel, br2_protocol, ...
             unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode, ...
-            get_opt(opts, 'channel_ops_map', []));   % <-- NEW — this is where get_opt(opts,...) belongs
+            get_opt(opts, 'channel_ops_map', []), corner_cfg);   % <-- NEW — this is where get_opt(opts,...) belongs
         
     else
         cache = process_bulk(cache, groups, channels_to_extract, verbose);
@@ -270,7 +270,8 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
                                  dist_ch, driver_map, verbose, channel_rules, ...
                                  detect_pitlane, fcy_channel, ...
                                  br2_channel, br2_protocol, ...
-                                 unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode, channel_ops_map)
+                                 unique_fp, show_report, concat_csv_dir, all_laps, load_all_ch, T_gated, l180_mode, channel_ops_map,...
+                                 corner_cfg)
     if nargin < 11, channel_rules  = [];                  end
     if nargin < 12, detect_pitlane = false;               end
     if nargin < 13, fcy_channel    = 'FCY_Flag';          end
@@ -284,6 +285,7 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
     if nargin < 21, T_gated        = table();             end
     if nargin < 22, l180_mode      = 'drop_duplicate';    end
     if nargin < 23, channel_ops_map = [];                 end   % <-- NEW
+    if nargin < 24, corner_cfg = [];                      end   % <-- NEW
     MYLAPS_CH_DEFAULT        = 'MyLaps X2TRA DeviceShortId';
     lap_opts.min_lap_time    = min_lt;
     lap_opts.max_lap_time    = max_lt;
@@ -293,7 +295,7 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
     lap_opts.br2_protocol    = br2_protocol;
     lap_opts.mylaps_channel  = MYLAPS_CH_DEFAULT;
     lap_opts.verbose         = false;
-
+    
     dist_opts.distance_channel = dist_ch;
     dist_opts.resolution       = [];
     dist_opts.common_grid      = true;
@@ -394,6 +396,8 @@ function cache = process_stream(cache, groups, channels_to_extract, ...
                 stats_channels = stat_channels;
                 lap_stats_opts = struct('operations', {stat_ops});
             end
+
+            lap_stats_opts.corner_cfg = corner_cfg;   % <-- NEW: thread corner config through
 
             t0_stats = tic;
             stats = lap_stats(laps, stats_channels, lap_stats_opts);

@@ -1911,7 +1911,7 @@
 % end
 
 
-function data = motec_ld_reader(filepath, channels_to_extract, ecu_format)
+function data = motec_ld_reader(filepath, channels_to_extract, ecu_format, unit_map_path)
 % MOTEC_LD_READER  Parse a MoTeC .ld binary file without the i2 API licence.
 %
 % Usage:
@@ -1927,6 +1927,13 @@ function data = motec_ld_reader(filepath, channels_to_extract, ecu_format)
 %         - Units string at metadata block offset +0x40 (not +0x48)
 %         - Datatype 4 = native float32 (not int16 + 2-byte padding)
 %
+%   data = motec_ld_reader(file, channels, ecu_format, unit_map_path)
+%       Unit conversion: channels listed in unit_map_path (csv/xlsx with columns
+%       Channel, TargetUnits) are converted from the units written in the file.
+%       Default: channel_units.csv next to this file. Pass '' to disable.
+%       Channel matches the raw name or the field name (case-insensitive).
+%       An unknown unit pair is an error. Original units kept in .units_raw.
+%
 % Datatype encoding (Dash format):
 %   1 = float16  — raw uint16 decoded as IEEE half-precision
 %   2 = int16    — scaled: (raw * mul/scale) / 10^dec + offset
@@ -1939,15 +1946,20 @@ function data = motec_ld_reader(filepath, channels_to_extract, ecu_format)
 
     DISTANCE_CHANNELS = {'Trip Distance', 'Odometer', 'Distance', 'Trip_Distance'};
 
+    if nargin < 4
+        unit_map_path = fullfile(fileparts(mfilename('fullpath')), 'channel_units.csv');
+    end
+    unit_map = motec_load_unit_map(unit_map_path);
+
     % --- ECU format flag ---
     if nargin < 3 || isempty(ecu_format)
         ecu_format = false;
     end
     if ecu_format
-        units_rel_offset = 0x40;
+        units_rel_offset = double(0x40);   % double: hex literals are uint8 and would saturate the seek
         fprintf('Format: ECU logger (units at +0x40, type-4 = float32)\n');
     else
-        units_rel_offset = 0x48;
+        units_rel_offset = double(0x48);
         fprintf('Format: Dash logger (units at +0x48, type-4 = int16+pad)\n');
     end
 
@@ -2005,7 +2017,7 @@ function data = motec_ld_reader(filepath, channels_to_extract, ecu_format)
         data_ptr    = fread(fid, 1, 'uint32=>double', 0, 'l');
         data_len    = fread(fid, 1, 'uint32=>double', 0, 'l');
         fread(fid,  1, 'uint16=>double', 0, 'l');              % sr_raw
-        fread(fid,  1, 'uint16=>double', 0, 'l');              % unk1
+        unk1        = fread(fid, 1, 'uint16=>double', 0, 'l');
         datatype    = fread(fid, 1, 'uint16=>double', 0, 'l');
         sample_rate = fread(fid, 1, 'uint16=>double', 0, 'l');
         ch_offset   = fread(fid, 1, 'int16=>double',  0, 'l');
@@ -2064,7 +2076,7 @@ function data = motec_ld_reader(filepath, channels_to_extract, ecu_format)
                     end
 
                 case 4
-                    if ecu_format
+                    if ecu_format || unk1 == 7   % unk1 = 7 marks an IEEE float32 channel
                         phys = fread(fid, data_len, 'float32=>double', 0, 'l');
                     else
                         % Confirmed via raw byte dump (GPS Latitude/Longitude
@@ -2107,11 +2119,31 @@ function data = motec_ld_reader(filepath, channels_to_extract, ecu_format)
                 if isfield(data, field)
                     field = sprintf('%s_%d', field, channel_count);
                 end
+
+                target_units = '';
+                if unit_map.isKey(lower(name_str))
+                    target_units = unit_map(lower(name_str));
+                elseif unit_map.isKey(lower(field))
+                    target_units = unit_map(lower(field));
+                end
+                units_written = units_str;
+                if ~isempty(target_units)
+                    [u_scale, u_off] = motec_unit_rule(units_str, target_units, name_str);
+                    phys      = phys * u_scale + u_off;
+                    units_str = target_units;
+                end
+
                 data.(field).data        = phys;
                 data.(field).time        = time_vec;
                 data.(field).units       = units_str;
+                data.(field).units_raw   = units_written;
                 data.(field).sample_rate = sample_rate;
                 data.(field).raw_name    = name_str;
+                data.(field).datatype    = datatype  ;
+                data.(field).ch_offset   = ch_offset ;
+                data.(field).ch_mul      = ch_mul    ;
+                data.(field).ch_scale    = ch_scale  ;
+                data.(field).dec_places  = dec_places;
                 channel_count = channel_count + 1;
                 fprintf('  [%3d] %-35s %5g Hz  %7d samples  [%s]\n', ...
                     channel_count, name_str, sample_rate, data_len, units_str);

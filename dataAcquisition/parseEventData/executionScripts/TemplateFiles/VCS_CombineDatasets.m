@@ -322,6 +322,11 @@ function augment_com_files_serial(com_dir, channels_file, cfg)
                 end
                 ld_ch.mul         = 1;
                 ld_ch.scale       = 1;
+                if isfield(ch, 'datatype') && ismember(ch.datatype, [5 6])   % float keeps NaN
+                    ld_ch.datatype = ch.datatype;
+                elseif isfield(ld_ch, 'datatype')
+                    ld_ch = rmfield(ld_ch, 'datatype');
+                end
                 vals = ld_ch.value(isfinite(ld_ch.value));
                 if ~isempty(vals) && min(vals) < 0
                     ld_ch.offset = floor(min(vals)) - 1;

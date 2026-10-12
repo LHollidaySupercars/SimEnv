@@ -18,8 +18,12 @@ function T = timing_vehicle_lookup(T, alias_path)
 %        vehicle value = MAN column; falls back to MAN_TLA if MAN is empty
 
     if nargin < 2 || isempty(alias_path)
-        this_dir   = fileparts(mfilename('fullpath'));
-        alias_path = fullfile(this_dir, '..', 'Motec_MP', 'alias', 'driverAlias.xlsx');
+        if isappdata(0, 'timing_driver_alias_file')
+            alias_path = getappdata(0, 'timing_driver_alias_file');   % set by run_timing_workflow
+        else
+            this_dir   = fileparts(mfilename('fullpath'));
+            alias_path = fullfile(this_dir, '..', 'Motec_MP', 'alias', 'driverAlias.xlsx');
+        end
     end
 
     n         = height(T);
@@ -73,8 +77,8 @@ function T = timing_vehicle_lookup(T, alias_path)
     n_miss = 0;
 
     for i = 1:n
-        car_key = strtrim(char(T.car(i)));
-        drv_key = lower(strtrim(char(T.driver(i))));
+        car_key = strtrim(char(string(T.car(i))));   % car may be numeric after readtable
+        drv_key = lower(strtrim(char(string(T.driver(i)))));
 
         if isKey(car_mfr, car_key)
             T.vehicle(i) = string(car_mfr(car_key));

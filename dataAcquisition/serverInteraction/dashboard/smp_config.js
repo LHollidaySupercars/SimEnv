@@ -26,7 +26,7 @@ const SMP_CONFIG = {
 
   // ── Event order (chronological) ────────────────────────────
   EVENT_ORDER: [
-    'SMP', 'AGP', 'TAU', 'CCH', 'TAS', 'PER', 'DAR', 'TSV', 'QRW', 'TMB', 'BAT', 'GST', 'SAN', 'ADL',
+    'SMP', 'AGP', 'TAU', 'CCH', 'TAS', 'PER', 'DAR', 'TSV', 'QLR', 'TMB', 'BAT', 'GST', 'SAN', 'ADL',
   ],
 
   // ── Manufacturer colours ─────────────────────────────────────

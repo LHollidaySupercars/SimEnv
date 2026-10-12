@@ -106,6 +106,7 @@ function T_all = smp_extract_topspeed_folder(folder_path, force)
 
         try
             T = smp_extract_topspeed(pdf_path, event_code, session_alias);
+            session_alias = char(T.session(1));   % session as read from the PDF
 
             % Attach combined identifier e.g. "RAU_QR12"
             T.identifier = repmat(string(sprintf('%s_%s', event_code, session_alias)), height(T), 1);

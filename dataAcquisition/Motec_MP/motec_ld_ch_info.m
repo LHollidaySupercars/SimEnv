@@ -68,12 +68,12 @@ function info = motec_ld_ch_info(filepath, filter_name)
         dec_places  = fread(fid, 1, 'int16=>double',  0, 'l');
 
         % Channel name at +0x20 (32 bytes, null-terminated)
-        fseek(fid, current_ptr + 0x20, 'bof');
+        fseek(fid, current_ptr + double(0x20), 'bof');
         name_raw = fread(fid, 32, 'uint8=>double')';
         name_str = raw_to_str(name_raw);
 
         % Units at +0x50 (12 bytes, null-terminated)
-        fseek(fid, current_ptr + 0x50, 'bof');
+        fseek(fid, current_ptr + double(0x40), 'bof');
         units_raw = fread(fid, 12, 'uint8=>double')';
         units_str = raw_to_str(units_raw);
 

@@ -93,8 +93,8 @@ function T = smp_extract_topspeed(pdf_path, event, session)
         T.kph = str2double(T.kph);
     end
 
-    % ── Upgrade session alias if filename gave a raw fallback ─────────────────
-    if is_raw_session(session)
+    % ── Take session alias from PDF text (overrides filename) ─────────────────
+    if true
         pdf_ses = extract_sentinel(out_lines, '__SESSION__');
         if ~isempty(pdf_ses)
             better = session_alias_from_text(pdf_ses);

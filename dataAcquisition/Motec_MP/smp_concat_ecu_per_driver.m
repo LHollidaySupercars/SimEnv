@@ -110,7 +110,7 @@ for fi = 1 : numel(ld_files)
 
     try
         hdr     = motec_ld_info(fp, false);
-        raw_drv = strtrim(hdr.driver);
+        raw_drv = strtrim(hdr.driver)
 
         % Prefer TLA > canonical > raw driver as group key
         [canon, ~, ~, ~, tla] = resolve_driver_info(raw_drv, driver_map);

@@ -31,6 +31,7 @@ function smp_sort_hol_to_teams(hol_dir, driver_alias_file, opts)
     do_move   = get_opt(opts, 'move',      true);
     verbose   = get_opt(opts, 'verbose',   true);
     dry_run   = get_opt(opts, 'dry_run',   false);
+    enduro    = get_opt(opts, 'enduro', false);
 
     if dry_run
         fprintf('[DRY RUN] No files will be moved or copied.\n\n');
@@ -79,8 +80,13 @@ function smp_sort_hol_to_teams(hol_dir, driver_alias_file, opts)
         % Pattern: <DRV_TLA>_<year>_<session>.ld  e.g. MOS_2026_R15.ld
         [~, fname_no_ext] = fileparts(ld_files(i).name);
         tokens  = strsplit(fname_no_ext, '_');
-        drv_tla = upper(strtrim(tokens{1}));
-
+        if enduro
+            drv_tla_P1 = upper(strtrim(tokens{1}));
+            drv_tla_P2 = upper(strtrim(tokens{2}));
+            drv_tla = sprintf('%s_%s', drv_tla_P1, drv_tla_P2)
+        else
+            drv_tla = upper(strtrim(tokens{1}));
+        end 
         % ---- Lookup TM_sorting_TLA ----
         alias_idx = find(strcmp(drv_tla, drv_tlas), 1);
 

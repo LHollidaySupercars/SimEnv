@@ -142,7 +142,6 @@
 %     end
 % end
 
-
 function info = motec_ld_info(filepath, verbose)
     if nargin < 2, verbose = true; end
 % MOTEC_LD_INFO  Read metadata from a MoTeC .ld file.
@@ -207,13 +206,32 @@ function info = motec_ld_info(filepath, verbose)
     info.driver     = fstr(hdr, 0x9E,   64);
     info.vehicle    = fstr(hdr, 0xDE,   64);
     info.engine_id  = fstr(hdr, 0x11E,  64);
+    
     info.venue      = fstr(hdr, 0x15E,  64);
+    info.event      = fstr(hdr, 0x15E,  64);
     info.session    = fstr(hdr, 0x5E4,  32);
     info.run        = fstr(hdr, 0x624,  32);
     info.team_name  = fstr(hdr, 0x694,  64);
     info.venue_raw   = info.venue;
     info.session_raw = info.session;
 
+
+    info.venue      = fstr(hdr, 0x15E,  64);
+    info.event      = fstr(hdr, 0x15E,  64);
+    info.session    = fstr(hdr, 0x5E4,  32);
+    info.run        = fstr(hdr, 0x624,  32);
+    info.team_name  = fstr(hdr, 0x694,  64);
+    info.venue_raw   = info.venue;
+    info.session_raw = info.session;
+
+    % The 'event' field (0x15E) is formatted as "E<round>_<venue_hex>"
+    % e.g. "E09_QLR" -> venue_hex = "QLR". Parsed directly from the
+    % fixed-offset event string — no lookup table or binary scan needed.
+    info.venue_hex = '';
+    tok3 = regexp(info.event, '^E\d+_(.+)$', 'tokens');
+    if ~isempty(tok3)
+        info.venue_hex = tok3{1}{1};
+    end
     % Device code at 0x4A is the ECU serial (e.g. "C185" for Control Dash 185)
     % — it is the same for every car using the same ECU hardware, so it is NOT
     %   the race number.  Leave car_number empty here; it is populated
@@ -237,7 +255,8 @@ function info = motec_ld_info(filepath, verbose)
     info.venue_corrected   = '';
     info.session_corrected = '';
     [info.venue_corrected, info.session_corrected] = find_correction_block(filepath);
-
+    % attempt on getting venue name into the file
+    %%%% find_correction_block to desired 
     if ~isempty(info.venue_corrected)
         info.venue = info.venue_corrected;
     end
@@ -366,3 +385,4 @@ function mfr = infer_manufacturer(vehicle_str)
         mfr = '';
     end
 end
+

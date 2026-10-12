@@ -51,6 +51,7 @@ function conn = smp_sql_connect(target)
     end
 
     % ── Register driver ───────────────────────────────────────────────────
+    t_conn = tic;
     try
         driver = com.microsoft.sqlserver.jdbc.SQLServerDriver;
         java.sql.DriverManager.registerDriver(driver);
@@ -59,12 +60,23 @@ function conn = smp_sql_connect(target)
     end
 
     % ── Build connection string and connect ───────────────────────────────
+    t_driver = toc(t_conn);
     switch lower(target)
 
         case 'azure_local'
             % Windows Integrated Auth — uses your AVESCO\lholliday login
+            % useBulkCopyForBatchInsert=true: driver-level optimization —
+            % converts any addBatch()/executeBatch() sequence on a single
+            % repeated INSERT statement (exactly what smp_push_to_sql.m /
+            % smp_push_laps_to_sql.m / smp_push_lap_samples_to_sql.m all
+            % do) into a native SQL Server bulk-copy operation instead of
+            % one network round-trip per row. Zero code changes needed in
+            % those push functions to benefit — this is purely a
+            % connection-level setting. Not supported if the target table
+            % has triggers/computed-column quirks; none of our upload
+            % tables do.
             conn_str = sprintf( ...
-                'jdbc:sqlserver://%s;databaseName=%s;integratedSecurity=true;', ...
+                'jdbc:sqlserver://%s;databaseName=%s;integratedSecurity=true;useBulkCopyForBatchInsert=true;sendStringParametersAsUnicode=false;', ...
                 LOCAL_SERVER, LOCAL_DATABASE);
             fprintf('Connecting to LOCAL SQL Express (%s / %s)...\n', ...
                 LOCAL_SERVER, LOCAL_DATABASE);
@@ -78,11 +90,15 @@ function conn = smp_sql_connect(target)
 
         case 'azure_online'
             % Entra ID Interactive — browser MFA popup on first use per session
+            % useBulkCopyForBatchInsert=true — see azure_local case above
+            % for rationale; same driver-level batch-insert speedup applies
+            % here too.
             conn_str = sprintf( ...
                 ['jdbc:sqlserver://%s;databaseName=%s;' ...
                  'authentication=ActiveDirectoryInteractive;' ...
                  'tenantId=%s;encrypt=true;trustServerCertificate=false;' ...
-                 'hostNameInCertificate=*.database.windows.net;loginTimeout=60;'], ...
+                 'hostNameInCertificate=*.database.windows.net;loginTimeout=60;' ...
+                 'useBulkCopyForBatchInsert=true;sendStringParametersAsUnicode=false;'], ...
                 AZ_SERVER, AZ_DATABASE, AZ_TENANT_ID);
             fprintf('Connecting to Azure SQL (%s / %s)...\n', AZ_SERVER, AZ_DATABASE);
             fprintf('  >> A browser window may appear for MFA authentication.\n');
@@ -98,6 +114,7 @@ function conn = smp_sql_connect(target)
             error('smp_sql_connect: Unknown target "%s". Use ''azure_local'' or ''azure_online''.', target);
     end
 
-    fprintf('Connected successfully to [%s].\n', upper(target));
+    fprintf('Connected successfully to [%s] in %.1fs (driver load %.1fs + login %.1fs).\n', ...
+        upper(target), toc(t_conn), t_driver, toc(t_conn) - t_driver);
     fprintf('Call conn.close() when done with this session.\n\n');
 end

@@ -18,7 +18,9 @@ function T_rh = smp_load_rh_patch(rh_patch_file, driver_map)
     end
 
     Traw = readtable(rh_patch_file, 'TextType', 'char', 'ReadVariableNames', true);
-    req_cols = {'Car', 'FrontRH', 'RearRH', 'Session'};
+    req_cols = {'Car', 'FrontRH', 'RearRH', 'Session','CamberFL', 'CamberFR', 'CamberRL', 'CamberRR',...
+        'FrontAxleMass','RearAxleMass','CamberGain','FinishingFuel','ToeFront','ToeRear','StartingFuel',...
+        'RefuelRate'};
     actual_names = Traw.Properties.VariableNames;
     col_map = containers.Map('KeyType', 'char', 'ValueType', 'char');
     for c = req_cols
@@ -34,6 +36,20 @@ function T_rh = smp_load_rh_patch(rh_patch_file, driver_map)
     FrontRH = double(Traw.(col_map('FrontRH')));
     RearRH  = double(Traw.(col_map('RearRH')));
     SessionRaw = Traw.(col_map('Session'));
+    CamberFL = Traw.(col_map('CamberFL'));
+    CamberFR = Traw.(col_map('CamberFR'));
+    CamberRL = Traw.(col_map('CamberRL'));
+    CamberRR = Traw.(col_map('CamberRR'));
+    FrontAxleMass= Traw.(col_map('FrontAxleMass'));
+    RearAxleMass= Traw.(col_map('RearAxleMass'));
+    CamberGain= Traw.(col_map('CamberGain'));
+    FinishingFuel= Traw.(col_map('FinishingFuel'));
+    ToeFront= Traw.(col_map('ToeFront'));
+    ToeRear= Traw.(col_map('ToeRear'));
+    StartingFuel= Traw.(col_map('StartingFuel'));
+    RefuelRate= Traw.(col_map('RefuelRate'));
+
+
     if isnumeric(SessionRaw)
         Session = arrayfun(@num2str, SessionRaw, 'UniformOutput', false);
     else
@@ -52,8 +68,15 @@ function T_rh = smp_load_rh_patch(rh_patch_file, driver_map)
         MAN{i} = local_resolve_manufacturer_by_tla(Driver{i}, driver_map);
     end
 
-    T_rh = table(Car, Driver, MAN, FrontRH, RearRH, Session, ...
-        'VariableNames', {'Car', 'Driver', 'MAN', 'FrontRH', 'RearRH', 'Session'});
+    T_rh = table(Car, Driver, MAN, FrontRH, RearRH, Session, CamberFL, CamberFR, CamberRL, CamberRR,...
+        FrontAxleMass,RearAxleMass,CamberGain,FinishingFuel,ToeFront,ToeRear,StartingFuel,...
+        RefuelRate,...
+        'VariableNames', {'Car', 'Driver', 'MAN', 'FrontRH', 'RearRH', 'Session','CamberFL',...
+        'CamberFR',...
+        'CamberRL',...
+        'CamberRR',...
+        'FrontAxleMass','RearAxleMass','CamberGain','FinishingFuel','ToeFront','ToeRear','StartingFuel',...
+        'RefuelRate'});
 end
 
 

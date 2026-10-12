@@ -3,6 +3,10 @@
 % point
 mm2m = 1/1000;
 vehicle.ford.kinematics.body.CoG = [-29, 10.49, 284] .* mm2m; % Centre of Gravity
+vehicle.ford.kinematics.body.frontAxleMass = 736;
+vehicle.ford.kinematics.body.rearAxleMass= 624;
+vehicle.ford.kinematics.body.frontArm = 1.49;
+vehicle.ford.kinematics.body.rearArm  = 1.27;
 
 vehicle.ford.kinematics.rear.tyreCorneringStiffness = 3000; % N/degree
 vehicle.ford.kinematics.front.tyreCorneringStiffness = 3000; % N/degree
@@ -133,8 +137,8 @@ vehicle.ford.kinematics.rear.upright.wheelMatingFace2RotatationalAxis = [0, 80.2
     
 vehicle.ford.steering.ratio = 58 / (2 * pi); % reference from tickford
 
-vehicle.Chevrolet = vehicle.ford .* mm2m; 
-vehicle.toyota = vehicle.ford .* mm2m; 
+vehicle.chevrolet = vehicle.ford; 
+vehicle.toyota = vehicle.ford; 
 
 %% Front Geometry 
 % Nominal position is 3
@@ -203,9 +207,9 @@ vehicle.ford.kinematics.front.ARB.transferLinkAArm = [-2050.2524, 680.5690, 93.5
 
 vehicle.ford.sensors.teamData.IMU =[-91.85, 150.75, 25.0] .* mm2m; 
 
-%% Copy the vehicle to toyota and Chevrolet
-vehicle.Chevrolet = vehicle.ford .* mm2m; 
-vehicle.toyota = vehicle.ford .* mm2m; 
+%% Copy the vehicle to toyota and chevrolet
+vehicle.chevrolet = vehicle.ford; 
+vehicle.toyota = vehicle.ford; 
 %% VSD
 vehicle.ford.minimumWheelbase = 2745.0 .* mm2m;  % mm
 vehicle.ford.maximumWheelbase = 2767.5 .* mm2m; % mm
@@ -272,39 +276,39 @@ vehicle.toyota.wheelArchLinersFront = true;
 vehicle.toyota.wheelArchLinersRear = true;
 
 
-vehicle.Chevrolet.minimumWheelbase = 2745.0 .* mm2m;  % mm
-vehicle.Chevrolet.maximumWheelbase = 2767.5 .* mm2m; % mm
-vehicle.Chevrolet.maximumTrackWidthFront = 2000 .* mm2m;  % mm
-vehicle.Chevrolet.maximumTrackWidthRear = 2000 .* mm2m;  % mm
-vehicle.Chevrolet.maximumLength = 4876.1 .* mm2m; % mm
-vehicle.Chevrolet.frontAxleBodyWorkMaximum = (1933.3 + 10) .* mm2m; % mm
-vehicle.Chevrolet.rearAxleBodyWorkMaximum = (1952.6 + 10) .* mm2m; % mm
-vehicle.Chevrolet.roofHeight_neg625mm = 1123.3 .* mm2m;  mm
-vehicle.Chevrolet.roofheight_neg224_1mm = 1137.8 .* mm2m;  % mm
-vehicle.Chevrolet.roofheight_pos605mm = 1081.1 .* mm2m;  % mm
-vehicle.Chevrolet.frontBumperLocation = [ -3027.9, 0 , -25.1] .* mm2m; % mm
-vehicle.Chevrolet.rearBumperLocation = [1848.2, 0, 648.4] .* mm2m; % mm
-vehicle.Chevrolet.rearWingPivotPointX = 1703.8 + [ 2 ,-5];% mm
-vehicle.Chevrolet.rearWingPivotPointZ = 977.2 + [ 2, -5];% mm
-vehicle.Chevrolet.rearWingElementDimensions = 1500 + [ 1, -1]; % mm
-vehicle.Chevrolet.rearWingAngleMin = 9; % degrees
-vehicle.Chevrolet.rearWingAngleMax = 10; % degrees
-vehicle.Chevrolet.rearWingToDecklidSpoilerSpacingMax = [0, 273.5, 0] + [0, 3, 0;0, -3, 0]; % mm
-vehicle.Chevrolet.rearWingDeflection_mm_0 = 0; % mm
-vehicle.Chevrolet.rearWingDeflection_mm_TBA1 = 0; % mm
-vehicle.Chevrolet.rearWingDeflection_mm_TBA2 = 0; % mmø
-vehicle.Chevrolet.rearWingDeflection_deg_0 = 0; % deg
-vehicle.Chevrolet.rearWingDeflection_deg_TBA1 = 0; % deg
-vehicle.Chevrolet.rearWingDeflection_deg_TBA2 = 0; % deg
-vehicle.Chevrolet.bonnetHeight_neg1595 = [0, 0, 801.3] .* mm2m;  % + 3, -1mm
-vehicle.Chevrolet.bonnetHeight_neg2170 = [0, 0, 743.5] .* mm2m;  % + 3, -1mm
-vehicle.Chevrolet.bonnetHeight_neg2425 = [0, 0, 711.4] .* mm2m;  % + 3, -1mm
-vehicle.Chevrolet.bonnetHeight_neg2740 = [0, 0, 609.1] .* mm2m;  % + 3, -1mm
-vehicle.Chevrolet.bonnetHeight_neg1397 = [0, 0, 870] .* mm2m;  % + 3, -3mm
-vehicle.Chevrolet.bonnetHeight_neg1675 = [0, 0, 845.2] .* mm2m;  % + 3, -3mm
-vehicle.Chevrolet.dashHeight = [0, 0, 796] .* mm2m;  %mm
-vehicle.Chevrolet.wheelArchLinersFront = true; % boolean
-vehicle.Chevrolet.wheelArchLinersRear = true; % boolean
+vehicle.chevrolet.minimumWheelbase = 2745.0 .* mm2m;  % mm
+vehicle.chevrolet.maximumWheelbase = 2767.5 .* mm2m; % mm
+vehicle.chevrolet.maximumTrackWidthFront = 2000 .* mm2m;  % mm
+vehicle.chevrolet.maximumTrackWidthRear = 2000 .* mm2m;  % mm
+vehicle.chevrolet.maximumLength = 4876.1 .* mm2m; % mm
+vehicle.chevrolet.frontAxleBodyWorkMaximum = (1933.3 + 10) .* mm2m; % mm
+vehicle.chevrolet.rearAxleBodyWorkMaximum = (1952.6 + 10) .* mm2m; % mm
+vehicle.chevrolet.roofHeight_neg625mm = 1123.3 .* mm2m;  
+vehicle.chevrolet.roofheight_neg224_1mm = 1137.8 .* mm2m;  % mm
+vehicle.chevrolet.roofheight_pos605mm = 1081.1 .* mm2m;  % mm
+vehicle.chevrolet.frontBumperLocation = [ -3027.9, 0 , -25.1] .* mm2m; % mm
+vehicle.chevrolet.rearBumperLocation = [1848.2, 0, 648.4] .* mm2m; % mm
+vehicle.chevrolet.rearWingPivotPointX = 1703.8 + [ 2 ,-5];% mm
+vehicle.chevrolet.rearWingPivotPointZ = 977.2 + [ 2, -5];% mm
+vehicle.chevrolet.rearWingElementDimensions = 1500 + [ 1, -1]; % mm
+vehicle.chevrolet.rearWingAngleMin = 9; % degrees
+vehicle.chevrolet.rearWingAngleMax = 10; % degrees
+vehicle.chevrolet.rearWingToDecklidSpoilerSpacingMax = [0, 273.5, 0] + [0, 3, 0;0, -3, 0]; % mm
+vehicle.chevrolet.rearWingDeflection_mm_0 = 0; % mm
+vehicle.chevrolet.rearWingDeflection_mm_TBA1 = 0; % mm
+vehicle.chevrolet.rearWingDeflection_mm_TBA2 = 0; % mmø
+vehicle.chevrolet.rearWingDeflection_deg_0 = 0; % deg
+vehicle.chevrolet.rearWingDeflection_deg_TBA1 = 0; % deg
+vehicle.chevrolet.rearWingDeflection_deg_TBA2 = 0; % deg
+vehicle.chevrolet.bonnetHeight_neg1595 = [0, 0, 801.3] .* mm2m;  % + 3, -1mm
+vehicle.chevrolet.bonnetHeight_neg2170 = [0, 0, 743.5] .* mm2m;  % + 3, -1mm
+vehicle.chevrolet.bonnetHeight_neg2425 = [0, 0, 711.4] .* mm2m;  % + 3, -1mm
+vehicle.chevrolet.bonnetHeight_neg2740 = [0, 0, 609.1] .* mm2m;  % + 3, -1mm
+vehicle.chevrolet.bonnetHeight_neg1397 = [0, 0, 870] .* mm2m;  % + 3, -3mm
+vehicle.chevrolet.bonnetHeight_neg1675 = [0, 0, 845.2] .* mm2m;  % + 3, -3mm
+vehicle.chevrolet.dashHeight = [0, 0, 796] .* mm2m;  %mm
+vehicle.chevrolet.wheelArchLinersFront = true; % boolean
+vehicle.chevrolet.wheelArchLinersRear = true; % boolean
 
 %% ------------------------------------------------------------------------
 %  --------------------------Bicycle model calcs---------------------------

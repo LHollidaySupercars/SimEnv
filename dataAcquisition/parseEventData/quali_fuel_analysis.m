@@ -17,7 +17,8 @@ function [result, summary, tbl] = quali_fuel_analysis(laps, session, opts)
 %   summary    - scalar struct: n_flying_laps, n_tyre_changes
 %   tbl        - MATLAB table, one row per flying lap:
 %                  LapNum | LapTime | LapTime_s | TyreSet | TyreChange |
-%                  Fuel_OnLap_kg | Fuel_ToNext_kg |
+%                  TyreChangeAll | Fuel_OnLap_kg | Fuel_ToNext_kg |
+%                  dLapTime_s | dFuel_kg | s_per_kg | s_per_10kg | SameSet |
 %                  Press_FL FR RL RR | Temp_FL FR RL RR
 
 % ======================================================================
@@ -34,6 +35,7 @@ LAP_TYPES_FOR_TYRE = {'flying', 'inlap', 'outlap', 'pitlap'};
 
 if nargin < 3 || isempty(opts), opts = struct(); end
 if ~isfield(opts, 'plot'), opts.plot = true; end
+if ~isfield(opts, 'fuel_plot'), opts.fuel_plot = opts.plot; end
 
 % ======================================================================
 %  PHASE 1 — LAP COUNT
@@ -91,6 +93,7 @@ for k = 1:n_laps
     end
 
     % --- Tyre IDs and stint tracking ---------------------------------
+    is_push = strcmp(lap_k.lap_type, 'flying');
     cur_id  = struct();
     changed = struct('FL', false, 'FR', false, 'RL', false, 'RR', false);
     for c = 1:4
@@ -100,21 +103,27 @@ for k = 1:n_laps
         else
             cur_id.(corner) = NaN;
         end
-        if k > 1
+        if is_push && ~isnan_safe(prev_tyre_id.(corner))
             changed.(corner) = ~isequal(cur_id.(corner), prev_tyre_id.(corner)) && ...
-                                ~(isnan_safe(cur_id.(corner)) || isnan_safe(prev_tyre_id.(corner)));
+                                ~isnan_safe(cur_id.(corner));
         end
     end
 
     any_changed = changed.FL || changed.FR || changed.RL || changed.RR;
-    if k > 1 && any_changed
+    all_changed = changed.FL && changed.FR && changed.RL && changed.RR;
+    if all_changed
         stint_number = stint_number + 1;
+    elseif any_changed
+        warning('quali_fuel_analysis: lap %d changed only some tyre IDs; not counted as a new set.', ...
+            lap_k.lap_number);
     end
 
-    result(k).tyre_id      = cur_id;
-    result(k).tyre_changed = changed;
-    result(k).stint_number = stint_number;
-    prev_tyre_id           = cur_id;
+    result(k).tyre_id          = cur_id;
+    result(k).tyre_changed     = changed;
+    result(k).tyre_all_changed = all_changed;
+    result(k).stint_number     = stint_number;
+    % Only push laps update the reference, so in/out laps cannot mask a change.
+    if is_push, prev_tyre_id = cur_id; end
 
     % --- Tyre pressure & temperature per surrounding lap type --------
     for lt = 1:numel(LAP_TYPES_FOR_TYRE)
@@ -138,12 +147,34 @@ for k = 1:n_laps
 end
 
 % ======================================================================
+%  PHASE 4b — PUSH-LAP-TO-PUSH-LAP FUEL AND PACE
+% ======================================================================
+push_idx = find(strcmp({result.lap_type}, 'flying'));
+if has_fuel
+    for a = push_idx(:)'
+        result(a).fuel_cum = interp1(fuel_ch.time, fuel_ch.data, result(a).t_end, 'linear');
+    end
+end
+for j = 1:numel(push_idx) - 1
+    a = push_idx(j);  b = push_idx(j + 1);
+    if has_fuel
+        result(a).fuel_to_next = channel_delta(fuel_ch, result(a).t_end, result(b).t_start);
+        result(b).d_fuel = channel_delta(fuel_ch, result(a).t_start, result(b).t_start);
+    end
+    result(b).d_lap_s  = result(b).lap_time - result(a).lap_time;
+    result(b).same_set = ~result(b).tyre_all_changed;
+    % Lap time gained per kg burned; positive means faster as fuel burns off.
+    result(b).s_per_kg = -result(b).d_lap_s / result(b).d_fuel;
+end
+
+% ======================================================================
 %  PHASE 5 — SUMMARY STRUCT
 % ======================================================================
 summary = struct();
 summary.n_flying_laps  = n_flying;
-summary.n_tyre_changes = sum(arrayfun(@(r) ...
-    r.tyre_changed.FL || r.tyre_changed.FR || r.tyre_changed.RL || r.tyre_changed.RR, result));
+summary.n_tyre_changes = sum([result.tyre_all_changed]);
+same = [result.same_set] & ~isnan([result.s_per_kg]);
+summary.s_per_kg_same_set = mean([result(same).s_per_kg], 'omitnan');
 
 % ======================================================================
 %  PHASE 6 — BUILD TABLE AND DISPLAY
@@ -157,6 +188,9 @@ disp(tbl);
 if opts.plot
     plot_tyre_pressures(result, CORNERS);
 end
+if opts.fuel_plot && has_fuel
+    plot_fuel_effect(result);
+end
 
 end
 
@@ -164,6 +198,45 @@ end
 % ======================================================================
 %  LOCAL HELPERS
 % ======================================================================
+
+function plot_fuel_effect(result)
+    push = result(strcmp({result.lap_type}, 'flying'));
+    if numel(push) < 2, return, end
+
+    fuel = [push.fuel_cum];
+    lt   = [push.lap_time];
+    set_ = [push.stint_number];
+    laps = [push.lap_number];
+
+    figure('Name', 'Qualifying: Lap Time vs Fuel Burned', 'NumberTitle', 'off');
+    hold on; grid on; box on;
+    cmap = lines(max(set_));
+
+    % Solid between push laps on the same set, dashed across a tyre change.
+    for j = 2:numel(push)
+        if any(isnan([fuel(j-1:j) lt(j-1:j)])), continue, end
+        if push(j).same_set
+            plot(fuel(j-1:j), lt(j-1:j), '-', 'Color', cmap(set_(j),:), 'LineWidth', 1.5, 'HandleVisibility', 'off');
+            text(mean(fuel(j-1:j)), mean(lt(j-1:j)), sprintf('  %.3f s/10kg', push(j).s_per_kg*10), ...
+                'FontSize', 8, 'VerticalAlignment', 'bottom');
+        else
+            plot(fuel(j-1:j), lt(j-1:j), '--', 'Color', [0.6 0.6 0.6], 'HandleVisibility', 'off');
+        end
+    end
+
+    for s = unique(set_)
+        m = set_ == s;
+        scatter(fuel(m), lt(m), 70, cmap(s,:), 'filled', 'DisplayName', sprintf('Tyre set %d', s));
+    end
+    for k = 1:numel(push)
+        text(fuel(k), lt(k), sprintf(' L%d', laps(k)), 'FontSize', 8, 'VerticalAlignment', 'top');
+    end
+
+    xlabel('Cumulative fuel burned at end of lap (kg)');
+    ylabel('Lap time (s)');
+    title('Push-lap pace vs fuel burned (dashed = tyre change)');
+    legend('Location', 'best');
+end
 
 % ======================================================================
 %  TABLE BUILDER
@@ -201,6 +274,13 @@ function tbl = build_result_table(result, corners)
 
     LapType        = string({result.lap_type})';
     Fuel_OnLap_kg  = [result.fuel_on_lap]';
+    Fuel_ToNext_kg = [result.fuel_to_next]';
+    TyreChangeAll  = [result.tyre_all_changed]';
+    SameSet        = [result.same_set]';
+    dLapTime_s     = [result.d_lap_s]';
+    dFuel_kg       = [result.d_fuel]';
+    s_per_kg       = [result.s_per_kg]';
+    s_per_10kg     = 10 * s_per_kg;
 
     press   = NaN(n, 4);
     temp    = NaN(n, 4);
@@ -214,12 +294,14 @@ function tbl = build_result_table(result, corners)
     end
 
     tbl = table(LapNum, LapType, LapTime, LapTime_s, TyreSet, TyreChange, ...
-        Fuel_OnLap_kg, ...
+        TyreChangeAll, Fuel_OnLap_kg, Fuel_ToNext_kg, ...
+        dLapTime_s, dFuel_kg, s_per_kg, s_per_10kg, SameSet, ...
         tyre_id(:,1), tyre_id(:,2), tyre_id(:,3), tyre_id(:,4), ...
         press(:,1), press(:,2), press(:,3), press(:,4), ...
         temp(:,1),  temp(:,2),  temp(:,3),  temp(:,4), ...
         'VariableNames', {'LapNum','LapType','LapTime','LapTime_s','TyreSet','TyreChange', ...
-                          'Fuel_OnLap_kg', ...
+                          'TyreChangeAll','Fuel_OnLap_kg','Fuel_ToNext_kg', ...
+                          'dLapTime_s','dFuel_kg','s_per_kg','s_per_10kg','SameSet', ...
                           'TyreID_FL','TyreID_FR','TyreID_RL','TyreID_RR', ...
                           'Press_FL','Press_FR','Press_RL','Press_RR', ...
                           'Temp_FL','Temp_FR','Temp_RL','Temp_RR'});
@@ -233,6 +315,13 @@ function r = make_empty_result(corners, lap_types)
     r.t_start      = NaN;
     r.t_end        = NaN;
     r.fuel_on_lap  = NaN;
+    r.fuel_to_next = NaN;
+    r.fuel_cum     = NaN;
+    r.d_lap_s      = NaN;
+    r.d_fuel       = NaN;
+    r.s_per_kg     = NaN;
+    r.same_set     = false;
+    r.tyre_all_changed = false;
     r.stint_number = 1;
 
     tc = struct(); ti = struct();

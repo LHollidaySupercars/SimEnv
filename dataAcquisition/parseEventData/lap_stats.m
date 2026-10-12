@@ -244,6 +244,7 @@ function stats = lap_stats(laps, channels, opts)
 
         for c = 1:numel(corner_cfg)
                     cn = corner_cfg(c).corner_num;
+                    if ~iscell(cn), cn = {char(string(cn))}; end   % corner_num may be numeric
         for ph = 1:numel(phases)
                         ph_name    = phases{ph};
                         gate_field = phase_channels.(ph_name);

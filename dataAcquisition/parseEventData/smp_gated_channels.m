@@ -126,6 +126,11 @@ function [data, new_names] = smp_gated_channels(data, T)
         ch.write_to_ld = true;
         ch.overwrite   = true;
         ch.dec_places  = gated_auto_dec_places(ch.data);
+        % Closed-gate NaN must be stored as float32; int16 would write NaN as the offset value.
+        % dec_places must stay 0: non-zero values blanked float channels in i2, which shows float decimals itself.
+        if any(isnan(ch.data))
+            ch.datatype = 5;  ch.offset = 0;  ch.dec_places = 0;  ch.mul = 1;  ch.scale = 1;
+        end
         % Gate output if result is strictly 0/1
         if all(ismember(unique(ch.data(isfinite(ch.data))), [0; 1]))
             ch.interp_method = 'nearest';

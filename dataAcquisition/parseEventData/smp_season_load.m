@@ -58,6 +58,8 @@ function season = smp_season_load(filepath)
     season.tracks = {};
     season.min_lt = struct();
     season.max_lt = struct();
+    season.lap_dist = struct();   % optional LapDistance column (metres); unset when absent
+    lapdist_col = find_col(cols, {'LapDistance','lapdistance','Lap_Distance','TrackLength'});
 
     for i = 1:height(T)
         raw_track = strtrim(char(string(T.(track_col){i})));
@@ -75,6 +77,9 @@ function season = smp_season_load(filepath)
         season.tracks{end+1}   = track_key;
         season.min_lt.(safe_key) = min_val;
         season.max_lt.(safe_key) = max_val;
+        if ~isempty(lapdist_col) && isnumeric(T.(lapdist_col)(i)) && isfinite(T.(lapdist_col)(i))
+            season.lap_dist.(safe_key) = T.(lapdist_col)(i);
+        end
 
         fprintf('  %-6s  MinLT=%.1fs  MaxLT=%.1fs\n', track_key, min_val, max_val);
     end

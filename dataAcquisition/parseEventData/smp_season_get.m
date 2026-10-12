@@ -1,12 +1,16 @@
-function [min_lt, max_lt] = smp_season_get(season, track_acronym)
-% SMP_SEASON_GET  Retrieve MinLT and MaxLT for a given track acronym.
+function [min_lt, max_lt, lap_dist] = smp_season_get(season, track_acronym)
+% SMP_SEASON_GET  Retrieve MinLT, MaxLT and LapDistance (m, NaN if unknown) for a track acronym.
 %
 % Usage:
-%   [min_lt, max_lt] = smp_season_get(season, 'SMP')
+%   [min_lt, max_lt, lap_dist] = smp_season_get(season, 'SMP')
 %
 % Returns defaults (10s / 600s) with a warning if the track is not found.
 
     safe_key = matlab.lang.makeValidName(upper(strtrim(track_acronym)));
+    lap_dist = NaN;
+    if isfield(season, 'lap_dist') && isfield(season.lap_dist, safe_key)
+        lap_dist = season.lap_dist.(safe_key);
+    end
 
     if isfield(season.min_lt, safe_key) && isfield(season.max_lt, safe_key)
         min_lt = season.min_lt.(safe_key);

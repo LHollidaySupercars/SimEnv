@@ -54,20 +54,29 @@ fprintf('  Time    : %s\n', datestr(now, 'HH:MM:SS'));
 fprintf('============================================\n\n');
 
 % ---- Split groups across workers ----
-chunk_size_p1 = ceil(n_groups_p1 / n_workers_p1);
+% chunk_size_p1 = ceil(n_groups_p1 / n_workers_p1);
+% for w = 1 : n_workers_p1
+%     i_start = (w-1)*chunk_size_p1 + 1;
+%     i_end   = min(w*chunk_size_p1, n_groups_p1);
+%     if i_start > n_groups_p1
+%         worker_groups = groups_p1([]); %#ok<NASGU>
+%         fprintf('Worker %d: no groups assigned\n', w);
+%     else
+%         worker_groups = groups_p1(i_start:i_end); %#ok<NASGU>
+%         fprintf('Worker %d: groups %d-%d  (%d group(s))\n', ...
+%             w, i_start, i_end, i_end - i_start + 1);
+%     end
+%     save(fullfile(p1_tmp, sprintf('chunk_%d.mat', w)), 'worker_groups');
+% end
+
+% ---- Split groups across workers (round-robin: every worker gets >= 1 group) ----
 for w = 1 : n_workers_p1
-    i_start = (w-1)*chunk_size_p1 + 1;
-    i_end   = min(w*chunk_size_p1, n_groups_p1);
-    if i_start > n_groups_p1
-        worker_groups = groups_p1([]); %#ok<NASGU>
-        fprintf('Worker %d: no groups assigned\n', w);
-    else
-        worker_groups = groups_p1(i_start:i_end); %#ok<NASGU>
-        fprintf('Worker %d: groups %d-%d  (%d group(s))\n', ...
-            w, i_start, i_end, i_end - i_start + 1);
-    end
+    idx           = w : n_workers_p1 : n_groups_p1;
+    worker_groups = groups_p1(idx); %#ok<NASGU>
+    fprintf('Worker %d: %d group(s) [%s]\n', w, numel(idx), num2str(idx));
     save(fullfile(p1_tmp, sprintf('chunk_%d.mat', w)), 'worker_groups');
 end
+
 
 % ---- Save shared worker cfg (driver_filter cleared — worker sets it) ----
 worker_cfg               = concat_cfg; %#ok<NASGU>

@@ -42,13 +42,26 @@ function T = smp_flatten_stats(cache, event_name)
     % ------------------------------------------------------------------ %
     %  Ops to extract and their SQL suffix
     %  stats field name  →  SQL column suffix
+    %
+    %  Matches the fixed 11-op set smp_compile_event_upload.m now applies
+    %  uniformly to every whitelisted channel (see its stat_ops list) —
+    %  previously this list only pulled 5 of those ops through to SQL
+    %  (max/min/mean/mean_nz/change), silently dropping median/std/var/
+    %  range/final/initial even though lap_stats had already computed
+    %  them, so the upload table never had those columns.
     % ------------------------------------------------------------------ %
     OPS = {
         'max',           'max';
         'min',           'min';
         'mean',          'mean';
         'mean_non_zero', 'mean_nz';
-        'change',        'change',;
+        'median',        'median';
+        'std',           'std';
+        'var',           'var';
+        'range',         'range';
+        'change',        'change';
+        'final',         'final';
+        'initial',       'initial';
     };
     n_ops = size(OPS, 1);
 
@@ -145,6 +158,11 @@ function T = smp_flatten_stats(cache, event_name)
             r.source_file  = id.source_file;
             r.lap_number   = lap_numbers(li);
             r.lap_time     = lap_times(li);
+            if isfield(stats_s.(ref_ch), 'lap_types') && numel(stats_s.(ref_ch).lap_types) >= li
+                r.lap_type = stats_s.(ref_ch).lap_types{li};
+            else
+                r.lap_type = '';
+            end
 
             % Channel stats
             for ci = 1:n_stat_cols

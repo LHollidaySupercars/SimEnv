@@ -537,7 +537,7 @@ function [ui, advPnl] = buildReportTab(parent, defPptx) %#ok<INUSD>
     ui.overwrite.Layout.Row = 6; ui.overwrite.Layout.Column = 4;
 
     makeLabel(bg, 'Batch Size:', [7 1]);
-    ui.batchSize = uieditfield(bg, 'numeric', 'Value', 200, 'Tooltip', 'Upload batch size (rows per JDBC call)');
+    ui.batchSize = uieditfield(bg, 'numeric', 'Value', 10000, 'Tooltip', 'Upload batch size (rows per JDBC call)');
     ui.batchSize.Layout.Row = 7; ui.batchSize.Layout.Column = 2;
 
     makeLabel(bg, 'N Workers:', [7 3]);

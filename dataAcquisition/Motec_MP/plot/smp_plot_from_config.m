@@ -224,6 +224,8 @@ function figs = smp_plot_from_config(SMP, plots, cfg, driver_map, opts)
                     figs{p} = trace_scatter_all(plot_run_list, pd, colour_cfg, driver_map, opts, SHAPES, ax_in);
                 case 'spider'
                     figs{p} = make_spider(plot_run_list, pd, colour_cfg, driver_map, opts, ax_in);
+                case 'phase_composition_bar'
+                    figs{p} = make_phase_composition_bar(plot_run_list, pd, colour_cfg, driver_map, opts, ax_in);
                 otherwise
                     warning('smp_plot_from_config: plot type "%s" not supported.', pd.type);
             end
@@ -2827,6 +2829,340 @@ function fig = make_psd_scatter(run_list, pd, colour_cfg, driver_map, opts, SHAP
     apply_legend(ax, leg_h, leg_l, opts);
 end
 
+function fig = make_phase_composition_bar(run_list, pd, colour_cfg, driver_map, opts, ax_in)
+% MAKE_PHASE_COMPOSITION_BAR  Horizontal stacked bar of corner-phase time
+% proportions, one bar per driver, sorted by a composite pace score
+% (mean + std of corner-gated per-lap time), fastest driver highlighted.
+% Off-Pedal is drawn as an overlay on the Mid-Corner segment, not its
+% own stack width.
+%
+% Excel config:
+%   type            = phase_composition_bar
+%   yAxis1..5       = Braking / Entry / MidCrn / Exit / LiftCoast
+%                     _TimeVCH channels, in that order
+%   cornerNum       = corner number string matching corner_cfg, e.g. "1"
+%                     (used to look up the ThrottleWindow denominator and
+%                     the Off-Pedal overlay stat for the same corner)
+%   lap_type_filter = Flying   (recommended — filters out-laps upstream)
+%
+% Optional pd fields:
+%   pd.sort_weight       — w in score = z(mean_t) + w*z(std_t). Default 1.
+%   pd.highlight_driver  — TLA to highlight. Default: fastest (rank 1).
+%   pd.highlight_fastest — true/false, default true.
+
+    if nargin < 6, ax_in = []; end
+    [fig, ax] = new_fig(pd, opts, ax_in);
+    fs = get_opt(opts, 'font_size', 11);
+
+    PHASE_LABELS = {'Braking', 'Entry', 'Mid-Corner', 'Exit', 'Lift & Coast'};
+    n_phases     = min(numel(pd.y_channels), 5);
+
+    if n_phases == 0
+        warning('make_phase_composition_bar: no y_channels defined for plot "%s".', pd.name);
+        return;
+    end
+
+    n_drivers = numel(run_list);
+    if n_drivers == 0
+        warning('make_phase_composition_bar: empty run_list for plot "%s".', pd.name);
+        return;
+    end
+
+    corner_num = get_opt_field(pd, 'cornerNum', '');
+    denom_field    = sanitise_fn(sprintf('Corner%s_ThrottleWindowTimeVCH', corner_num));
+    off_pedal_field = sanitise_fn(sprintf('Corner%s_OffPedal_TimeVCH', corner_num));
+    if isempty(corner_num)
+        warning('make_phase_composition_bar: pd.cornerNum not set — denominator/overlay lookups will fail for "%s".', pd.name);
+    end
+
+    % ------------------------------------------------------------------
+    %  Gather per-driver phase proportions + composite pace score
+    % ------------------------------------------------------------------
+    props        = NaN(n_drivers, n_phases);   % proportion per phase, per driver
+    off_pedal_p  = NaN(n_drivers, 1);          % off-pedal share of Mid-Corner
+    mean_t       = NaN(n_drivers, 1);
+    std_t        = NaN(n_drivers, 1);
+    labels       = cell(n_drivers, 1);
+    keep_mask    = false(n_drivers, 1);
+
+    for r = 1:n_drivers
+        entry = run_list(r);
+        labels{r} = entry.driver;
+
+        row_vals   = NaN(1, n_phases);
+        phase_time = cell(1, n_phases);   % per-lap arrays, one per phase
+
+        for pi = 1:n_phases
+            y_field = sanitise_fn(pd.y_channels{pi});
+            if ~isfield(entry.stats, y_field)
+                fprintf('  [WARN] phase_composition_bar: channel "%s" not in stats for %s — skipping phase.\n', ...
+                    pd.y_channels{pi}, entry.driver);
+                continue;
+            end
+            ch = entry.stats.(y_field);
+
+            if isfield(ch, 'time')
+                per_lap = ch.time;
+            else
+                per_lap = local_apply_math(ch, pd.math_fn);
+            end
+            phase_time{pi} = per_lap;
+
+            finite_vals = per_lap(isfinite(per_lap));
+            if ~isempty(finite_vals)
+                row_vals(pi) = median(finite_vals);
+            end
+        end
+
+        if all(~isfinite(row_vals)), continue; end
+
+        % ---- Normalise against throttle-drop-to-full-throttle window,
+        %      NOT the sum of the phases themselves ----
+        denom_median = NaN;
+        if isfield(entry.stats, denom_field)
+            dch = entry.stats.(denom_field);
+            if isfield(dch, 'time')
+                dvals = dch.time(isfinite(dch.time));
+                if ~isempty(dvals), denom_median = median(dvals); end
+            end
+        else
+            fprintf('  [WARN] phase_composition_bar: denominator "%s" not in stats for %s.\n', ...
+                denom_field, entry.driver);
+        end
+
+        row_vals(~isfinite(row_vals)) = 0;
+        if isfinite(denom_median) && denom_median > 0
+            props(r, :) = row_vals / denom_median;
+        else
+            % fall back to sum-of-phases if the denominator is unavailable,
+            % so the bar still renders rather than being dropped entirely
+            total = sum(row_vals);
+            if total > 0
+                props(r, :) = row_vals / total;
+            else
+                props(r, :) = row_vals;
+            end
+        end
+
+        % ---- Off-Pedal overlay share (fraction of Mid-Corner time) ----
+        mid_idx = find(strcmpi(PHASE_LABELS(1:n_phases), 'Mid-Corner'), 1);
+        if ~isempty(mid_idx) && isfield(entry.stats, off_pedal_field)
+            opch = entry.stats.(off_pedal_field);
+            if isfield(opch, 'time')
+                op_vals = opch.time(isfinite(opch.time));
+                mid_vals = phase_time{mid_idx};
+                mid_vals = mid_vals(isfinite(mid_vals));
+                if ~isempty(op_vals) && ~isempty(mid_vals)
+                    op_med  = median(op_vals);
+                    mid_med = median(mid_vals);
+                    if mid_med > 0
+                        off_pedal_p(r) = min(op_med / mid_med, 1);
+                    end
+                end
+            end
+        end
+
+        % ---- Corner-gated pace score: sum phase times PER LAP ----
+        n_laps_max = 0;
+        for pi = 1:n_phases
+            if ~isempty(phase_time{pi})
+                n_laps_max = max(n_laps_max, numel(phase_time{pi}));
+            end
+        end
+        if n_laps_max > 0
+            corner_total_per_lap = zeros(1, n_laps_max);
+            valid_mask = true(1, n_laps_max);
+            for pi = 1:n_phases
+                if isempty(phase_time{pi})
+                    valid_mask(:) = false;
+                    continue;
+                end
+                pt = phase_time{pi};
+                if numel(pt) < n_laps_max
+                    valid_mask(numel(pt)+1:end) = false;
+                    pt(end+1:n_laps_max) = NaN; %#ok<AGROW>
+                end
+                corner_total_per_lap = corner_total_per_lap + pt(1:n_laps_max);
+                valid_mask = valid_mask & isfinite(pt(1:n_laps_max));
+            end
+            ct = corner_total_per_lap(valid_mask);
+            if ~isempty(ct)
+                mean_t(r) = mean(ct);
+                std_t(r)  = std(ct);
+            end
+        end
+
+        keep_mask(r) = true;
+    end
+
+    keep_idx = find(keep_mask);
+    if isempty(keep_idx)
+        warning('make_phase_composition_bar: no valid drivers for plot "%s".', pd.name);
+        return;
+    end
+
+    props       = props(keep_idx, :);
+    off_pedal_p = off_pedal_p(keep_idx);
+    mean_t      = mean_t(keep_idx);
+    std_t       = std_t(keep_idx);
+    labels      = labels(keep_idx);
+    n_kept      = numel(keep_idx);
+
+    % ------------------------------------------------------------------
+    %  Composite pace score: z(mean_t) + w * z(std_t), lower = better
+    % ------------------------------------------------------------------
+    w = get_opt_field(pd, 'sort_weight', 1);
+
+    if all(~isfinite(mean_t))
+        warning('make_phase_composition_bar: no corner-gated lap times found — falling back to input order for plot "%s".', pd.name);
+        score = (1:n_kept)';
+    else
+        z_mean = zscore_safe(mean_t);
+        z_std  = zscore_safe(std_t);
+        score  = z_mean + w * z_std;
+        score(~isfinite(score)) = Inf;
+    end
+
+    [~, sort_idx] = sort(score, 'ascend');
+    props_s       = props(sort_idx, :);
+    off_pedal_p_s = off_pedal_p(sort_idx);
+    labels_s      = labels(sort_idx);
+
+    % ------------------------------------------------------------------
+    %  Highlight driver — default: fastest (rank 1 post-sort)
+    % ------------------------------------------------------------------
+    highlight_fastest = true;
+    if isfield(pd, 'highlight_fastest') && ~isempty(pd.highlight_fastest)
+        highlight_fastest = logical(pd.highlight_fastest);
+    end
+
+    highlight_row = 0;
+    if highlight_fastest
+        if isfield(pd, 'highlight_driver') && ~isempty(pd.highlight_driver)
+            hit = find(strcmpi(labels_s, pd.highlight_driver), 1);
+            if ~isempty(hit), highlight_row = hit; end
+        else
+            highlight_row = 1;
+        end
+    end
+
+    phase_cols = phase_segment_colours(n_phases);
+    mid_idx    = find(strcmpi(PHASE_LABELS(1:n_phases), 'Mid-Corner'), 1);
+
+    % ------------------------------------------------------------------
+    %  Draw stacked horizontal bars, bar 1 (fastest) at the top
+    % ------------------------------------------------------------------
+    y_pos = n_kept:-1:1;
+
+    hold(ax, 'on');
+    h_bars = gobjects(1, n_phases);
+    bar_height = 0.7;
+    for r = 1:n_kept
+        left = 0;
+        mid_left = NaN; mid_seg = NaN;
+        for pi = 1:n_phases
+            seg = props_s(r, pi);
+            if seg <= 0, continue; end
+            yc = y_pos(r);
+            xx = [left, left+seg, left+seg, left];
+            yy = [yc-bar_height/2, yc-bar_height/2, yc+bar_height/2, yc+bar_height/2];
+            hp = patch(ax, xx, yy, phase_cols(pi,:), 'EdgeColor', 'none');
+            if r == 1
+                h_bars(pi) = hp;
+            end
+            if pi == mid_idx
+                mid_left = left; mid_seg = seg;
+            end
+            left = left + seg;
+        end
+
+        % ---- Off-Pedal overlay: hatched darker block inside Mid-Corner ----
+        if isfinite(mid_left) && isfinite(off_pedal_p_s(r)) && off_pedal_p_s(r) > 0
+            ov_width = mid_seg * off_pedal_p_s(r);
+            yc = y_pos(r);
+            xx = [mid_left, mid_left+ov_width, mid_left+ov_width, mid_left];
+            yy = [yc-bar_height/2, yc-bar_height/2, yc+bar_height/2, yc+bar_height/2];
+            patch(ax, xx, yy, [0 0 0], 'FaceAlpha', 0.35, 'EdgeColor', 'none', ...
+                'HandleVisibility', 'off');
+        end
+
+        if r == highlight_row
+            rectangle(ax, 'Position', [0, y_pos(r)-bar_height/2, max(sum(props_s(r,:)),1e-6), bar_height], ...
+                'EdgeColor', [1 0.84 0], 'LineWidth', 2.2);
+        end
+    end
+
+    % ------------------------------------------------------------------
+    %  Axis dressing
+    % ------------------------------------------------------------------
+    ax.YTick = 1:n_kept;
+    ax.YTickLabel = flip(labels_s);
+    ax.YLim = [0.5, n_kept+0.5];
+    x_max = max(1, max(sum(props_s, 2), [], 'omitnan'));
+    ax.XLim = [0, x_max];
+    xtickformat(ax, '%.0f%%');
+    xlabel(ax, sprintf('Share of throttle-off window (Corner %s)', corner_num), 'FontSize', fs);
+    ax.FontSize = fs - 1;
+
+    leg_l = PHASE_LABELS(1:n_phases);
+    apply_legend(ax, h_bars, leg_l, opts);
+
+    apply_axis_limits(ax, pd);
+end
+
+function v = get_opt_field(pd, fname, default_val)
+    if isfield(pd, fname) && ~isempty(pd.(fname))
+        v = pd.(fname);
+    else
+        v = default_val;
+    end
+end
+
+function z = zscore_safe(x)
+    mu = mean(x(isfinite(x)));
+    sg = std(x(isfinite(x)));
+    if ~isfinite(sg) || sg == 0
+        z = zeros(size(x));
+    else
+        z = (x - mu) / sg;
+    end
+end
+
+function cols = phase_segment_colours(n_phases)
+    palette = [
+        0.85 0.30 0.25;   % Braking     — red
+        0.95 0.65 0.15;   % Entry       — amber
+        0.20 0.55 0.85;   % Mid-Corner  — blue
+        0.30 0.75 0.40;   % Exit        — green
+        0.55 0.35 0.75];  % Lift & Coast— purple
+    cols = palette(1:n_phases, :);
+end
+% function v = get_opt_field(pd, fname, default_val)
+%     if isfield(pd, fname) && ~isempty(pd.(fname))
+%         v = pd.(fname);
+%     else
+%         v = default_val;
+%     end
+% end
+
+% function z = zscore_safe(x)
+%     mu = mean(x(isfinite(x)));
+%     sg = std(x(isfinite(x)));
+%     if ~isfinite(sg) || sg == 0
+%         z = zeros(size(x));
+%     else
+%         z = (x - mu) / sg;
+%     end
+% end
+
+% function cols = phase_segment_colours(n_phases)
+%     palette = [
+%         0.85 0.30 0.25;   % Braking   — red
+%         0.95 0.65 0.15;   % Entry     — amber
+%         0.20 0.55 0.85;   % Mid-Corner— blue
+%         0.30 0.75 0.40];  % Exit      — green
+%     cols = palette(1:n_phases, :);
+% end
 
 % function fig = make_timeseries(run_list, pd, colour_cfg, driver_map, opts, ...
 %                                 dist_ch, dist_npts, n_laps_avg, ax_in)
@@ -4555,7 +4891,7 @@ function fig = make_spider(run_list, pd, colour_cfg, driver_map, opts, ax_in)
     end
 
     use_scalar = isfield(pd, 'spider_scalar') && pd.spider_scalar;
-
+    
     % ---- Gather per-run, per-axis values -------------------------------
     vals   = NaN(numel(run_list), n_axes);
     labels = cell(numel(run_list), 1);
@@ -4571,6 +4907,12 @@ function fig = make_spider(run_list, pd, colour_cfg, driver_map, opts, ax_in)
             if use_scalar
                 if isfield(entry.stats.(y_field), 'scalar')
                     vals(r, ai) = entry.stats.(y_field).scalar;
+                end
+            elseif isfield(entry.stats.(y_field), 'time')
+                per_lap = entry.stats.(y_field).time;
+                finite_vals = per_lap(isfinite(per_lap));
+                if ~isempty(finite_vals)
+                    vals(r, ai) = median(finite_vals);
                 end
             else
                 per_lap = local_apply_math(entry.stats.(y_field), pd.math_fn);

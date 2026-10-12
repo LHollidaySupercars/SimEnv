@@ -22,15 +22,19 @@ addpath(fileparts(mfilename('fullpath')));
 %  =========================================================
 
 % ── Event ────────────────────────────────────────────────
-EVENT_CODE   = 'TSV';           % Short event code (must match eventAlias.xlsx)
-SESSION      = {'P01'};           % Session alias to filter plots  ('' = all sessions)
+EVENT_CODE   = 'BAT';           % Short event code (must match eventAlias.xlsx)
+SESSION      = {'P03'};           % Session alias to filter plots  ('' = all sessions)
+
+% ── Driver alias (vehicle lookup) ────────────────────────
+DRIVER_ALIAS_FILE = 'D:\SimEnv\dataAcquisition\Motec_MP\alias\driverAliasEnduro.xlsx';
+setappdata(0, 'timing_driver_alias_file', DRIVER_ALIAS_FILE);
 
 % ── PDF folders ──────────────────────────────────────────
 % Pit speed PDFs live directly in the event folder
-PIT_SPEED_FOLDER  = 'C:/SimEnv/dataAcquisition/timing/timingData/07_TSV/pitLane';
+PIT_SPEED_FOLDER  = 'D:\SimEnv\dataAcquisition\timing\timingData\11_BAT\speedTrap';
 
 % Top speed PDFs live in a 'top_speed' subfolder
-TOP_SPEED_FOLDER  = 'C:/SimEnv/dataAcquisition/timing/timingData/07_TSV/speedTrap';
+TOP_SPEED_FOLDER  = 'D:\SimEnv\dataAcquisition\timing\timingData\11_BAT\speedTrap';
 
 % ── Which reports to run ──────────────────────────────────
 RUN_PIT_SPEED    = false;    % Extract + plot pit lane speed trap
@@ -40,7 +44,7 @@ FORCE_RESCRAPE   = true;   % true = re-parse PDFs even if CSVs already exist
 % ── Plot options ──────────────────────────────────────────
 SORT_ORDER    = 'none';    % 'none' | 'descend' | 'ascend'  (sort x-axis by mean speed)
 Y_LIM_PIT     = [0, 50];   % e.g. [40 80]  — leave [] for auto
-Y_LIM_TOP     = [210, 260]; % e.g. [250 320] — leave [] for auto
+Y_LIM_TOP     = [210, 300]; % e.g. [250 320] — leave [] for auto
 EXCLUDE_CARS  = {};        % e.g. {'97', '88'} — cars to hide from plot
 INCLUDE_CARS  = {};        % e.g. {'1', '97'}  — show only these cars ([] = all)
 

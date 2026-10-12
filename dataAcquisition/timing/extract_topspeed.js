@@ -97,7 +97,10 @@ const csvOut  = path.join(pdfDir, `${pdfBase}_topspeed.csv`);
     //   ^spaces, multiple-of-10 offset (10/20/.../90), 2+ spaces, integers
     //   NOTE: no driver name on continuation rows
     //
-    const driverRe = /^\s{0,4}(\d{1,3})\s{1,4}([A-Za-z][A-Za-z '.\\-]{2,}?)\s{2,}(\d[\d ]+)$/;
+    const driverRe = /^\s{0,4}(\d{1,3})\s{1,4}([A-Za-z][A-Za-z '.\/\\-]{2,}?)\s{2,}(\d[\d ]+)$/;
+    // Wrapped name: car + first half ending in '/', speeds follow on the next line
+    const wrapStartRe = /^\s{0,4}(\d{1,3})\s{1,4}([A-Za-z][A-Za-z '.\/\\-]*\/)\s*$/;
+    const wrapEndRe   = /^\s+([A-Za-z][A-Za-z '.\-]+?)\s{2,}(\d[\d ]+)$/;
     const contRe   = /^\s{1,}(10|20|30|40|50|60|70|80|90)\s{2,}(\d[\d ]+)\s*$/;
 
     const rows = [];
@@ -108,7 +111,15 @@ const csvOut  = path.join(pdfDir, `${pdfBase}_topspeed.csv`);
         const line = lines[i];
         if (!line.trim()) continue;
 
-        const dm = driverRe.exec(line);
+        let dm = driverRe.exec(line);
+        if (!dm) {
+            const ws = wrapStartRe.exec(line);
+            const we = ws && i + 1 < lines.length ? wrapEndRe.exec(lines[i + 1]) : null;
+            if (ws && we) {
+                dm = [null, ws[1], ws[2].trim() + we[1].trim(), we[2]];
+                i++;
+            }
+        }
         const cm = !dm && contRe.exec(line);
 
         if (dm) {
@@ -168,7 +179,13 @@ const csvOut  = path.join(pdfDir, `${pdfBase}_topspeed.csv`);
 
 // ── Detect session label from PDF header lines ────────────────────────────────
 function detectPdfSession(lines) {
-    // Matches lines like: "Practice P2   45 Mins" or "Race 9   X Mins" or "Qualifying Q6  24 Mins"
+    // Preferred: report title e.g. "... Championship - Practice 3 (All Drivers)"
+    const titleRe = /-\s*(Qualifying\s+Race|Practice|Qualifying|Race|Warm[\s-]?Up|Sprint)\s+([A-Z]?\d+)\b/i;
+    for (const line of lines) {
+        const t = titleRe.exec(line.trim());
+        if (t) return `${t[1].trim()} ${t[2].trim()}`;
+    }
+    // Fallback: header line e.g. "Practice P2   45 Mins"
     const re = /^(Qualifying\s+Race|Practice|Qualifying|Race|Warm[\s-]?Up|Sprint)\s+([A-Z]?\d+)\s+\d+\s*Mins/i;
     for (const line of lines) {
         const m = re.exec(line.trim());

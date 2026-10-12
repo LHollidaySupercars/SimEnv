@@ -94,4 +94,4 @@ end
 %     fprintf('  Peak Fx         : %.0f N\n',  p_def.D * Fz_nom);
 %     fprintf('  Slip stiffness  : %.0f N\n',  p_def.B * p_def.C * p_def.D * Fz_nom);
 %     fprintf('  Approx kappa_pk : %.3f\n',    1 / (p_def.B * p_def.C));
-% end
+% end   

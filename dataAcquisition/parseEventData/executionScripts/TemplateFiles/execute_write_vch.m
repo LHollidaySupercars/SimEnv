@@ -94,6 +94,11 @@ for fi = 1:numel(SOURCE_FILES)
             ld_ch.mul         = 1;
             ld_ch.scale       = 1;
             ld_ch.offset      = 0;
+            if isfield(ch, 'datatype') && ismember(ch.datatype, [5 6])   % float keeps NaN
+                ld_ch.datatype = ch.datatype;
+            elseif isfield(ld_ch, 'datatype')
+                ld_ch = rmfield(ld_ch, 'datatype');
+            end
             % Float16 (datatype=1) is inherently signed — use it for channels
             % with negative values so i2 reads the sign bit correctly.
             % Int16 (datatype=2) is read by i2 as unsigned uint16, so negative

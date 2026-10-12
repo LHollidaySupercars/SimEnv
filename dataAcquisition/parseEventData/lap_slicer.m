@@ -115,9 +115,20 @@ function laps = lap_slicer(session, opts)
     detect_pitlane  = get_opt(opts, 'detect_pitlane', false);
     mylaps_ch_name  = get_opt(opts, 'mylaps_channel', 'MyLaps_X2TRA_DeviceShortId');
     br2_ch_name     = get_opt(opts, 'br2_channel',    'BR2_Beacon_Number');
-    br2_proto_in    = get_opt(opts, 'br2_protocol',   'standard');
+    br2_proto_in    = get_opt(opts, 'br2_protocol',   'auto');   % 'auto' | 'standard' | 'TAS2025' | 'BTH'
     fcy_ch_name     = get_opt(opts, 'fcy_channel',    'Sw_State_SC');
     beacon_check    = get_opt(opts, 'beacon_check',   false);
+    pit_sensor_detect = get_opt(opts, 'pit_sensor_detect', true);  % pulse beacon only: derive pit-in/out from jack, pit switch and speed
+    jack_ch_name      = get_opt(opts, 'jack_channel',      'C1_Air Jack');
+    pitsw_ch_name     = get_opt(opts, 'pitsw_channel',     'Driver Pit Switch');
+    speed_ch_name     = get_opt(opts, 'speed_channel',     'Ground_Speed');
+    pit_speed_kmh     = get_opt(opts, 'pit_speed_kmh',     40);
+    pit_min_s         = get_opt(opts, 'pit_min_s',         5);
+    pit_exit_kmh      = get_opt(opts, 'pit_exit_kmh',      70);   % hysteresis: leave pit state only above this
+    pit_debounce_s    = get_opt(opts, 'pit_debounce_s',    1);    % ignore jack/pit-switch pulses shorter than this
+    pit_snap_s        = get_opt(opts, 'pit_snap_s',        1);    % pit events this close to an S/F pulse are not separate boundaries
+    track_lap_dist    = get_opt(opts, 'track_lap_distance', NaN);   % metres; NaN disables the distance check
+    min_lap_dist_frac = get_opt(opts, 'min_lap_dist_frac',  0.95);
     beacon_label    = get_opt(opts, 'beacon_check_label', '');
 
     % BR2 thresholds
@@ -230,6 +241,20 @@ function laps = lap_slicer(session, opts)
         end
     end
 
+    % 'auto': a Beacon channel with large negative excursions carries the pulse-type S/F signal (BTH); else standard.
+    if ischar(br2_proto_in) && strcmpi(br2_proto_in, 'auto')
+        br2_proto_in = 'standard';
+        bf = find_channel(session, 'Beacon', ch_names);
+        if ~isempty(bf)
+            bv = round(session.(bf).data(:));
+            if any(bv < br2_protocol_get('BTH').neg_thresh)
+                br2_field    = bf;
+                br2_proto_in = 'BTH';
+                if verbose, fprintf('  [INFO] Beacon pulse detected on "%s" - using BTH protocol.\n', bf); end
+            end
+        end
+    end
+
     if verbose
         fprintf('\n=== Lap Slicer ===\n');
         if ~isempty(rlt_field)
@@ -266,6 +291,7 @@ function laps = lap_slicer(session, opts)
     %    t_end = t_start of the next lap (or session end).
     % ------------------------------------------------------------------
     br2_mode = false;   % set true when Mode B is active
+    pit_sensor_active = false;   % true when pit events came from the sensors, not beacon values
 
     % Pre-compute ZOH beacon channel for Mode A pit classification.
     MIN_BEACON_HOLD_S = 0.1;
@@ -422,7 +448,54 @@ function laps = lap_slicer(session, opts)
         br2_pitin_t     = [];   % session time of each pit-in line crossing
         br2_pitout_t    = [];   % session time of each pit-out event
 
-        if strcmp(br2_proto.variant, 'simple_pulse')
+        if strcmp(br2_proto.variant, 'excursion')
+            % S/F = idle -> large negative -> large positive -> idle; time = start of the
+            % negative leg. Raw signal used because the pulse may be shorter than the ZOH hold.
+            in_exc = false;
+            exc_hi = br2_proto.idle + 100;   % large positive leg also counts, in case it leads
+            for i = 1:numel(br2_raw)
+                if ~in_exc && (br2_raw(i) < br2_proto.neg_thresh || br2_raw(i) > exc_hi)
+                    br2_sf_times(end+1) = br2_time(i);   %#ok<AGROW>
+                    in_exc = true;
+                elseif in_exc && abs(br2_raw(i) - br2_proto.idle) <= 1
+                    in_exc = false;
+                end
+            end
+            if isempty(br2_sf_times)
+                [u_vals, ~, u_idx] = unique(br2_raw);
+                [~, top] = sort(accumarray(u_idx, 1), 'descend');
+                top = top(1:min(6, numel(top)));
+                fprintf('  [DIAG] BTH beacon: no excursion on "%s" (n=%d, min=%g, max=%g); most common values: %s\n', ...
+                    br2_field, numel(br2_raw), min(br2_raw), max(br2_raw), mat2str(u_vals(top)'));
+                bc = ch_names(contains(lower(ch_names), 'beacon'));
+                fprintf('  [DIAG] beacon-like channels present: %s\n', strjoin(bc(:)', ', '));
+            end
+            if ~isempty(br2_sf_times)
+                br2_sf_times = sort(br2_sf_times);
+                br2_sf_times = br2_sf_times([true, diff(br2_sf_times) > min_lap_time]);
+            end
+            if pit_sensor_detect
+                pit_iv = detect_pit_intervals(session, ch_names, jack_ch_name, pitsw_ch_name, ...
+                    speed_ch_name, pit_speed_kmh, pit_min_s, pit_exit_kmh, pit_debounce_s, br2_sf_times);
+                if isempty(pit_iv)
+                    if verbose, fprintf('  [INFO] Pit sensors: no pit intervals found (or channels missing).\n'); end
+                else
+                    % Events at the very start/end of the session would make zero-length slices.
+                    pin  = pit_iv(:,1)';
+                    pout = pit_iv(:,2)';
+                    pin  = pin(pin > t_session_start + 1 & pin < t_session_end - 1);
+                    pout = pout(pout > t_session_start + 1 & pout < t_session_end - 1);
+                    % S/F pulses are never dropped; pit events hugging a pulse would only create sliver laps.
+                    near_sf = @(x) arrayfun(@(e) any(abs(br2_sf_times - e) < pit_snap_s), x);
+                    pin  = pin(~near_sf(pin));
+                    pout = pout(~near_sf(pout));
+                    br2_pitin_t  = pin;
+                    br2_pitout_t = pout;
+                    pit_sensor_active = true;
+                    if verbose, fprintf('  [INFO] Pit sensors: %d pit interval(s).\n', size(pit_iv, 1)); end
+                end
+            end
+        elseif strcmp(br2_proto.variant, 'simple_pulse')
             % --- Simple-pulse protocol detection (e.g. TAS2025) ---
             % S/F:     idle -> sf_pulse -> idle   time = start of sf_pulse
             % Pit-in:  idle -> pitin             time = start of pitin state
@@ -732,7 +805,7 @@ function laps = lap_slicer(session, opts)
     %     for classification only (step 7), not filtering.
     %     Only NaN boundaries, lap_range, and exclude_laps are applied here.
     % ------------------------------------------------------------------
-    valid_mask = ~any(isnan(boundaries), 2);
+    valid_mask = ~any(isnan(boundaries), 2) & (boundaries(:,2) - boundaries(:,1) > 0.1);
 
     if ~isempty(lap_range)
         valid_mask = valid_mask & ...
@@ -1024,7 +1097,7 @@ function laps = lap_slicer(session, opts)
                     laps(k-1).pit_segment = build_pit_segment( ...
                         laps(k-1).channels, laps(k-1).pit_entry_t, laps(k).t_start);
                 end
-            elseif br2_mode && strcmp(laps(k).lap_type, 'inlap') && strcmp(prev_type, 'pitlap')
+            elseif br2_mode && ~pit_sensor_active && strcmp(laps(k).lap_type, 'inlap') && strcmp(prev_type, 'pitlap')
                 % A pit-in detection on the lap immediately following a
                 % pitlap is a false positive (999→900/0 signal residue
                 % from the recent pit exit).  Force outlap and clear.
@@ -1044,6 +1117,7 @@ function laps = lap_slicer(session, opts)
     %     Priority order: FCY > pit-type (set in step 6/6b) > slow > long
     %     min/max_lap_time apply to 'flying' and unclassified laps only.
     % ------------------------------------------------------------------
+    spd_f_dist = find_channel(session, speed_ch_name, ch_names);
     for k = 1:numel(laps)
         % FCY overrides everything (including pit-type laps)
         if ~isempty(fcy_field)
@@ -1059,6 +1133,15 @@ function laps = lap_slicer(session, opts)
         % Skipped in Modes A and B — those types are authoritative from
         % the physical beacon / BR2 sequence.
         beacon_mode_active = (exist('slice_types_preset', 'var') && ~isempty(slice_types_preset)) || br2_mode;
+        % Beacon-mode 'flying' slices covering under a fraction of the track length are not full laps.
+        if br2_mode && strcmp(laps(k).lap_type, 'flying') && isfinite(track_lap_dist) && ~isempty(spd_f_dist)
+            st = session.(spd_f_dist).time(:);  sv = session.(spd_f_dist).data(:);
+            m  = st >= laps(k).t_start & st < laps(k).t_end;
+            sv = max(sv(m), 0);  sv(~isfinite(sv)) = 0;
+            if nnz(m) > 1 && trapz(st(m), sv / 3.6) < min_lap_dist_frac * track_lap_dist
+                laps(k).lap_type = 'unknown';   % under-distance and no pit-event evidence; deliberately not guessed
+            end
+        end
         if ismember(laps(k).lap_type, {'flying', ''}) && ~beacon_mode_active
             lt = laps(k).lap_time;
             if lt < min_lap_time
@@ -1609,6 +1692,84 @@ end
 %     end
 %     field = '';
 % end
+
+
+% ======================================================================= %
+%  DETECT_PIT_INTERVALS  [t_in t_out] rows where the car is in the pit lane:
+%  jack up, OR (pit switch on AND speed <= limit), OR speed <= limit for
+%  at least min_s. Returns [] when the speed channel is missing.
+% ======================================================================= %
+function iv = detect_pit_intervals(session, ch_names, jack_name, pitsw_name, speed_name, limit_kmh, min_s, exit_kmh, debounce_s, sf_times)
+    iv = zeros(0, 2);
+    sp_f = find_channel(session, speed_name, ch_names);
+    if isempty(sp_f), return; end
+    t = session.(sp_f).time(:);
+    v = session.(sp_f).data(:);
+    % Hysteresis: a slow state starts below limit_kmh and persists until speed exceeds exit_kmh.
+    strong = isfinite(v) & v <= limit_kmh;
+    weak   = isfinite(v) & v <= max(exit_kmh, limit_kmh);
+    slow = false(size(t));
+    dw = diff([false; weak(:); false]);
+    ws = find(dw == 1);
+    we = find(dw == -1) - 1;
+    for r = 1:numel(ws)
+        if any(strong(ws(r):we(r))), slow(ws(r):we(r)) = true; end
+    end
+
+    jack = false(size(t));
+    jf = find_channel(session, jack_name, ch_names);
+    if ~isempty(jf), jack = sample_on(session.(jf), t); end
+    pitsw = false(size(t));
+    pf = find_channel(session, pitsw_name, ch_names);
+    if ~isempty(pf), pitsw = sample_on(session.(pf), t); end
+    jack  = drop_short_runs(jack,  t, debounce_s);
+    pitsw = drop_short_runs(pitsw, t, debounce_s);
+
+    slow_runs = mask_runs(slow, t);
+    slow_runs = slow_runs(slow_runs(:,2) - slow_runs(:,1) >= min_s, :);
+    long_slow = false(size(t));
+    for r = 1:size(slow_runs, 1)
+        long_slow = long_slow | (t >= slow_runs(r,1) & t <= slow_runs(r,2));
+    end
+
+    iv = mask_runs(jack | (pitsw & slow) | long_slow, t);
+    if isempty(iv), return; end
+
+    % Merge gaps under 30 s (a stop split by sensor dropouts), then drop blips shorter than min_s.
+    merged = iv(1, :);
+    for r = 2:size(iv, 1)
+        no_sf_between = ~any(sf_times > merged(end,2) & sf_times < iv(r,1));
+        if iv(r,1) - merged(end,2) < 30.0 || no_sf_between
+            merged(end,2) = iv(r,2);
+        else
+            merged(end+1, :) = iv(r, :); %#ok<AGROW>
+        end
+    end
+    iv = merged(merged(:,2) - merged(:,1) >= min_s, :);
+end
+
+function on = sample_on(ch, t)
+% Nearest-sample lookup of a switch channel onto time base t.
+    d = ch.data(:);  tt = ch.time(:);
+    ok = isfinite(d) & isfinite(tt);
+    if nnz(ok) < 2, on = false(size(t)); return; end
+    on = interp1(tt(ok), d(ok), t, 'nearest', 0) > 0.5;
+end
+
+function m = drop_short_runs(m, t, min_s)
+    r = mask_runs(m, t);
+    for i = 1:size(r, 1)
+        if r(i,2) - r(i,1) < min_s, m(t >= r(i,1) & t <= r(i,2)) = false; end
+    end
+end
+
+function runs = mask_runs(m, t)
+    m = m(:);
+    d = diff([false; m; false]);
+    s = find(d == 1);
+    e = find(d == -1) - 1;
+    runs = [t(s), t(e)];
+end
 
 
 % ======================================================================= %

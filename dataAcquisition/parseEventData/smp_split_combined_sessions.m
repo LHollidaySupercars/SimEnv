@@ -91,7 +91,7 @@ ECU_FORMAT      = isfield(cfg, 'ecu_format') && cfg.ecu_format;
 HOL_VENUE       = cfg.hol_venue;
 HOL_EVENT       = cfg.hol_event;
 OVERWRITE       = isfield(cfg, 'overwrite') && cfg.overwrite;
-AUX_CH          = cfg.channel;;
+AUX_CH          = cfg.channel;
 if isfield(cfg, 'split_aux_ch'), AUX_CH = cfg.split_aux_ch; end
 AUX_LABEL       = 'Ground Speed';
 
